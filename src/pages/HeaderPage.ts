@@ -23,8 +23,8 @@ export class HeaderPage {
     summitPopupClose = () => this.page.getByRole('button', { name: /Close|Dismiss/i }).or(this.page.locator('.close-btn, [aria-label*="Close"]')).first();
     otAgentClose = () => this.page.getByRole('button', { name: /Close|Collapse Agent/i }).or(this.page.locator('.ot-agent-close, #ot-agent-close')).first();
 
-    // Logo (from snapshot)
-    logoLink = () => this.page.getByRole('link', { name: /OpenText/i }).first();
+    // Logo (from snapshot) — INTENTIONAL BREAK: wrong name to demo AIC Debug Report
+    logoLink = () => this.page.getByRole('link', { name: /WrongCompanyName/i }).first();
 
     // Main Navigation Menu Items
     headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });

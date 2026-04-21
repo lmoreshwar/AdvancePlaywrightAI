@@ -2,9 +2,9 @@ name: 🎭 Playwright Tests on BrowserStack
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, 'feature/*']
   pull_request:
-    branches: [main, master]
+    branches: [main, master, 'feature/*']
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
 
       - name: 🧪 Run Tests on BrowserStack
         id: test
-        run: npm run test:bstack -- src/tests/header.spec.ts
+        run: npm run test:bstack -- src/tests/header.spec.ts --grep "should display the header|should display OpenText logo"
         continue-on-error: true
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
