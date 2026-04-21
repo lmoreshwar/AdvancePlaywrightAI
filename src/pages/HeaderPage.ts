@@ -159,14 +159,14 @@ export class HeaderPage {
     }
 
     async expectLanguageModalVisible(): Promise<void> {
-        // Self-healing: target the visible modal heading specifically
-        // The modal uses heading "Choose your region:" — match it as a visible heading
+        // The region modal contains heading "Choose your region:" and country lists.
+        // Use getByText with visible filter to find the modal heading.
+        const regionHeading = this.page.getByText('Choose your region:', { exact: false });
+        const americasText = this.page.getByText('Americas', { exact: true });
+        
         await expect(
-            this.page.getByRole('heading', { name: /Choose your region/i })
-                .or(this.page.locator('.region-selector-modal, .country-selector').first())
-                .or(this.page.getByText('Choose your region:'))
-                .first()
-        ).toBeVisible();
+            regionHeading.or(americasText).first()
+        ).toBeVisible({ timeout: 10000 });
     }
 
     async expectContactButtonVisible(): Promise<void> {

@@ -1,67 +1,84 @@
-# 🔍 AI Test Debugging & RCA Report
-## Goal: Analyze and Fix ALL Failing Tests — Auto-populated per execution
+# 🔍 AIC Debug Report — Auto-Generated
 
-**Instructions**: This file is auto-populated by the AI Agent after each test run.
-- Each failure gets its own numbered entry below.
-- Categories: `Locator Change` | `UI Change / Bug` | `Script Issue` | `Environment Issue`
-- The AI will attempt **self-healing** for Locator/Script issues, and **flag bugs** for UI changes.
+**Generated**: 4/22/2026, 1:16:11 AM  
+**Duration**: 87.2s  
+
+## 📊 Run Summary
+
+| Metric | Value |
+|---|---|
+| Total Tests | 1 |
+| ✅ Passed | 0 |
+| ❌ Failed | 2 |
+| ⏭️ Skipped | 0 |
+
+## 🗂️ Failure Breakdown by Category
+
+| Category | Count | AI Healable |
+|---|---|---|
+| 📝 Script Issue | 2 | ✅ Yes |
 
 ---
 
-## 📊 Latest Run Summary
-- **Date**: 2026-04-22
-- **Spec File**: `header.spec.ts`
+## 🔴 FAILURE #1
+
+### 1. 🚨 Failure Summary
+- **Test**: `@P1 @Regression should open language switcher modal`
 - **Project**: `desktop-chrome`
-- **Total Tests**: 14
-- **Passed**: 13 ✅
-- **Failed**: 1 ❌
-- **Active Failures**: 1
+- **Error Location**: `HeaderPage.ts:167`
+- **Error**:
+```
+Error: expect(locator).toBeVisible() failed
+
+Locator: locator('text=Choose your region').first().or(locator('text=Americas').first())
+Expected: visible
+Error: strict mode violation: locator('text=Choose your region').first().or(locator('text=Americas').first()) resolved to 2 elements:
+    1) <h4 id="language-modal-label" class="modal-title pb-2 pb-md-3 pb-lg-4 pr-2 pr-lg-0">Choose your region:</h4> aka getByRole('heading', { name: 'Choose your region:' })
+    2) <h3 class="text-sm font-weight-bo
+```
+
+### 2. 🗂️ Category: **📝 Script Issue**
+
+### 3. 🤖 Self-Healing
+- **AI Healable**: ✅ Yes
+- **Suggestion**: Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion).
+
+### 4. 📸 Screenshot
+`C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome\test-failed-1.png`
+
+### 5. 🔬 Trace
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome\trace.zip`
 
 ---
 
-## 🔴 FAILURE #1 (FIXED ✅)
+## 🔴 FAILURE #2
 
 ### 1. 🚨 Failure Summary
-- **Test ID**: `@P0 @Smoke should display the header on homepage`
-- **Error**: `strict mode violation` — Combined locator matched multiple elements (logo + nav)
-- **Failed At**: `HeaderPage.ts:135` → `expectHeaderVisible()`
-
-### 2. 🗂️ Category: **Script Issue**
-The `.or()` chain locator matched both the logo link AND the navigation bar simultaneously, violating Playwright's strict mode.
-
-### 3. 🤖 Self-Healing: **Yes — Auto-healed**
-Appended `.first()` to the combined locator to satisfy strict mode while still validating the header.
-
-### 4. 🛠️ Fix Applied
-```diff
-- await expect(this.logoLink().or(this.headerNav()).or(this.hamburgerBtn())).toBeVisible();
-+ await expect(this.logoLink().or(this.headerNav()).or(this.hamburgerBtn()).first()).toBeVisible();
+- **Test**: `@P1 @Regression should open language switcher modal`
+- **Project**: `desktop-chrome`
+- **Error Location**: `HeaderPage.ts:167`
+- **Error**:
 ```
-- **Result**: ✅ **PASSED**
+Error: expect(locator).toBeVisible() failed
 
----
-
-## 🔴 FAILURE #2 (FIXED ✅)
-
-### 1. 🚨 Failure Summary
-- **Test ID**: `@P1 @Regression should open language switcher modal`
-- **Error**: `expect(locator).toBeVisible() failed` — `locator('[role="dialog"]:has-text("language")')` not found
-- **Failed At**: `HeaderPage.ts:152` → `expectLanguageModalVisible()`
-
-### 2. 🗂️ Category: **Locator Change (UI Text Changed)**
-The application UI shows **"Choose your region:"** as the modal header, but the locator was searching for `"language"`. The modal does NOT use role="dialog" — it renders as a custom overlay.
-
-### 3. 🤖 Self-Healing: **Yes — Auto-healed**
-Updated the locator to use a resilient regex pattern matching any of: `"Choose your region"`, `"Choose your country"`, or `"language"`.
-
-### 4. 🛠️ Fix Applied
-```diff
-- await expect(this.page.locator('[role="dialog"]:has-text("language")')).toBeVisible();
-+ await expect(
-+     this.page.getByText(/Choose your region|Choose your country|language/i).first()
-+ ).toBeVisible();
+Locator: locator('text=Choose your region').first().or(locator('text=Americas').first())
+Expected: visible
+Error: strict mode violation: locator('text=Choose your region').first().or(locator('text=Americas').first()) resolved to 2 elements:
+    1) <h4 id="language-modal-label" class="modal-title pb-2 pb-md-3 pb-lg-4 pr-2 pr-lg-0">Choose your region:</h4> aka getByRole('heading', { name: 'Choose your region:' })
+    2) <h3 class="text-sm font-weight-bo
 ```
-- **Result**: ✅ **PASSED** (Verified on BrowserStack — Windows 10, Chrome latest, 14/14 tests passed in 3.0m)
+
+### 2. 🗂️ Category: **📝 Script Issue**
+
+### 3. 🤖 Self-Healing
+- **AI Healable**: ✅ Yes
+- **Suggestion**: Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion).
+
+### 4. 📸 Screenshot
+`C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome-retry1\test-failed-1.png`
+
+### 5. 🔬 Trace
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome-retry1\trace.zip`
 
 ---
 
@@ -69,7 +86,7 @@ Updated the locator to use a resilient regex pattern matching any of: `"Choose y
 
 | Category | What It Means | AI Action |
 |---|---|---|
-| **Locator Change** | DOM structure or element text changed | Self-heal with resilient locator |
-| **UI Change / Bug** | Application behavior changed | ⚠️ Flag to user as potential bug |
-| **Script Issue** | Test code logic error (strict mode, timeout) | Auto-fix the script |
-| **Environment Issue** | Network, server, flakiness | Retry or skip with warning |
+| 🔗 Locator Change | DOM structure or element text changed | Self-heal with SmartLocator fallback |
+| 📝 Script Issue | Test code logic error (strict mode, timeout) | Auto-fix the script |
+| 🐛 UI Bug | Application behavior changed unexpectedly | ⚠️ Flag as bug to development team |
+| 🌐 Environment Issue | Network, server, or infrastructure problem | Retry or check infra health |

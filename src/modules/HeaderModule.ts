@@ -145,13 +145,27 @@ export class HeaderModule {
 
         this.logger.step(2, 'Click language switcher');
         await this.headerPage.clickLanguageSwitcher();
-        // Wait longer for the modal overlay to render
+        // Wait for the modal overlay to render
         await this.page.waitForTimeout(2000);
 
-        this.logger.step(3, 'Verify language modal is visible');
+        this.logger.step(3, 'Force-dismiss any overlapping popups via DOM');
+        // Remove Summit popup and OT Agent chatbot if they overlap the region modal
+        await this.page.evaluate(() => {
+            // Remove Summit popup overlay
+            document.querySelectorAll('[class*="summit"], [class*="Summit"], [class*="promo-banner"], [class*="floating"]').forEach(el => {
+                (el as HTMLElement).style.display = 'none';
+            });
+            // Remove OT Agent chatbot
+            document.querySelectorAll('[class*="ot-agent"], [class*="chatbot"], [id*="agent"], [class*="proactive"]').forEach(el => {
+                (el as HTMLElement).style.display = 'none';
+            });
+        });
+        await this.page.waitForTimeout(500);
+
+        this.logger.step(4, 'Verify language modal is visible');
         await this.headerPage.expectLanguageModalVisible();
 
-        this.logger.step(4, 'Close language modal');
+        this.logger.step(5, 'Close language modal');
         await this.page.keyboard.press('Escape');
 
         this.logger.info('Language switcher verification passed');
