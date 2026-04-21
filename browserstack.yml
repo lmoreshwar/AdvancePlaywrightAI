@@ -1,0 +1,15 @@
+browserstackAuth:
+  userName: ${BROWSERSTACK_USERNAME}
+  accessKey: ${BROWSERSTACK_ACCESS_KEY}
+platforms:
+  - os: Windows
+    osVersion: 10
+    browserName: chrome
+    browserVersion: latest
+    resolution: 1920x1080
+browserstackLocal: false
+buildName: "OpenText Playwright Framework Build"
+projectName: "OpenText AI Tester"
+debug: true
+networkLogs: true
+consoleLogs: "errors"

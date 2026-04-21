@@ -1,0 +1,26 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+tta-report/
+.auth/
+*.env.local
+.DS_Store
+Thumbs.db
+.playwright-cli/
+
+# Security
+.env
+
+# Logs and Reports
+log/
+tta-report/
+playwright-report/
+test-results/
+
+# Temp files
+*.log
+*.txt
+*.png
+*.jpeg
+*.jpg

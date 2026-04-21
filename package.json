@@ -1,0 +1,53 @@
+{
+  "name": "opentext-playwright-framework",
+  "version": "1.0.0",
+  "description": "AI-powered Playwright test automation framework for OpenText website using @playwright/cli with SKILLS",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:chromium": "playwright test --project=desktop-chrome",
+    "test:firefox": "playwright test --project=desktop-firefox",
+    "test:webkit": "playwright test --project=desktop-safari",
+    "test:edge": "playwright test --project=desktop-edge",
+    "test:mobile": "playwright test --project=mobile-chrome --project=mobile-safari",
+    "test:tablet": "playwright test --project=tablet-chrome",
+    "test:header": "playwright test --grep @Header",
+    "test:homepage": "playwright test --grep @Homepage",
+    "test:responsive": "playwright test --grep @Responsive",
+    "test:smoke": "playwright test --grep @Smoke",
+    "test:regression": "playwright test --grep @Regression",
+    "test:p0": "playwright test --grep @P0",
+    "test:visual": "playwright test --grep @Visual",
+    "test:report": "playwright show-report",
+    "test:ci": "playwright test --reporter=list,json",
+    "test:bstack": "node -r dotenv/config node_modules/browserstack-node-sdk/src/bin/runner.js playwright test",
+    "build": "tsc",
+    "clean": "rm -rf dist test-results playwright-report tta-report",
+    "cli:install": "npm install -g @playwright/cli@latest",
+    "cli:open": "playwright-cli open https://www.opentext.com --headed",
+    "cli:snapshot": "playwright-cli snapshot",
+    "cli:skills": "playwright-cli install --skills"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "testing",
+    "automation",
+    "opentext",
+    "playwright-cli",
+    "ai-testing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.6",
+    "browserstack-node-sdk": "^1.52.0",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.9.3"
+  }
+}
