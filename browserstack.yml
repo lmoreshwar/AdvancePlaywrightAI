@@ -8,7 +8,7 @@ platforms:
     browserVersion: latest
     resolution: 1920x1080
 browserstackLocal: false
-buildName: "OpenText Playwright Framework Build - ${GITHUB_RUN_ID:-Local}"
+buildName: "OpenText Playwright Framework Build"
 projectName: "OpenText AI Tester"
 debug: true
 networkLogs: true
