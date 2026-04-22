@@ -1,10 +1,6 @@
 name: 👁️ Percy Visual Regression (Weekly)
 
 on:
-  # Temporary trigger for discovery on feature branch
-  push:
-    branches: [ feature/1_fixes ]
-
   # 1. Manual trigger from GitHub UI
   workflow_dispatch:
     inputs:
@@ -16,6 +12,7 @@ on:
         options:
           - production
           - staging
+          - qa
           - dev
       viewports:
         description: 'Resolutions to capture'
