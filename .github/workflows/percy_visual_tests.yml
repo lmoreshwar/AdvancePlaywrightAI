@@ -17,6 +17,16 @@ on:
           - production
           - staging
           - dev
+      viewports:
+        description: 'Resolutions to capture'
+        required: true
+        default: '375,768,1280,1920'
+        type: choice
+        options:
+          - '375,768,1280,1920' # All
+          - '1280,1920'         # Desktop Only
+          - '375'               # Mobile Only
+          - '768'               # Tablet Only
 
   # 2. Scheduled trigger (Every Monday at 00:00 UTC)
   schedule:
@@ -45,7 +55,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: 👁️ Execute Percy Visual Tests
-        run: npm run test:visual:ci
+        run: npx percy exec --widths=${{ github.event.inputs.viewports || '375,768,1280,1920' }} -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           BASE_URL: https://www.opentext.com
