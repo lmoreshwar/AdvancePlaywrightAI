@@ -1,6 +1,10 @@
 name: 🎭 Playwright Tests on BrowserStack
 
 on:
+  # Temporary trigger for discovery on feature branch
+  push:
+    branches: [ feature/1_fixes ]
+
   # 1. Manual trigger with parameters
   workflow_dispatch:
     inputs:
