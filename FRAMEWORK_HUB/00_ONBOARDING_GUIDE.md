@@ -69,7 +69,7 @@ The AI will run it locally on your machine (`npx playwright test`). If it fails,
 
 Application UIs change. If a test fails in the CI pipeline tomorrow:
 
-1. **Check the Report:** Go to `tta-report/AIC_DEBUG_REPORT.md`. The framework automatically categorizes the failure (e.g., *Locator Change* vs *Script Issue*).
+1. **Check the Report:** Go to `ai-debug-report/AIC_DEBUG_REPORT.md`. The framework automatically categorizes the failure (e.g., *Locator Change* vs *Script Issue*).
 2. **Trigger the Fix:** Open `FRAMEWORK_HUB/03_AI_Commands/AIC_MODIFY_IMPROVE.md` and type:
 > *"Process AIC_MODIFY_IMPROVE.md based on the failure for Contact Support in AIC_DEBUG_REPORT.md"*
 

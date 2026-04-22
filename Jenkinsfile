@@ -111,7 +111,7 @@ pipeline {
 
                     env.TEST_EXIT_CODE = exitCode.toString()
                     if (exitCode != 0) {
-                        unstable('⚠️ Some tests failed — check the TTA Report.')
+                        unstable('⚠️ Some tests failed — check the AI Debug Report.')
                     }
                 }
             }
@@ -121,7 +121,7 @@ pipeline {
     post {
         always {
             // Archive all reports
-            archiveArtifacts(artifacts: 'tta-report/**', allowEmptyArchive: true, fingerprint: true)
+            archiveArtifacts(artifacts: 'ai-debug-report/**', allowEmptyArchive: true, fingerprint: true)
             archiveArtifacts(artifacts: 'playwright-report/**', allowEmptyArchive: true)
             archiveArtifacts(artifacts: 'test-results/**', allowEmptyArchive: true)
             archiveArtifacts(artifacts: 'log/**', allowEmptyArchive: true)
@@ -129,7 +129,7 @@ pipeline {
             // Publish HTML Reports (requires HTML Publisher plugin)
             publishHTML(target: [
                 allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
-                reportDir: 'tta-report', reportFiles: 'index.html', reportName: 'TTA Report'
+                reportDir: 'ai-debug-report', reportFiles: 'index.html', reportName: 'AI Debug Report'
             ])
 
             publishHTML(target: [
@@ -139,7 +139,7 @@ pipeline {
         }
 
         failure {
-            echo '❌ Tests FAILED! Check the AIC Debug Report in tta-report/AIC_DEBUG_REPORT.md'
+            echo '❌ Tests FAILED! Check the AIC Debug Report in ai-debug-report/AIC_DEBUG_REPORT.md'
         }
 
         success {

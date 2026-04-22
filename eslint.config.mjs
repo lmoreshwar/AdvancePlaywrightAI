@@ -21,6 +21,6 @@ export default tseslint.config(
         },
     },
     {
-        ignores: ['dist/**', 'node_modules/**', 'playwright-report/**', 'test-results/**', 'tta-report/**'],
+        ignores: ['dist/**', 'node_modules/**', 'playwright-report/**', 'test-results/**', 'ai-debug-report/**'],
     }
 );

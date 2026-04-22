@@ -27,7 +27,7 @@ This document explains the AI-powered self-healing, auto-debugging, and intellig
 │                    REPORTING LAYER                           │
 │                                                             │
 │   ┌────────────────────────────────────────────────────┐    │
-│   │           Enhanced TTA Reporter                     │    │
+│   │         Enhanced AI Debug Reporter                  │    │
 │   │  ┌──────────────┐  ┌──────────────┐  ┌──────────┐ │    │
 │   │  │ Auto-Categorize│ │ Debug Report │  │ GitHub   │ │    │
 │   │  │ Failures      │ │ Generator    │  │ Summary  │ │    │
@@ -99,10 +99,10 @@ console.log(SmartLocator.getSummary());
 
 ---
 
-## 📊 Pillar 2: Intelligent TTA Reporter
+## 📊 Pillar 2: Intelligent AI Debug Reporter
 
 ### What It Does
-The Enhanced TTA Reporter **auto-categorizes** every test failure and generates:
+The Enhanced AI Debug Reporter **auto-categorizes** every test failure and generates:
 1. **AIC_DEBUG_REPORT.md** — Categorized RCA for every failure
 2. **HTML Report** — Visual dashboard with category badges
 3. **JSON Report** — Machine-readable for CI/CD pipelines
@@ -128,7 +128,7 @@ The reporter pattern-matches error messages to determine the category:
 ```
 
 ### AIC Debug Report Output
-When failures occur, `tta-report/AIC_DEBUG_REPORT.md` is auto-generated:
+When failures occur, `ai-debug-report/AIC_DEBUG_REPORT.md` is auto-generated:
 
 ```markdown
 ## 🔴 FAILURE #1
@@ -155,7 +155,7 @@ Push/PR to main → Install → Run Tests → Upload Artifacts
                                               │
                               ┌───────────────┼───────────────┐
                               ▼               ▼               ▼
-                        tta-report/    playwright-report/  test-results/
+                        ai-debug-report/    playwright-report/  test-results/
                         ├── index.html  (Playwright HTML)   ├── screenshots
                         ├── AIC_DEBUG   report)              ├── videos
                         │   _REPORT.md                       └── traces
@@ -165,7 +165,7 @@ Push/PR to main → Install → Run Tests → Upload Artifacts
 ### Where to Find Reports After CI Failure
 
 1. **GitHub Actions** → Your workflow run → **Artifacts** tab
-2. Download `tta-report` → Open `AIC_DEBUG_REPORT.md` for categorized RCA
+2. Download `ai-debug-report` → Open `AIC_DEBUG_REPORT.md` for categorized RCA
 3. Download `test-results` → View screenshots and replay traces
 
 ### Job Summary
@@ -183,7 +183,7 @@ Test Run (Local or CI/CD)
     └── Some Tests Fail
             │
             ▼
-    TTA Reporter Auto-Generates
+    AI Debug Reporter Auto-Generates
     AIC_DEBUG_REPORT.md
             │
             ├── Category: Locator Change ──→ SmartLocator fallback tried at runtime
@@ -204,10 +204,10 @@ Test Run (Local or CI/CD)
 | File | Purpose |
 |---|---|
 | `src/utils/SmartLocator.ts` | Self-healing locator utility with fallback chains |
-| `src/utils/CustomTTAReporter.ts` | Enhanced reporter with auto-categorization |
+| `src/utils/AiDebugReporter.ts` | Enhanced reporter with auto-categorization |
 | `.github/workflows/playwright.yml` | CI/CD workflow for GitHub Actions |
 | `FRAMEWORK_HUB/03_AI_Commands/AIC_DEBUG_REPORT.md` | Debug report template (auto-populated on failure) |
-| `tta-report/AIC_DEBUG_REPORT.md` | Auto-generated debug report (per run) |
+| `ai-debug-report/AIC_DEBUG_REPORT.md` | Auto-generated debug report (per run) |
 
 ---
 

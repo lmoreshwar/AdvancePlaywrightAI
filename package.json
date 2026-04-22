@@ -32,7 +32,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "build": "tsc",
-    "clean": "rm -rf dist test-results playwright-report tta-report",
+    "clean": "rm -rf dist test-results playwright-report ai-debug-report",
     "cli:install": "npm install -g @playwright/cli@latest",
     "cli:open": "playwright-cli open https://www.opentext.com --headed",
     "cli:snapshot": "playwright-cli snapshot",
