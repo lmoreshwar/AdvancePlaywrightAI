@@ -33,6 +33,9 @@ on:
         type: choice
         options:
           - 'desktop-chrome'
+          - 'all-projects'
+          - 'all-desktop'
+          - 'all-mobile'
           - 'mobile-chrome'
           - 'viewport-xl'
           - 'viewport-lg'
@@ -40,8 +43,6 @@ on:
           - 'viewport-sm'
           - 'viewport-xs'
           - 'tablet-chrome'
-          - 'desktop-firefox'
-          - 'desktop-safari'
 
   # 2. Scheduled trigger (Every day at 02:00 UTC)
   schedule:
@@ -72,11 +73,21 @@ jobs:
       - name: 🧪 Run Tests on BrowserStack
         id: test
         run: |
-          # Use the selected environment and test suite from the UI
-          # Default to @Smoke if triggered by schedule
+          # Logic to handle batch project selections
+          PROJECT_SELECTION="${{ github.event.inputs.project || 'desktop-chrome' }}"
+          
+          if [ "$PROJECT_SELECTION" == "all-projects" ]; then
+            PROJECT_FLAG=""
+          elif [ "$PROJECT_SELECTION" == "all-desktop" ]; then
+            PROJECT_FLAG="--project=desktop-chrome --project=desktop-firefox --project=desktop-safari --project=desktop-edge"
+          elif [ "$PROJECT_SELECTION" == "all-mobile" ]; then
+            PROJECT_FLAG="--project=mobile-chrome --project=mobile-safari"
+          else
+            PROJECT_FLAG="--project=$PROJECT_SELECTION"
+          fi
+
           TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
-          PROJECT_TO_RUN="${{ github.event.inputs.project || 'desktop-chrome' }}"
-          npm run test:bstack -- --grep "$TAG_TO_RUN" --project="$PROJECT_TO_RUN"
+          npm run test:bstack -- --grep "$TAG_TO_RUN" $PROJECT_FLAG
         continue-on-error: true
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}

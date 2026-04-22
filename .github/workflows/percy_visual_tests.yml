@@ -19,10 +19,11 @@ on:
         default: '375,768,1280,1920'
         type: choice
         options:
-          - '375,768,1280,1920' # All
-          - '1280,1920'         # Desktop Only
-          - '375'               # Mobile Only
-          - '768'               # Tablet Only
+          - '375,768,1280,1920' # Full Suite (Mobile, Tablet, Laptop, Desktop)
+          - '1280,1920'         # Desktop/Laptop Only
+          - '375,768'           # Mobile/Tablet Only
+          - '1920'              # Large Desktop Only (4K/HD)
+          - '375'               # Mobile Only (Portrait)
 
   # 2. Scheduled trigger (Every Monday at 00:00 UTC)
   schedule:
