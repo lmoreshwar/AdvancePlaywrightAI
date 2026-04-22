@@ -4,7 +4,6 @@ import menusData from '../testdata/menus.json';
 
 const mainMenuItems = menusData.mainMenuItems;
 
-
 /**
  * Regression Test: Header
  * Maps to test cases from testcases.md — Header section

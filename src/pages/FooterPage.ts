@@ -2,7 +2,7 @@ import { expect, Page } from '@playwright/test';
 
 /**
  * FooterPage - Page Object for OpenText website footer
- * 
+ *
  * NOTE: Locators below are initial placeholders. Use @playwright/cli to
  * discover actual locators:
  *   playwright-cli open https://www.opentext.com --headed
@@ -25,7 +25,8 @@ export class FooterPage {
     footerLogo = () => this.footer().locator('img, svg').first();
     footerColumns = () => this.footer().locator('ul, [class*="column"], [class*="col"]');
     copyrightText = () => this.footer().locator('[class*="copyright"], [class*="legal"]').first();
-    socialLinks = () => this.footer().locator('a[href*="linkedin"], a[href*="twitter"], a[href*="facebook"], a[href*="youtube"]');
+    socialLinks = () =>
+        this.footer().locator('a[href*="linkedin"], a[href*="twitter"], a[href*="facebook"], a[href*="youtube"]');
 
     // ============================================
     // ACTIONS
@@ -43,7 +44,7 @@ export class FooterPage {
      */
     async getFooterLinkTexts(): Promise<string[]> {
         const texts = await this.footerLinks().allTextContents();
-        return texts.map(t => t.trim()).filter(t => t.length > 0);
+        return texts.map((t) => t.trim()).filter((t) => t.length > 0);
     }
 
     /**

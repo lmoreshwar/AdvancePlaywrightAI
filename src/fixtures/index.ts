@@ -53,11 +53,11 @@ export const test = base.extend<TestFixtures>({
 
     /**
      * 🛡️ AUTO-DISMISS OVERLAYS — Global popup/overlay handlers
-     * 
+     *
      * Uses Playwright's addLocatorHandler() to automatically dismiss
      * any blocking overlay (cookie banner, Summit popup, OT Agent chatbot)
      * whenever they interfere with a test action.
-     * 
+     *
      * This runs for EVERY test automatically via the 'page' fixture.
      */
     page: async ({ page }, use) => {
@@ -69,7 +69,7 @@ export const test = base.extend<TestFixtures>({
                 await page.getByRole('button', { name: 'Accept All' }).click();
                 console.log('[AutoDismiss] 🍪 Cookie banner dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         // ─── Handler 2: OpenText Summit Floating Popup ───
@@ -86,7 +86,7 @@ export const test = base.extend<TestFixtures>({
                 }
                 console.log('[AutoDismiss] 🎪 Summit popup dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         // ─── Handler 3: OT Agent Chatbot ───
@@ -94,7 +94,9 @@ export const test = base.extend<TestFixtures>({
         await page.addLocatorHandler(
             page.getByText('OT Agent').first(),
             async () => {
-                const agentClose = page.locator('[aria-label*="Close"], [aria-label*="Collapse"], .ot-agent-close').first();
+                const agentClose = page
+                    .locator('[aria-label*="Close"], [aria-label*="Collapse"], .ot-agent-close')
+                    .first();
                 if (await agentClose.isVisible({ timeout: 1000 }).catch(() => false)) {
                     await agentClose.click();
                 } else {
@@ -102,7 +104,7 @@ export const test = base.extend<TestFixtures>({
                 }
                 console.log('[AutoDismiss] 🤖 OT Agent chatbot dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         // ─── Handler 4: Privacy/GDPR Close Button ───
@@ -115,7 +117,7 @@ export const test = base.extend<TestFixtures>({
                 }
                 console.log('[AutoDismiss] 🔒 Privacy banner dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         await use(page);

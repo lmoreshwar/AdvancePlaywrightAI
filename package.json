@@ -24,6 +24,13 @@
     "test:report": "playwright show-report",
     "test:ci": "playwright test --reporter=list,json",
     "test:bstack": "node -r dotenv/config node_modules/browserstack-node-sdk/src/bin/runner.js playwright test",
+    "test:qa": "cross-env TEST_ENV=qa playwright test",
+    "test:staging": "cross-env TEST_ENV=staging playwright test",
+    "test:dev": "cross-env TEST_ENV=dev playwright test",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
     "build": "tsc",
     "clean": "rm -rf dist test-results playwright-report tta-report",
     "cli:install": "npm install -g @playwright/cli@latest",
@@ -44,10 +51,15 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.0.6",
     "browserstack-node-sdk": "^1.52.0",
+    "cross-env": "^7.0.3",
     "dotenv": "^17.2.3",
-    "typescript": "^5.9.3"
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.34.0"
   }
 }

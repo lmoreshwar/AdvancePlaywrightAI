@@ -1,6 +1,22 @@
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-dotenv.config();
+/**
+ * Multi-Environment Config Loading
+ *
+ * Priority: Environment variables > .env.{TEST_ENV} > .env (default)
+ *
+ * Usage:
+ *   TEST_ENV=qa npm test        → loads .env.qa
+ *   TEST_ENV=staging npm test   → loads .env.staging
+ *   npm test                    → loads .env (production)
+ */
+const testEnv = process.env.TEST_ENV || 'production';
+const envFile = testEnv === 'production' ? '.env' : `.env.${testEnv}`;
+
+// Load environment-specific file first, then default .env as fallback
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
+dotenv.config(); // Fallback — won't override existing vars
 
 export interface AppConfig {
     baseUrl: string;
@@ -14,7 +30,7 @@ export interface AppConfig {
 /**
  * Application configuration — loaded from environment variables.
  * All values can be overridden via .env file or CI environment variables.
- * 
+ *
  * NOTE: Test data (menus, viewports) lives in src/testdata/menus.json
  */
 export const config: AppConfig = {

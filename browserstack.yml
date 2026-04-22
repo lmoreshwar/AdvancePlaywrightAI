@@ -2,11 +2,31 @@ browserstackAuth:
   userName: ${BROWSERSTACK_USERNAME}
   accessKey: ${BROWSERSTACK_ACCESS_KEY}
 platforms:
+  # ─── Desktop Browsers (Cross-Browser) ───
   - os: Windows
     osVersion: 10
     browserName: chrome
     browserVersion: latest
     resolution: 1920x1080
+  - os: Windows
+    osVersion: 11
+    browserName: edge
+    browserVersion: latest
+    resolution: 1920x1080
+  - os: OS X
+    osVersion: Sonoma
+    browserName: safari
+    browserVersion: latest
+    resolution: 1920x1080
+  - os: Windows
+    osVersion: 10
+    browserName: firefox
+    browserVersion: latest
+    resolution: 1920x1080
+
+# ─── Parallel Execution ───
+parallelsPerPlatform: 2
+
 browserstackLocal: false
 buildName: "OpenText Playwright Framework Build"
 projectName: "OpenText AI Tester"

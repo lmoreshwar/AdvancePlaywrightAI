@@ -9,7 +9,7 @@ const viewports = menusData.viewports as ViewportConfig[];
 /**
  * Regression Test: Homepage Across Viewports
  * Maps to test cases from testcases.md — Responsive section
- * 
+ *
  * Runs the same set of checks at each viewport breakpoint:
  *   XL (>=1376), LG (>=968), MD (>=720), SM (>=576), XS (>=440)
  */
