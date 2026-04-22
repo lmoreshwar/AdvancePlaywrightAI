@@ -1,6 +1,9 @@
 import { test, expect } from '../fixtures';
 import { HeaderModule } from '../modules/HeaderModule';
-import { mainMenuItems } from '../config';
+import menusData from '../testdata/menus.json';
+
+const mainMenuItems = menusData.mainMenuItems;
+
 
 /**
  * Regression Test: Header

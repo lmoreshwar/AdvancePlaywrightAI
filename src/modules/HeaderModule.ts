@@ -1,7 +1,10 @@
 import { expect, Page } from '@playwright/test';
 import { HeaderPage } from '../pages/HeaderPage';
 import { Logger } from '../utils/Logger';
-import { mainMenuItems } from '../config';
+import menusData from '../testdata/menus.json';
+
+const mainMenuItems = menusData.mainMenuItems;
+
 
 /**
  * HeaderModule - Business logic for header-related test workflows
