@@ -36,4 +36,47 @@ export class DataGenerator {
             return v.toString(16);
         });
     }
+
+    /**
+     * Generate a random date between two dates
+     */
+    static randomDate(start: Date, end: Date): Date {
+        return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    }
+
+    /**
+     * Generate a past date within the last N days
+     */
+    static randomPastDate(days: number): Date {
+        const end = new Date();
+        const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+        return this.randomDate(start, end);
+    }
+
+    /**
+     * Generate a future date within the next N days
+     */
+    static randomFutureDate(days: number): Date {
+        const start = new Date();
+        const end = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+        return this.randomDate(start, end);
+    }
+
+    /**
+     * Generate a random formatted date (YYYY-MM-DD by default)
+     */
+    static randomFormattedDate(daysOffset: number = 30): string {
+        const date = Math.random() > 0.5 ? this.randomPastDate(daysOffset) : this.randomFutureDate(daysOffset);
+        return date.toISOString().split('T')[0];
+    }
+
+    /**
+     * Generate a random 10-digit US phone number
+     */
+    static randomPhone(): string {
+        const areaCode = this.randomInt(200, 999);
+        const prefix = this.randomInt(200, 999);
+        const line = this.randomInt(1000, 9999);
+        return `(${areaCode}) ${prefix}-${line}`;
+    }
 }
