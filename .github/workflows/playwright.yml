@@ -26,6 +26,22 @@ on:
           - '@Header'
           - '@Homepage'
           - '@Responsive'
+      project:
+        description: 'Browser/Device Project'
+        required: true
+        default: 'desktop-chrome'
+        type: choice
+        options:
+          - 'desktop-chrome'
+          - 'mobile-chrome'
+          - 'viewport-xl'
+          - 'viewport-lg'
+          - 'viewport-md'
+          - 'viewport-sm'
+          - 'viewport-xs'
+          - 'tablet-chrome'
+          - 'desktop-firefox'
+          - 'desktop-safari'
 
   # 2. Scheduled trigger (Every day at 02:00 UTC)
   schedule:
@@ -59,7 +75,8 @@ jobs:
           # Use the selected environment and test suite from the UI
           # Default to @Smoke if triggered by schedule
           TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
-          npm run test:bstack -- --grep "$TAG_TO_RUN"
+          PROJECT_TO_RUN="${{ github.event.inputs.project || 'desktop-chrome' }}"
+          npm run test:bstack -- --grep "$TAG_TO_RUN" --project="$PROJECT_TO_RUN"
         continue-on-error: true
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}

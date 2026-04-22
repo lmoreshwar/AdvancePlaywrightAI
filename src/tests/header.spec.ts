@@ -14,6 +14,8 @@ test.describe('@P0 @Regression @Header Header Regression', () => {
     test.beforeEach(async ({ page }) => {
         headerModule = new HeaderModule(page);
         await headerModule.navigateAndVerifyHeader();
+        // Wait for stability before starting any test
+        await page.waitForLoadState('networkidle');
     });
 
     // ═══════════════════════════════════════
