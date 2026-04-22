@@ -9,17 +9,20 @@ Follow this exact flow to go from a manual test case to a fully automated, CI-re
 ---
 
 ## 🟢 Step 1: Document Your Requirement
-The AI needs a clear target. Drop your plain-English manual test cases into the Requirements Hub.
+The AI needs a clear target. We use a **3-Tier Input System** depending on how formal your requirements are. Choose ONE of the following methods:
 
+### Method A: Formal Test Cases
+Use this for strict, step-by-step test scenarios (e.g., exported from Jira/ALM).
 - **File**: `FRAMEWORK_HUB/01_Requirements/testcases.md`
-- **Action**: Add your test case in a simple format.
 
-**Example Format:**
-> **TC-01: Verify Contact Support Flow**
-> 1. Go to homepage
-> 2. Open the "Support" menu
-> 3. Click "Contact Support"
-> 4. Expected: User is navigated to the Contact Support page and "How can we help?" heading is visible.
+### Method B: Agile User Stories
+Use this for high-level, plain-English acceptance criteria. 
+- **File**: `FRAMEWORK_HUB/01_Requirements/user_stories.md`
+- **Example**: *"As a user, clicking 'Support' on the homepage should open a dropdown where I can click 'Contact'."*
+
+### Method C: Ad-Hoc Command (No File Needed)
+If you just want to instruct the AI directly without saving a document, you can paste your plain English requirements directly into the AI prompt (Step 2).
+
 
 ---
 
