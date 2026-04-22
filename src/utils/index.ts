@@ -6,5 +6,4 @@ export type { LocatorStrategy, SelfHealingEvent } from './SmartLocator';
 export { WindowHelper } from './WindowHelper';
 export { IframeHelper } from './IframeHelper';
 export { FileHelper } from './FileHelper';
-export { ApiHelper } from './ApiHelper';
 export { StringHelper } from './StringHelper';
