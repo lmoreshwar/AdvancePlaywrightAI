@@ -75,7 +75,7 @@ export class CustomerStoriesModule {
     /**
      * Select a specific option within a named filter fieldset
      */
-    private async selectFilterOption(filterName: string, optionText: string) {
+    async selectFilterOption(filterName: string, optionText: string) {
         this.logger.info(`Selecting "${optionText}" in "${filterName}"`);
         
         const fieldset = this.pageObj.getFilterFieldset(filterName);

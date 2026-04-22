@@ -1,0 +1,27 @@
+browserstackAuth:
+  userName: moreshwarlandge_H5tuaR
+  accessKey: X4yqFc194spQvnasxeYU
+platforms:
+  - os: Windows
+    osVersion: 10
+    browserName: chrome
+    browserVersion: latest
+    resolution: 1920x1080
+parallelsPerPlatform: 2
+browserstackLocal: false
+buildName: OpenText Playwright Framework Build
+projectName: OpenText AI Tester
+debug: true
+networkLogs: true
+consoleLogs: errors
+testContextOptions:
+  skipSessionStatus: false
+  skipSessionName: false
+userName: moreshwarlandge_H5tuaR
+accessKey: X4yqFc194spQvnasxeYU
+buildIdentifier: '#43'
+logDir: C:\Users\DELL\AI Workspace\OpenText\log
+browserStackLocalOptions:
+  skipBinaryInitialisation: false
+proxySettings: {}
+accessibility: false

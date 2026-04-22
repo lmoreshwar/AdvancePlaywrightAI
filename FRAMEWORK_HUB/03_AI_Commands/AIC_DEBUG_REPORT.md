@@ -1,35 +1,68 @@
 # 🔍 AIC Debug Report — Auto-Generated
 
-**Generated**: 4/22/2026, 5:13:02 PM  
-**Duration**: 1210.7s  
+**Generated**: 4/22/2026, 10:48:39 PM  
+**Duration**: 309.5s  
 
 ## 📊 Run Summary
 
 | Metric | Value |
 |---|---|
-| Total Tests | 62 |
-| ✅ Passed | 57 |
-| ❌ Failed | 5 |
-| ⏭️ Skipped | 4 |
+| Total Tests | 11 |
+| ✅ Passed | 8 |
+| ❌ Failed | 3 |
+| ⏭️ Skipped | 2 |
 
 ## 🗂️ Failure Breakdown by Category
 
 | Category | Count | AI Healable |
 |---|---|---|
-| ❓ Unknown | 1 | ❌ No |
-| 🔗 Locator Change | 4 | ✅ Yes |
+| 🔗 Locator Change | 1 | ✅ Yes |
+| ❓ Unknown | 2 | ❌ No |
 
 ---
 
 ## 🔴 FAILURE #1
 
 ### 1. 🚨 Failure Summary
-- **Test**: `@P1 @Regression should return exactly 19 results for deep filter`
-- **Project**: `-latest:Windows 10-browserstack`
-- **Error Location**: `CustomerStoriesModule.ts:90`
+- **Test**: `Header Language Modal Visual @Regression`
+- **Project**: `desktop-chrome`
+- **Error Location**: `HeaderPage.ts:143`
 - **Error**:
 ```
-Error: page.waitForTimeout: Target page, context or browser has been closed
+TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('link', { name: /Choose your country/i }).first()
+    - found getByRole('button', { name: 'Accept All' }), intercepting action to run the handler
+    - locator handler has finished
+    - interception handler has finished, continuing
+    - locator resolved to <a href="#" id="footer-locale" data-toggle="modal" data-target="#language-modal" class="nav-link d-flex text-body">…</a>
+  - attempting click action
+ 
+```
+
+### 2. 🗂️ Category: **🔗 Locator Change**
+
+### 3. 🤖 Self-Healing
+- **AI Healable**: ✅ Yes
+- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
+
+### 4. 📸 Screenshot
+`C:\Users\DELL\AI Workspace\OpenText\test-results\visual--Visual-Visual-Regr-ae482-age-Modal-Visual-Regression-desktop-chrome\test-failed-1.png`
+
+### 5. 🔬 Trace
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\visual--Visual-Visual-Regr-ae482-age-Modal-Visual-Regression-desktop-chrome\trace.zip`
+
+---
+
+## 🔴 FAILURE #2
+
+### 1. 🚨 Failure Summary
+- **Test**: `Customer Stories Filtered Results Visual @Regression`
+- **Project**: `desktop-chrome`
+- **Error Location**: `WaitHelper.ts:77`
+- **Error**:
+```
+TimeoutError: page.waitForLoadState: Timeout 15000ms exceeded.
 ```
 
 ### 2. 🗂️ Category: **❓ Unknown**
@@ -38,120 +71,36 @@ Error: page.waitForTimeout: Target page, context or browser has been closed
 - **AI Healable**: ❌ No
 - **Suggestion**: Manual investigation required. Check the error details and screenshot.
 
-### 5. 🔬 Trace
-`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\customer-stories--P0-Regre-9e93a--19-results-for-deep-filter--latest-Windows-10-browserstack-retry1\trace.zip`
-
----
-
-## 🔴 FAILURE #2
-
-### 1. 🚨 Failure Summary
-- **Test**: `should have sticky header at SM`
-- **Project**: `-latest:Windows 10-browserstack`
-- **Error Location**: `FooterPage.ts:67`
-- **Error**:
-```
-TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
-Call log:
-  - waiting for getByRole('contentinfo').locator('a').first() to be visible
-    58 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
-```
-
-### 2. 🗂️ Category: **🔗 Locator Change**
-
-### 3. 🤖 Self-Healing
-- **AI Healable**: ✅ Yes
-- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
-
 ### 4. 📸 Screenshot
-`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4\test-failed-1.png`
+`C:\Users\DELL\AI Workspace\OpenText\test-results\visual--Visual-Visual-Regr-8f2c1-d-Results-Visual-Regression-desktop-chrome\test-failed-1.png`
 
 ### 5. 🔬 Trace
-`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4\trace.zip`
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\visual--Visual-Visual-Regr-8f2c1-d-Results-Visual-Regression-desktop-chrome\trace.zip`
 
 ---
 
 ## 🔴 FAILURE #3
 
 ### 1. 🚨 Failure Summary
-- **Test**: `should have sticky header at SM`
-- **Project**: `-latest:Windows 10-browserstack`
-- **Error Location**: `FooterPage.ts:67`
+- **Test**: `Customer Stories Filtered Results Visual @Regression`
+- **Project**: `desktop-chrome`
+- **Error Location**: `WaitHelper.ts:77`
 - **Error**:
 ```
-TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
-Call log:
-  - waiting for getByRole('contentinfo').locator('a').first() to be visible
-    58 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
+TimeoutError: page.waitForLoadState: Timeout 15000ms exceeded.
 ```
 
-### 2. 🗂️ Category: **🔗 Locator Change**
+### 2. 🗂️ Category: **❓ Unknown**
 
 ### 3. 🤖 Self-Healing
-- **AI Healable**: ✅ Yes
-- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
+- **AI Healable**: ❌ No
+- **Suggestion**: Manual investigation required. Check the error details and screenshot.
 
 ### 4. 📸 Screenshot
-`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4-retry1\test-failed-1.png`
+`C:\Users\DELL\AI Workspace\OpenText\test-results\visual--Visual-Visual-Regr-8f2c1-d-Results-Visual-Regression-desktop-chrome-retry1\test-failed-1.png`
 
 ### 5. 🔬 Trace
-`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4-retry1\trace.zip`
-
----
-
-## 🔴 FAILURE #4
-
-### 1. 🚨 Failure Summary
-- **Test**: `should have sticky header at XS`
-- **Project**: `-latest:Windows 10-browserstack`
-- **Error Location**: `FooterPage.ts:67`
-- **Error**:
-```
-TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
-Call log:
-  - waiting for getByRole('contentinfo').locator('a').first() to be visible
-    57 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
-```
-
-### 2. 🗂️ Category: **🔗 Locator Change**
-
-### 3. 🤖 Self-Healing
-- **AI Healable**: ✅ Yes
-- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
-
-### 4. 📸 Screenshot
-`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4\test-failed-1.png`
-
-### 5. 🔬 Trace
-`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4\trace.zip`
-
----
-
-## 🔴 FAILURE #5
-
-### 1. 🚨 Failure Summary
-- **Test**: `should have sticky header at XS`
-- **Project**: `-latest:Windows 10-browserstack`
-- **Error Location**: `FooterPage.ts:67`
-- **Error**:
-```
-TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
-Call log:
-  - waiting for getByRole('contentinfo').locator('a').first() to be visible
-    56 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
-```
-
-### 2. 🗂️ Category: **🔗 Locator Change**
-
-### 3. 🤖 Self-Healing
-- **AI Healable**: ✅ Yes
-- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
-
-### 4. 📸 Screenshot
-`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4-retry1\test-failed-1.png`
-
-### 5. 🔬 Trace
-`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4-retry1\trace.zip`
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\visual--Visual-Visual-Regr-8f2c1-d-Results-Visual-Regression-desktop-chrome-retry1\trace.zip`
 
 ---
 
