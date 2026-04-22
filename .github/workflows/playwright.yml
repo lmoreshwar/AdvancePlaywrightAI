@@ -1,10 +1,6 @@
 name: 🎭 Playwright Tests on BrowserStack
 
 on:
-  # Temporary trigger for discovery on feature branch
-  push:
-    branches: [ feature/1_fixes ]
-
   # 1. Manual trigger with parameters
   workflow_dispatch:
     inputs:
@@ -56,7 +52,7 @@ jobs:
   test-browserstack:
     name: 🧪 Run Tests on BrowserStack
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: 📥 Checkout Code
@@ -91,7 +87,8 @@ jobs:
           fi
 
           TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
-          npm run test:bstack -- --grep "$TAG_TO_RUN" $PROJECT_FLAG
+          # Use explicit config and single worker for BrowserStack stability in CI
+          npm run test:bstack -- --config=playwright.config.ts --grep "$TAG_TO_RUN" $PROJECT_FLAG --workers=1
         continue-on-error: true
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
@@ -100,6 +97,24 @@ jobs:
           BASE_URL: https://www.opentext.com
           TEST_ENV: ${{ github.event.inputs.environment || 'qa' }}
           CI: true
+
+      - name: 🧰 Ensure Report Directories Exist
+        if: always()
+        run: |
+          mkdir -p ai-debug-report
+          mkdir -p playwright-report
+          mkdir -p test-results
+          mkdir -p log
+
+      - name: 🔎 Debug Generated Files
+        if: always()
+        run: |
+          pwd
+          ls -la
+          ls -la ai-debug-report || true
+          ls -la playwright-report || true
+          ls -la test-results || true
+          ls -la log || true
 
       - name: 📊 Upload AI Debug Report
         if: always()
