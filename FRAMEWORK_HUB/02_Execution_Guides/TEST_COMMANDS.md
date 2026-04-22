@@ -31,7 +31,7 @@ Runs tests on the BrowserStack grid using `browserstack.yml` for infrastructure 
 | :--- | :--- |
 | **Install/Update Playwright** | `npx playwright install` |
 | **Check Playwright version** | `npx playwright --version` |
-| **Clear old reports/logs** | `rm -rf test-results/ log/ tta-report/` |
+| **Clear old reports/logs** | `rm -rf test-results/ log/ ai-debug-report/` |
 
 ---
 

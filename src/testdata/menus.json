@@ -1,19 +1,24 @@
 {
-    "viewports": [
-        { "name": "xl", "width": 1376, "height": 900, "type": "desktop" },
-        { "name": "lg", "width": 968, "height": 900, "type": "desktop" },
-        { "name": "md", "width": 720, "height": 1024, "type": "tablet" },
-        { "name": "sm", "width": 576, "height": 1024, "type": "mobile" },
-        { "name": "xs", "width": 440, "height": 900, "type": "mobile" }
-    ],
     "mainMenuItems": [
-        { "name": "Why OpenText", "hasSubmenu": true },
-        { "name": "Products", "hasSubmenu": true },
-        { "name": "Solutions", "hasSubmenu": true },
-        { "name": "Services", "hasSubmenu": true },
-        { "name": "Partners", "hasSubmenu": true },
-        { "name": "Support", "hasSubmenu": true },
-        { "name": "Resources", "hasSubmenu": true }
+        "Why OpenText",
+        "Products",
+        "Solutions",
+        "Services",
+        "Partners",
+        "Support",
+        "Resources"
     ],
-    "headerUtilityItems": ["Search", "Language switcher", "My Account", "Contact"]
+    "headerUtilityItems": [
+        "Search",
+        "Language switcher",
+        "My Account",
+        "Contact"
+    ],
+    "viewports": [
+        { "name": "xl", "width": 1376, "height": 900,  "type": "desktop" },
+        { "name": "lg", "width": 968,  "height": 900,  "type": "desktop" },
+        { "name": "md", "width": 720,  "height": 1024, "type": "tablet"  },
+        { "name": "sm", "width": 576,  "height": 1024, "type": "mobile"  },
+        { "name": "xs", "width": 440,  "height": 900,  "type": "mobile"  }
+    ]
 }

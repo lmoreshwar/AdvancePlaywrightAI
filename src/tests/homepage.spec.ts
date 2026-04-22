@@ -6,7 +6,6 @@ import { HomepageModule } from '../modules/HomepageModule';
  * Maps to test cases from testcases.md — Homepage section
  */
 test.describe('@P0 @Regression @Homepage Homepage Regression', () => {
-
     // ═══════════════════════════════════════
     // TC-HP01: Navigate to Homepage
     // ═══════════════════════════════════════
@@ -30,7 +29,10 @@ test.describe('@P0 @Regression @Homepage Homepage Regression', () => {
     // ═══════════════════════════════════════
     // TC-HP03: Validate utility items
     // ═══════════════════════════════════════
-    test('@P1 @Regression should display My Account, Language Switcher, Search, Contact', async ({ page, headerPage }) => {
+    test('@P1 @Regression should display My Account, Language Switcher, Search, Contact', async ({
+        page,
+        headerPage,
+    }) => {
         await test.step('Navigate and verify utility items', async () => {
             await page.goto('/', { waitUntil: 'domcontentloaded' });
             await headerPage.expectSearchIconVisible();

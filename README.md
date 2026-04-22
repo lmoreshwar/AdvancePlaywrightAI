@@ -32,7 +32,7 @@ OpenText/
 │       ├── Logger.ts                ← Structured logging
 │       ├── WaitHelper.ts            ← Custom wait conditions
 │       ├── DataGenerator.ts         ← Random data generation
-│       └── CustomTTAReporter.ts     ← HTML/JSON test reporter
+│       └── AiDebugReporter.ts       ← HTML/JSON test reporter
 ├── testcases.md                     ← Original test cases
 └── requirement.md                   ← Requirements document
 ```
@@ -295,7 +295,7 @@ npm run test:headed      # See the browser
 ## 📊 Reports
 
 After running tests:
-- **TTA Report**: `tta-report/index.html` (custom dark-theme HTML report)
+- **AI Debug Report**: `ai-debug-report/index.html` (custom dark-theme HTML report)
 - **Playwright Report**: `npx playwright show-report`
 - **JSON Results**: `test-results/results.json`
 

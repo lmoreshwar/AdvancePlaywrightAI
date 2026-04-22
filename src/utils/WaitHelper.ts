@@ -19,10 +19,7 @@ export class WaitHelper {
         this.page = page;
     }
 
-    async waitForCondition(
-        condition: () => Promise<boolean>,
-        options?: WaitOptions,
-    ): Promise<void> {
+    async waitForCondition(condition: () => Promise<boolean>, options?: WaitOptions): Promise<void> {
         const timeout = options?.timeout || this.defaultTimeout;
         const interval = options?.interval || 500;
         const message = options?.message || 'Condition not met';
@@ -109,11 +106,14 @@ export class WaitHelper {
             await this.page.waitForTimeout(interval);
             const currentBox = await locator.boundingBox();
 
-            if (lastBox && currentBox &&
+            if (
+                lastBox &&
+                currentBox &&
                 lastBox.x === currentBox.x &&
                 lastBox.y === currentBox.y &&
                 lastBox.width === currentBox.width &&
-                lastBox.height === currentBox.height) {
+                lastBox.height === currentBox.height
+            ) {
                 return;
             }
             lastBox = currentBox;

@@ -17,21 +17,30 @@ export class HeaderPage {
 
     // Cookie Banner (Must be handled first)
     acceptCookiesBtn = () => this.page.getByRole('button', { name: 'Accept All' });
-    privacyCloseBtn = () => this.page.getByRole('button', { name: /Close|Dismiss/i }).or(this.page.locator('.ot-close-icon'));
+    privacyCloseBtn = () =>
+        this.page.getByRole('button', { name: /Close|Dismiss/i }).or(this.page.locator('.ot-close-icon'));
 
     // Floating Pop-ups (Marketing & Chatbots)
-    summitPopupClose = () => this.page.getByRole('button', { name: /Close|Dismiss/i }).or(this.page.locator('.close-btn, [aria-label*="Close"]')).first();
-    otAgentClose = () => this.page.getByRole('button', { name: /Close|Collapse Agent/i }).or(this.page.locator('.ot-agent-close, #ot-agent-close')).first();
+    summitPopupClose = () =>
+        this.page
+            .getByRole('button', { name: /Close|Dismiss/i })
+            .or(this.page.locator('.close-btn, [aria-label*="Close"]'))
+            .first();
+    otAgentClose = () =>
+        this.page
+            .getByRole('button', { name: /Close|Collapse Agent/i })
+            .or(this.page.locator('.ot-agent-close, #ot-agent-close'))
+            .first();
 
     // Logo (from snapshot)
     logoLink = () => this.page.getByRole('link', { name: /OpenText/i }).first();
 
     // Main Navigation Menu Items
     headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
-    
+
     // Mobile Responsive Controls
     hamburgerBtn = () => this.page.getByRole('button', { name: /Toggle navigation|Menu/i });
-    
+
     // Semantic getters for dropdowns
     menuItemByText = (text: string) => this.headerNav().getByRole('button', { name: text }).first();
 
@@ -47,8 +56,8 @@ export class HeaderPage {
 
     async acceptCookies(): Promise<void> {
         // Wait for the cookie banner to appear
-        await this.page.waitForTimeout(2000); 
-        
+        await this.page.waitForTimeout(2000);
+
         const acceptBtn = this.acceptCookiesBtn();
         const closeBtn = this.privacyCloseBtn();
 
@@ -59,7 +68,7 @@ export class HeaderPage {
         } else if (await closeBtn.isVisible().catch(() => false)) {
             await closeBtn.click().catch(() => {});
         }
-        
+
         // Extra safety wait for overlay to fully clear
         await this.page.waitForTimeout(500);
     }
@@ -73,7 +82,9 @@ export class HeaderPage {
             const summitPopup = this.page.getByText(/OpenText Summit|Find a summit near you/i).first();
             if (await summitPopup.isVisible({ timeout: 2000 })) {
                 // Try clicking the close button on the Summit popup
-                const closeBtn = this.page.locator('.close-btn, [aria-label*="Close"], button:has(.close-icon)').first();
+                const closeBtn = this.page
+                    .locator('.close-btn, [aria-label*="Close"], button:has(.close-icon)')
+                    .first();
                 if (await closeBtn.isVisible({ timeout: 1000 })) {
                     await closeBtn.click();
                 } else {
@@ -81,16 +92,24 @@ export class HeaderPage {
                 }
                 await this.page.waitForTimeout(500);
             }
-        } catch (e) { /* Ignore if it doesn't appear */ }
+        } catch (e) {
+            /* Ignore if it doesn't appear */
+        }
 
         // Handle OT Agent Chatbot
         try {
-            const agentChat = this.page.locator('.ot-agent-close, #ot-agent-close, [aria-label*="Close Agent"], [aria-label*="Collapse Agent"]').first();
+            const agentChat = this.page
+                .locator(
+                    '.ot-agent-close, #ot-agent-close, [aria-label*="Close Agent"], [aria-label*="Collapse Agent"]',
+                )
+                .first();
             if (await agentChat.isVisible({ timeout: 1000 })) {
                 await agentChat.click();
                 await this.page.waitForTimeout(500);
             }
-        } catch (e) { /* Ignore if it doesn't appear */ }
+        } catch (e) {
+            /* Ignore if it doesn't appear */
+        }
     }
 
     async clickMainMenu(menuText: string): Promise<void> {
@@ -107,13 +126,13 @@ export class HeaderPage {
 
     async getMainMenuTexts(): Promise<string[]> {
         const items = await this.headerNav().getByRole('button').allTextContents();
-        return items.map(t => t.trim()).filter(t => t.length > 0);
+        return items.map((t) => t.trim()).filter((t) => t.length > 0);
     }
 
     async getSubmenuItemTexts(): Promise<string[]> {
         // Placeholder for active submenu
         const items = await this.page.locator('[class*="submenu"][class*="active"] a').allTextContents();
-        return items.map(t => t.trim()).filter(t => t.length > 0);
+        return items.map((t) => t.trim()).filter((t) => t.length > 0);
     }
 
     async clickSearch(): Promise<void> {
@@ -163,10 +182,8 @@ export class HeaderPage {
         // Use getByText with visible filter to find the modal heading.
         const regionHeading = this.page.getByText('Choose your region:', { exact: false });
         const americasText = this.page.getByText('Americas', { exact: true });
-        
-        await expect(
-            regionHeading.or(americasText).first()
-        ).toBeVisible({ timeout: 10000 });
+
+        await expect(regionHeading.or(americasText).first()).toBeVisible({ timeout: 10000 });
     }
 
     async expectContactButtonVisible(): Promise<void> {
@@ -185,5 +202,4 @@ export class HeaderPage {
         // Use .first() in case multiple header elements are detected as sticky
         await expect(this.page.locator('header[class*="sticky"]').first()).toBeVisible();
     }
-
 }

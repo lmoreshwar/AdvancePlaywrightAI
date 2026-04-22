@@ -1,11 +1,4 @@
-import type {
-    Reporter,
-    FullConfig,
-    Suite,
-    TestCase,
-    TestResult,
-    FullResult,
-} from '@playwright/test/reporter';
+import type { Reporter, FullConfig, Suite, TestCase, TestResult, FullResult } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -32,7 +25,7 @@ interface FailureEntry {
 
 /**
  * Custom TTA (Test-Time Analytics) Reporter
- * 
+ *
  * Features:
  * - Real-time console output with pass/fail icons
  * - Auto-categorizes failures (Locator Change, Script Issue, UI Bug, Environment Issue)
@@ -41,8 +34,8 @@ interface FailureEntry {
  * - Generates JSON report for CI/CD integration
  * - Writes GitHub Actions step summary (if running in CI)
  */
-class CustomTTAReporter implements Reporter {
-    private reportDir: string = 'tta-report';
+class AiDebugReporter implements Reporter {
+    private reportDir: string = 'ai-debug-report';
     private results: TestReportEntry[] = [];
     private failures: FailureEntry[] = [];
     private startTime: number = 0;
@@ -60,7 +53,7 @@ class CustomTTAReporter implements Reporter {
             fs.mkdirSync(this.reportDir, { recursive: true });
         }
 
-        console.log(`\n🚀 OpenText TTA Reporter — Running ${this.totalTests} tests\n`);
+        console.log(`\n🚀 OpenText AI Debug Reporter — Running ${this.totalTests} tests\n`);
     }
 
     onTestBegin(test: TestCase): void {
@@ -93,8 +86,8 @@ class CustomTTAReporter implements Reporter {
             status: result.status || 'unknown',
             duration: result.duration,
             project: test.parent?.project()?.name || 'default',
-            errors: result.errors.map(e => e.message || '').filter(Boolean),
-            steps: result.steps.map(s => ({
+            errors: result.errors.map((e) => e.message || '').filter(Boolean),
+            steps: result.steps.map((s) => ({
                 title: s.title,
                 duration: s.duration,
                 error: s.error?.message,
@@ -130,7 +123,7 @@ class CustomTTAReporter implements Reporter {
         const totalTime = Date.now() - this.startTime;
 
         console.log(`\n${'═'.repeat(60)}`);
-        console.log(`📊 OpenText TTA Report Summary`);
+        console.log(`📊 OpenText AI Debug Report Summary`);
         console.log(`${'═'.repeat(60)}`);
         console.log(`  Total:   ${this.totalTests}`);
         console.log(`  Passed:  ${this.passedTests} ✅`);
@@ -164,13 +157,15 @@ class CustomTTAReporter implements Reporter {
         const msg = errorMessage.toLowerCase();
 
         // Script Issues — problems in the test code itself
-        if (msg.includes('strict mode violation') || msg.includes('resolved to') && msg.includes('elements')) {
+        if (msg.includes('strict mode violation') || (msg.includes('resolved to') && msg.includes('elements'))) {
             return 'Script Issue';
         }
 
         // Locator Changes — element not found or selector invalid
         if (
-            (msg.includes('element(s) not found') || msg.includes('waiting for locator') || msg.includes('waiting for getby')) &&
+            (msg.includes('element(s) not found') ||
+                msg.includes('waiting for locator') ||
+                msg.includes('waiting for getby')) &&
             (msg.includes('tobevisible') || msg.includes('timeout'))
         ) {
             return 'Locator Change';
@@ -180,7 +175,7 @@ class CustomTTAReporter implements Reporter {
         if (
             msg.includes('navigation timeout') ||
             msg.includes('net::err_') ||
-            msg.includes('page.goto') && msg.includes('timeout') ||
+            (msg.includes('page.goto') && msg.includes('timeout')) ||
             msg.includes('browsercontext.close') ||
             msg.includes('target closed') ||
             msg.includes('econnrefused')
@@ -192,7 +187,8 @@ class CustomTTAReporter implements Reporter {
         if (
             (msg.includes('expected:') && msg.includes('received:')) ||
             (msg.includes('tobehidden') && msg.includes('visible')) ||
-            (msg.includes('tohavetext') || msg.includes('tohavecount'))
+            msg.includes('tohavetext') ||
+            msg.includes('tohavecount')
         ) {
             return 'UI Bug';
         }
@@ -208,17 +204,22 @@ class CustomTTAReporter implements Reporter {
     /**
      * Get self-healing metadata for a given failure category
      */
-    private getSelfHealingInfo(category: FailureCategory, errorMsg: string): { selfHealable: boolean; suggestion: string } {
+    private getSelfHealingInfo(
+        category: FailureCategory,
+        errorMsg: string,
+    ): { selfHealable: boolean; suggestion: string } {
         switch (category) {
             case 'Locator Change':
                 return {
                     selfHealable: true,
-                    suggestion: 'Use SmartLocator with fallback strategies or update the locator to match the current DOM.',
+                    suggestion:
+                        'Use SmartLocator with fallback strategies or update the locator to match the current DOM.',
                 };
             case 'Script Issue':
                 return {
                     selfHealable: true,
-                    suggestion: 'Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion).',
+                    suggestion:
+                        'Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion).',
                 };
             case 'Environment Issue':
                 return {
@@ -251,7 +252,7 @@ class CustomTTAReporter implements Reporter {
             'Script Issue': '📝',
             'UI Bug': '🐛',
             'Environment Issue': '🌐',
-            'Unknown': '❓',
+            Unknown: '❓',
         };
 
         // Count by category
@@ -318,7 +319,7 @@ class CustomTTAReporter implements Reporter {
         md += `| 🐛 UI Bug | Application behavior changed unexpectedly | ⚠️ Flag as bug to development team |\n`;
         md += `| 🌐 Environment Issue | Network, server, or infrastructure problem | Retry or check infra health |\n`;
 
-        // Write to tta-report directory
+        // Write to ai-debug-report directory
         const reportPath = path.join(this.reportDir, 'AIC_DEBUG_REPORT.md');
         fs.writeFileSync(reportPath, md, 'utf-8');
         console.log(`📄 AIC Debug Report: ${path.resolve(reportPath)}`);
@@ -378,13 +379,18 @@ class CustomTTAReporter implements Reporter {
      * Remove ANSI color codes from error messages for clean markdown
      */
     private cleanAnsiCodes(text: string): string {
+        // eslint-disable-next-line no-control-regex
         return text.replace(/\u001b\[\d+(;\d+)*m/g, '').trim();
     }
 
     /**
      * Extract file:line from error stack
      */
-    private extractErrorLocation(error: { message?: string; stack?: string; location?: { file: string; line: number; column: number } }): string {
+    private extractErrorLocation(error: {
+        message?: string;
+        stack?: string;
+        location?: { file: string; line: number; column: number };
+    }): string {
         if (error.location) {
             return `${path.basename(error.location.file)}:${error.location.line}`;
         }
@@ -451,11 +457,12 @@ class CustomTTAReporter implements Reporter {
         <div class="summary-card"><div class="value">${(totalTime / 1000).toFixed(1)}s</div><div class="label">Duration</div></div>
     </div>
     <div class="test-list">
-        ${this.results.map(r => {
-            const failure = this.failures.find(f => f.fullTitle === r.fullTitle);
-            const catClass = failure ? this.getCategoryClass(failure.category) : '';
-            const catLabel = failure ? `<span class="category ${catClass}">${failure.category}</span>` : '';
-            return `
+        ${this.results
+            .map((r) => {
+                const failure = this.failures.find((f) => f.fullTitle === r.fullTitle);
+                const catClass = failure ? this.getCategoryClass(failure.category) : '';
+                const catLabel = failure ? `<span class="category ${catClass}">${failure.category}</span>` : '';
+                return `
         <div class="test-item ${r.status}">
             <span>${r.status === 'passed' ? '✅' : r.status === 'failed' ? '❌' : '⏭️'}</span>
             <div class="title">
@@ -466,9 +473,10 @@ class CustomTTAReporter implements Reporter {
             <span class="project">${r.project}</span>
             <span class="duration">${r.duration}ms</span>
         </div>`;
-        }).join('')}
+            })
+            .join('')}
     </div>
-    <div class="timestamp">Generated by OpenText TTA Reporter — AI Self-Healing Framework</div>
+    <div class="timestamp">Generated by OpenText AI Debug Reporter — AI Self-Healing Framework</div>
 </body>
 </html>`;
 
@@ -479,35 +487,48 @@ class CustomTTAReporter implements Reporter {
 
     private getCategoryClass(category: FailureCategory): string {
         switch (category) {
-            case 'Locator Change': return 'cat-locator';
-            case 'Script Issue': return 'cat-script';
-            case 'UI Bug': return 'cat-uibug';
-            case 'Environment Issue': return 'cat-env';
-            default: return '';
+            case 'Locator Change':
+                return 'cat-locator';
+            case 'Script Issue':
+                return 'cat-script';
+            case 'UI Bug':
+                return 'cat-uibug';
+            case 'Environment Issue':
+                return 'cat-env';
+            default:
+                return '';
         }
     }
 
     private generateJsonReport(totalTime: number): void {
         const reportPath = path.join(this.reportDir, 'results.json');
-        fs.writeFileSync(reportPath, JSON.stringify({
-            summary: {
-                total: this.totalTests,
-                passed: this.passedTests,
-                failed: this.failedTests,
-                skipped: this.skippedTests,
-                duration: totalTime,
-                timestamp: new Date().toISOString(),
-            },
-            failures: this.failures.map(f => ({
-                test: f.testTitle,
-                category: f.category,
-                selfHealable: f.selfHealable,
-                suggestion: f.suggestion,
-                error: f.errorMessage.substring(0, 500),
-                location: f.errorLocation,
-            })),
-            tests: this.results,
-        }, null, 2), 'utf-8');
+        fs.writeFileSync(
+            reportPath,
+            JSON.stringify(
+                {
+                    summary: {
+                        total: this.totalTests,
+                        passed: this.passedTests,
+                        failed: this.failedTests,
+                        skipped: this.skippedTests,
+                        duration: totalTime,
+                        timestamp: new Date().toISOString(),
+                    },
+                    failures: this.failures.map((f) => ({
+                        test: f.testTitle,
+                        category: f.category,
+                        selfHealable: f.selfHealable,
+                        suggestion: f.suggestion,
+                        error: f.errorMessage.substring(0, 500),
+                        location: f.errorLocation,
+                    })),
+                    tests: this.results,
+                },
+                null,
+                2,
+            ),
+            'utf-8',
+        );
         console.log(`📄 TTA JSON Report: ${path.resolve(reportPath)}`);
     }
 }
@@ -524,4 +545,4 @@ interface TestReportEntry {
     tracePath?: string;
 }
 
-export default CustomTTAReporter;
+export default AiDebugReporter;

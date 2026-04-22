@@ -2,17 +2,23 @@ import { test as base } from '@playwright/test';
 import { HeaderPage } from '../pages/HeaderPage';
 import { HomepagePage } from '../pages/HomepagePage';
 import { FooterPage } from '../pages/FooterPage';
+import { CustomerStoriesPage } from '../pages/CustomerStoriesPage';
 import { HeaderModule } from '../modules/HeaderModule';
 import { HomepageModule } from '../modules/HomepageModule';
+import { CustomerStoriesModule } from '../modules/CustomerStoriesModule';
+import { VisualModule } from '../modules/VisualModule';
 
 export type TestFixtures = {
     // Page Objects
     headerPage: HeaderPage;
     homepagePage: HomepagePage;
     footerPage: FooterPage;
+    customerStoriesPage: CustomerStoriesPage;
     // Modules
     headerModule: HeaderModule;
     homepageModule: HomepageModule;
+    customerStoriesModule: CustomerStoriesModule;
+    visualModule: VisualModule;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -52,12 +58,33 @@ export const test = base.extend<TestFixtures>({
     },
 
     /**
+     * Customer Stories Page fixture
+     */
+    customerStoriesPage: async ({ page }, use) => {
+        await use(new CustomerStoriesPage(page));
+    },
+
+    /**
+     * Customer Stories Module fixture
+     */
+    customerStoriesModule: async ({ page }, use) => {
+        await use(new CustomerStoriesModule(page));
+    },
+
+    /**
+     * Visual Module fixture
+     */
+    visualModule: async ({ page }, use) => {
+        await use(new VisualModule(page));
+    },
+
+    /**
      * 🛡️ AUTO-DISMISS OVERLAYS — Global popup/overlay handlers
-     * 
+     *
      * Uses Playwright's addLocatorHandler() to automatically dismiss
      * any blocking overlay (cookie banner, Summit popup, OT Agent chatbot)
      * whenever they interfere with a test action.
-     * 
+     *
      * This runs for EVERY test automatically via the 'page' fixture.
      */
     page: async ({ page }, use) => {
@@ -69,7 +96,7 @@ export const test = base.extend<TestFixtures>({
                 await page.getByRole('button', { name: 'Accept All' }).click();
                 console.log('[AutoDismiss] 🍪 Cookie banner dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         // ─── Handler 2: OpenText Summit Floating Popup ───
@@ -86,7 +113,7 @@ export const test = base.extend<TestFixtures>({
                 }
                 console.log('[AutoDismiss] 🎪 Summit popup dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         // ─── Handler 3: OT Agent Chatbot ───
@@ -94,7 +121,9 @@ export const test = base.extend<TestFixtures>({
         await page.addLocatorHandler(
             page.getByText('OT Agent').first(),
             async () => {
-                const agentClose = page.locator('[aria-label*="Close"], [aria-label*="Collapse"], .ot-agent-close').first();
+                const agentClose = page
+                    .locator('[aria-label*="Close"], [aria-label*="Collapse"], .ot-agent-close')
+                    .first();
                 if (await agentClose.isVisible({ timeout: 1000 }).catch(() => false)) {
                     await agentClose.click();
                 } else {
@@ -102,7 +131,7 @@ export const test = base.extend<TestFixtures>({
                 }
                 console.log('[AutoDismiss] 🤖 OT Agent chatbot dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         // ─── Handler 4: Privacy/GDPR Close Button ───
@@ -115,7 +144,7 @@ export const test = base.extend<TestFixtures>({
                 }
                 console.log('[AutoDismiss] 🔒 Privacy banner dismissed');
             },
-            { noWaitAfter: true }
+            { noWaitAfter: true },
         );
 
         await use(page);

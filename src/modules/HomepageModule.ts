@@ -82,7 +82,7 @@ export class HomepageModule {
             this.logger.step(2, 'Verify first scroller is visible');
             const firstScroller = this.homepagePage.scrollerByIndex(0);
             // Use evaluate for scroll to bypass actionability/稳定性 checks on moving marquees
-            await firstScroller.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+            await firstScroller.evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 
             this.logger.step(3, 'Check scroller dimensions');
             const box = await firstScroller.boundingBox();

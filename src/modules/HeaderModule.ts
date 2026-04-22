@@ -1,7 +1,9 @@
 import { expect, Page } from '@playwright/test';
 import { HeaderPage } from '../pages/HeaderPage';
 import { Logger } from '../utils/Logger';
-import { mainMenuItems } from '../config';
+import menusData from '../testdata/menus.json';
+
+const mainMenuItems = menusData.mainMenuItems;
 
 /**
  * HeaderModule - Business logic for header-related test workflows
@@ -24,7 +26,7 @@ export class HeaderModule {
     async navigateAndVerifyHeader(): Promise<void> {
         this.logger.step(1, 'Navigate to OpenText homepage');
         await this.page.goto('/', { waitUntil: 'domcontentloaded' });
-        
+
         this.logger.step(2, 'Accept Cookies to unblock UI');
         await this.headerPage.acceptCookies();
 
@@ -67,9 +69,7 @@ export class HeaderModule {
 
         this.logger.step(2, 'Verify expected menu items are present');
         for (const expectedMenu of mainMenuItems) {
-            const found = menuTexts.some(text =>
-                text.toLowerCase().includes(expectedMenu.toLowerCase())
-            );
+            const found = menuTexts.some((text) => text.toLowerCase().includes(expectedMenu.toLowerCase()));
             if (!found) {
                 this.logger.warn(`Menu item "${expectedMenu}" not found in: ${menuTexts.join(', ')}`);
             }
@@ -152,13 +152,17 @@ export class HeaderModule {
         // Remove Summit popup and OT Agent chatbot if they overlap the region modal
         await this.page.evaluate(() => {
             // Remove Summit popup overlay
-            document.querySelectorAll('[class*="summit"], [class*="Summit"], [class*="promo-banner"], [class*="floating"]').forEach(el => {
-                (el as HTMLElement).style.display = 'none';
-            });
+            document
+                .querySelectorAll('[class*="summit"], [class*="Summit"], [class*="promo-banner"], [class*="floating"]')
+                .forEach((el) => {
+                    (el as HTMLElement).style.display = 'none';
+                });
             // Remove OT Agent chatbot
-            document.querySelectorAll('[class*="ot-agent"], [class*="chatbot"], [id*="agent"], [class*="proactive"]').forEach(el => {
-                (el as HTMLElement).style.display = 'none';
-            });
+            document
+                .querySelectorAll('[class*="ot-agent"], [class*="chatbot"], [id*="agent"], [class*="proactive"]')
+                .forEach((el) => {
+                    (el as HTMLElement).style.display = 'none';
+                });
         });
         await this.page.waitForTimeout(500);
 

@@ -24,11 +24,11 @@ export interface SelfHealingEvent {
 
 /**
  * SmartLocator — Self-healing locator utility for Playwright
- * 
+ *
  * Wraps multiple locator strategies with automatic fallback.
  * When the primary locator fails, it tries fallbacks in order
  * and logs a warning for later analysis.
- * 
+ *
  * @example
  * ```ts
  * const logo = await SmartLocator.resolve('Logo', [
@@ -46,7 +46,7 @@ export class SmartLocator {
     /**
      * Resolve the first working locator from a list of strategies.
      * Tries each strategy in order; logs a warning if a fallback is used.
-     * 
+     *
      * @param elementName - Human-readable name for logging (e.g. "Logo", "Search Icon")
      * @param strategies - Ordered list of locator strategies (primary first)
      * @param options - Optional configuration
@@ -55,7 +55,7 @@ export class SmartLocator {
     static async resolve(
         elementName: string,
         strategies: LocatorStrategy[],
-        options: { timeout?: number; state?: 'visible' | 'attached' } = {}
+        options: { timeout?: number; state?: 'visible' | 'attached' } = {},
     ): Promise<Locator> {
         const { timeout = 5000, state = 'visible' } = options;
 
@@ -88,22 +88,24 @@ export class SmartLocator {
             } catch {
                 // This strategy failed, try next
                 if (i < strategies.length - 1) {
-                    console.debug(`[SmartLocator] Strategy "${strategy.name}" failed for "${elementName}", trying next...`);
+                    console.debug(
+                        `[SmartLocator] Strategy "${strategy.name}" failed for "${elementName}", trying next...`,
+                    );
                 }
             }
         }
 
         // All strategies failed — throw with detailed info
-        const tried = strategies.map(s => s.name).join(', ');
+        const tried = strategies.map((s) => s.name).join(', ');
         throw new Error(
-            `[SmartLocator] All ${strategies.length} strategies failed for "${elementName}". Tried: [${tried}]. This is likely a Locator Change or UI Bug.`
+            `[SmartLocator] All ${strategies.length} strategies failed for "${elementName}". Tried: [${tried}]. This is likely a Locator Change or UI Bug.`,
         );
     }
 
     /**
      * Build a combined Playwright locator using .or() chains from strategies.
      * This is a simpler approach that doesn't track self-healing but provides fallback.
-     * 
+     *
      * @param elementName - Human-readable name for error messages
      * @param strategies - Ordered list of locator strategies
      * @returns A single combined locator with .or() chains and .first()
@@ -145,8 +147,9 @@ export class SmartLocator {
         const lines = [
             `⚠️ ${SmartLocator.healingEvents.length} self-healing event(s) detected:`,
             '',
-            ...SmartLocator.healingEvents.map((e, i) =>
-                `  ${i + 1}. "${e.elementName}" — primary "${e.primaryStrategy}" → fallback "${e.usedStrategy}"`
+            ...SmartLocator.healingEvents.map(
+                (e, i) =>
+                    `  ${i + 1}. "${e.elementName}" — primary "${e.primaryStrategy}" → fallback "${e.usedStrategy}"`,
             ),
         ];
         return lines.join('\n');

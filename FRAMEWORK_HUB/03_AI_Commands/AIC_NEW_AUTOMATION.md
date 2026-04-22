@@ -111,6 +111,13 @@ If you create a NEW Page Object or Module:
 3. Add the fixture type to TestFixtures interface
 ```
 
+#### Rule 7: Responsive Test Case Routing
+```
+When analyzing test cases, decide where they belong BEFORE writing code:
+- Functional/Business Logic (e.g. data validation, forms) → Add to specific feature specs (e.g. header.spec.ts). DO NOT run these on multiple viewports unless explicitly asked.
+- Responsive Layout Logic (e.g. padding checking, mobile menus, breakpoints, elements shrinking/hiding across XL/LG/MD/SM/XS) → Add ONLY to src/tests/responsive.spec.ts inside the viewport loop.
+```
+
 ---
 
 ## 📁 4. Existing File Map (AI: Read These First!)

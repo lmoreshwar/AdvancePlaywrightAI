@@ -2,10 +2,10 @@ import { expect, Page } from '@playwright/test';
 
 /**
  * HomepagePage - Page Object for OpenText Homepage
- * 
+ *
  * Covers: Hero section, page components, scrollers, cards,
  * full-page layout validation
- * 
+ *
  * NOTE: Locators below are initial placeholders. Use @playwright/cli to
  * discover actual locators:
  *   playwright-cli open https://www.opentext.com --headed
@@ -89,7 +89,7 @@ export class HomepagePage {
      */
     async getCardTexts(): Promise<string[]> {
         const texts = await this.cards().allTextContents();
-        return texts.map(t => t.trim()).filter(t => t.length > 0);
+        return texts.map((t) => t.trim()).filter((t) => t.length > 0);
     }
 
     /**
