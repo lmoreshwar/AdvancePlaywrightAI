@@ -1,84 +1,157 @@
 # 🔍 AIC Debug Report — Auto-Generated
 
-**Generated**: 4/22/2026, 1:16:11 AM  
-**Duration**: 87.2s  
+**Generated**: 4/22/2026, 5:13:02 PM  
+**Duration**: 1210.7s  
 
 ## 📊 Run Summary
 
 | Metric | Value |
 |---|---|
-| Total Tests | 1 |
-| ✅ Passed | 0 |
-| ❌ Failed | 2 |
-| ⏭️ Skipped | 0 |
+| Total Tests | 62 |
+| ✅ Passed | 57 |
+| ❌ Failed | 5 |
+| ⏭️ Skipped | 4 |
 
 ## 🗂️ Failure Breakdown by Category
 
 | Category | Count | AI Healable |
 |---|---|---|
-| 📝 Script Issue | 2 | ✅ Yes |
+| ❓ Unknown | 1 | ❌ No |
+| 🔗 Locator Change | 4 | ✅ Yes |
 
 ---
 
 ## 🔴 FAILURE #1
 
 ### 1. 🚨 Failure Summary
-- **Test**: `@P1 @Regression should open language switcher modal`
-- **Project**: `desktop-chrome`
-- **Error Location**: `HeaderPage.ts:167`
+- **Test**: `@P1 @Regression should return exactly 19 results for deep filter`
+- **Project**: `-latest:Windows 10-browserstack`
+- **Error Location**: `CustomerStoriesModule.ts:90`
 - **Error**:
 ```
-Error: expect(locator).toBeVisible() failed
-
-Locator: locator('text=Choose your region').first().or(locator('text=Americas').first())
-Expected: visible
-Error: strict mode violation: locator('text=Choose your region').first().or(locator('text=Americas').first()) resolved to 2 elements:
-    1) <h4 id="language-modal-label" class="modal-title pb-2 pb-md-3 pb-lg-4 pr-2 pr-lg-0">Choose your region:</h4> aka getByRole('heading', { name: 'Choose your region:' })
-    2) <h3 class="text-sm font-weight-bo
+Error: page.waitForTimeout: Target page, context or browser has been closed
 ```
 
-### 2. 🗂️ Category: **📝 Script Issue**
+### 2. 🗂️ Category: **❓ Unknown**
 
 ### 3. 🤖 Self-Healing
-- **AI Healable**: ✅ Yes
-- **Suggestion**: Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion).
-
-### 4. 📸 Screenshot
-`C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome\test-failed-1.png`
+- **AI Healable**: ❌ No
+- **Suggestion**: Manual investigation required. Check the error details and screenshot.
 
 ### 5. 🔬 Trace
-`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome\trace.zip`
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\customer-stories--P0-Regre-9e93a--19-results-for-deep-filter--latest-Windows-10-browserstack-retry1\trace.zip`
 
 ---
 
 ## 🔴 FAILURE #2
 
 ### 1. 🚨 Failure Summary
-- **Test**: `@P1 @Regression should open language switcher modal`
-- **Project**: `desktop-chrome`
-- **Error Location**: `HeaderPage.ts:167`
+- **Test**: `should have sticky header at SM`
+- **Project**: `-latest:Windows 10-browserstack`
+- **Error Location**: `FooterPage.ts:67`
 - **Error**:
 ```
-Error: expect(locator).toBeVisible() failed
-
-Locator: locator('text=Choose your region').first().or(locator('text=Americas').first())
-Expected: visible
-Error: strict mode violation: locator('text=Choose your region').first().or(locator('text=Americas').first()) resolved to 2 elements:
-    1) <h4 id="language-modal-label" class="modal-title pb-2 pb-md-3 pb-lg-4 pr-2 pr-lg-0">Choose your region:</h4> aka getByRole('heading', { name: 'Choose your region:' })
-    2) <h3 class="text-sm font-weight-bo
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('contentinfo').locator('a').first() to be visible
+    58 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
 ```
 
-### 2. 🗂️ Category: **📝 Script Issue**
+### 2. 🗂️ Category: **🔗 Locator Change**
 
 ### 3. 🤖 Self-Healing
 - **AI Healable**: ✅ Yes
-- **Suggestion**: Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion).
+- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
 
 ### 4. 📸 Screenshot
-`C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome-retry1\test-failed-1.png`
+`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4\test-failed-1.png`
 
 ### 5. 🔬 Trace
-`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\header--P0-Regression-Head-7eb69-pen-language-switcher-modal-desktop-chrome-retry1\trace.zip`
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4\trace.zip`
+
+---
+
+## 🔴 FAILURE #3
+
+### 1. 🚨 Failure Summary
+- **Test**: `should have sticky header at SM`
+- **Project**: `-latest:Windows 10-browserstack`
+- **Error Location**: `FooterPage.ts:67`
+- **Error**:
+```
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('contentinfo').locator('a').first() to be visible
+    58 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
+```
+
+### 2. 🗂️ Category: **🔗 Locator Change**
+
+### 3. 🤖 Self-Healing
+- **AI Healable**: ✅ Yes
+- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
+
+### 4. 📸 Screenshot
+`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4-retry1\test-failed-1.png`
+
+### 5. 🔬 Trace
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--ca326-ld-have-sticky-header-at-SM--latest-Windows-10-browserstack4-retry1\trace.zip`
+
+---
+
+## 🔴 FAILURE #4
+
+### 1. 🚨 Failure Summary
+- **Test**: `should have sticky header at XS`
+- **Project**: `-latest:Windows 10-browserstack`
+- **Error Location**: `FooterPage.ts:67`
+- **Error**:
+```
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('contentinfo').locator('a').first() to be visible
+    57 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
+```
+
+### 2. 🗂️ Category: **🔗 Locator Change**
+
+### 3. 🤖 Self-Healing
+- **AI Healable**: ✅ Yes
+- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
+
+### 4. 📸 Screenshot
+`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4\test-failed-1.png`
+
+### 5. 🔬 Trace
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4\trace.zip`
+
+---
+
+## 🔴 FAILURE #5
+
+### 1. 🚨 Failure Summary
+- **Test**: `should have sticky header at XS`
+- **Project**: `-latest:Windows 10-browserstack`
+- **Error Location**: `FooterPage.ts:67`
+- **Error**:
+```
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('contentinfo').locator('a').first() to be visible
+    56 × locator resolved to hidden <a target="_blank" href="https://careers.opentext.com/">Careers</a>
+```
+
+### 2. 🗂️ Category: **🔗 Locator Change**
+
+### 3. 🤖 Self-Healing
+- **AI Healable**: ✅ Yes
+- **Suggestion**: Use SmartLocator with fallback strategies or update the locator to match the current DOM.
+
+### 4. 📸 Screenshot
+`C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4-retry1\test-failed-1.png`
+
+### 5. 🔬 Trace
+`npx playwright show-trace C:\Users\DELL\AI Workspace\OpenText\test-results\responsive--P0-Regression--71568-ld-have-sticky-header-at-XS--latest-Windows-10-browserstack4-retry1\trace.zip`
 
 ---
 

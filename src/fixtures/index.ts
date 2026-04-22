@@ -2,17 +2,21 @@ import { test as base } from '@playwright/test';
 import { HeaderPage } from '../pages/HeaderPage';
 import { HomepagePage } from '../pages/HomepagePage';
 import { FooterPage } from '../pages/FooterPage';
+import { CustomerStoriesPage } from '../pages/CustomerStoriesPage';
 import { HeaderModule } from '../modules/HeaderModule';
 import { HomepageModule } from '../modules/HomepageModule';
+import { CustomerStoriesModule } from '../modules/CustomerStoriesModule';
 
 export type TestFixtures = {
     // Page Objects
     headerPage: HeaderPage;
     homepagePage: HomepagePage;
     footerPage: FooterPage;
+    customerStoriesPage: CustomerStoriesPage;
     // Modules
     headerModule: HeaderModule;
     homepageModule: HomepageModule;
+    customerStoriesModule: CustomerStoriesModule;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -49,6 +53,20 @@ export const test = base.extend<TestFixtures>({
      */
     homepageModule: async ({ page }, use) => {
         await use(new HomepageModule(page));
+    },
+
+    /**
+     * Customer Stories Page fixture
+     */
+    customerStoriesPage: async ({ page }, use) => {
+        await use(new CustomerStoriesPage(page));
+    },
+
+    /**
+     * Customer Stories Module fixture
+     */
+    customerStoriesModule: async ({ page }, use) => {
+        await use(new CustomerStoriesModule(page));
     },
 
     /**

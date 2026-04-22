@@ -116,6 +116,19 @@ The AI must verify that the script executes correctly headlessly before concludi
 
 ---
 
+## 🛡️ Responsive Testing Guardrail
+
+To prevent test suite bloat and redundant execution, follow these strict rules for responsive testing:
+
+1. **Functional-First**: All new features must first be automated as functional tests on `desktop-chrome`.
+2. **Necessity-Based Responsive Layering**: Do NOT add tests to `responsive.spec.ts` or create responsive suites unless:
+   - The UI undergoes a **major structural change** (e.g., desktop sidebar becomes a mobile hamburger/modal).
+   - The feature is **inherently mobile-first** or has specific responsive requirements in the user story.
+   - A **breakpoint-specific bug** was discovered during research that functional tests cannot catch.
+3. **Avoid Pure Layout Checks**: Do not automate "pixel-perfect" padding checks across all 5 viewports unless explicitly requested, as these are brittle and high-maintenance.
+
+---
+
 ## 📝 Example Prompt to give to the AI Agent (Cursor/Claude Code)
 
 To start automating a specific test case, you can paste this exact prompt to your AI assistant:

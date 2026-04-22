@@ -49,18 +49,19 @@ Before writing a single line of code, the AI silently scans:
 - Existing `src/pages/` to reuse existing element locators.
 - Existing `src/modules/` to reuse setup workflows (like login or handling cookie banners).
 
-### 3. 🏗️ Architecture Routing (Rule 7)
-The AI analyzes your test cases and decides where they belong:
-- **Functional Tests** (clicks, navigation, data) → Placed in specific feature files (e.g., `header.spec.ts`).
-- **Responsive Layout Tests** (checking CSS, padding, mobile menus shrinking) → Placed exclusively in `responsive.spec.ts` under the viewport loop.
+### 3. 🤔 The Hard Pause (Implementation Plan)
+**CRITICAL RULE:** By default, the AI will generate an `implementation_plan.md` mapping out the new Page Objects, Modules, and Spec files. **The AI is strictly blocked from generating code** until the User explicitly reviews and approves the plan.
 
-### 4. 💻 Implementation (The 3-Layer Rule)
-The AI will write the automation matching our strict Enterprise Architecture:
+### 4. 🛠️ Playwright CLI (Local Dev Only)
+To extract complex DOM locators without relying on high-token MCP server calls, we rely on local inspection or the local `@playwright/cli`. **The AI will NEVER use the MCP browser server for DOM extraction**, preserving token limits and stabilizing execution.
+
+### 5. 💻 Implementation (The 3-Layer Rule)
+Only *after* the Implementation Plan is approved, the AI will write the automation matching our strict Enterprise Architecture:
 - Adds semantic element locators (`getByRole`) to the **Page Object**.
 - Creates step-by-step logic and logging in the **Module Object**.
 - Writes the test block and tags in the **Spec file**.
 
-### 5. ✅ Auto-Verification
+### 6. ✅ Auto-Verification
 The AI will run it locally on your machine (`npx playwright test`). If it fails, the AI will auto-read the error console and fix its code before informing you. 
 
 ---

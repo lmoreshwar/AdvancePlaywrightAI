@@ -6,17 +6,15 @@
 
 ## 📝 Example Format
 
-### Epic: Site Navigation
-**User Story 1: Contact Support Access**
-*As a visitor to OpenText.com, I want to be able to navigate to the Support page easily so that I can contact customer service if I need help.*
+### Epic: Customer Success
+**User Story 1: Customer Stories Filter Navigation**
+*As a website visitor, when I navigate to `/customers`, I should see a full list of customer success stories and be able to filter them by Industry, Product, Region, and Cloud.*
 
 **Acceptance Criteria (Please automate these):**
-- When I am on the homepage, I should see the main menu.
-- If I click on the "Support" menu item, a dropdown or navigation should occur.
-- I should be able to click on a "Contact Support" option.
-- The resulting page should load completely without errors.
-
----
-
-<!-- ADD YOUR PLAIN ENGLISH STORIES BELOW THIS LINE -->
-
+1. Navigate to `https://www.opentext.com/customers`.
+2. Verify the hero banner has the eyebrow text: `"Customer stories"`.
+3. Verify the top section title equals `"Read customer success stories"` followed by a button `"Explore customer success stories"`.
+4. Click `"Explore customer success stories"`. Verify it navigates/scrolls the user to the list of customer stories.
+5. Apply specific UI filters for: `By Industry`, `By Product`, `By Region/Country`, and `By Cloud`.
+6. **Scenario A (Basic)**: Select `By Industry = Banking` and `By Country = North America`. Verify results update and the count is displayed at the top.
+7. **Scenario B (Expected Data Match)**: Select filters `By Industry = High Tech`, `By Product = OpenText Analytics Database (Vertica)`, `By Country = North America`, and `By Cloud = Analytics`. Verify the exact results count shown to the user is `19`.
