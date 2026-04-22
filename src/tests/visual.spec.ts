@@ -16,8 +16,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await homepageModule.navigateAndVerifyHomepage();
         });
 
-        await test.step('Capture Homepage Snapshot', async () => {
-            // This sends the DOM to Percy for multi-resolution rendering
+        await test.step('Capture Homepage Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Homepage - Full View', standardWidths);
         });
     });
@@ -27,7 +27,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await headerModule.navigateAndVerifyHeader();
         });
 
-        await test.step('Capture Header Default Snapshot', async () => {
+        await test.step('Capture Header Default Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Header - Default State', standardWidths);
         });
     });
@@ -42,7 +43,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await headerPage.expectLanguageModalVisible();
         });
 
-        await test.step('Capture Language Modal Snapshot', async () => {
+        await test.step('Capture Language Modal Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Header - Language Modal Open', standardWidths);
         });
 
@@ -56,7 +58,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await homepageModule.navigateAndVerifyHomepage();
         });
 
-        await test.step('Capture Homepage Hero Snapshot', async () => {
+        await test.step('Capture Homepage Hero Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Homepage - Hero Section', standardWidths);
         });
     });
@@ -71,7 +74,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await footerPage.expectFooterVisible();
         });
 
-        await test.step('Capture Homepage Footer Snapshot', async () => {
+        await test.step('Capture Homepage Footer Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Homepage - Footer Section', standardWidths);
         });
     });
@@ -85,7 +89,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await homepagePage.scrollToBottom();
         });
 
-        await test.step('Capture Sticky Header Snapshot', async () => {
+        await test.step('Capture Sticky Header Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Homepage - Sticky Header State', standardWidths);
         });
     });
@@ -96,7 +101,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await customerStoriesModule.verifyHeroSection();
         });
 
-        await test.step('Capture Customer Stories Hero Snapshot', async () => {
+        await test.step('Capture Customer Stories Hero Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Customer Stories - Hero Section', standardWidths);
         });
     });
@@ -106,13 +112,15 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await customerStoriesModule.navigateToCustomerStories();
         });
 
-        await test.step('Capture Customer Stories Snapshot', async () => {
+        await test.step('Capture Customer Stories Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Customer Stories - Filters Section', standardWidths);
         });
         
-        await test.step('Expand a Filter and Capture', async () => {
+        await test.step('Expand a Filter and Capture', async ({ page }) => {
             // Visual check of the expanded dropdown state
             await customerStoriesModule.selectFilterOption('By Industry', 'High Tech');
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Customer Stories - Filter Expanded', standardWidths);
         });
     });
@@ -130,7 +138,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             });
         });
 
-        await test.step('Capture Filtered Results Snapshot', async () => {
+        await test.step('Capture Filtered Results Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Customer Stories - Filtered Results', standardWidths);
         });
     });
@@ -144,17 +153,20 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             const projectName = testInfo.project.name;
 
             if (projectName === 'viewport-xl') {
+                await page.waitForLoadState('networkidle');
                 await visualModule.takeSnapshot('Responsive - XL Header+Hero', standardWidths);
                 return;
             }
 
             if (projectName === 'viewport-md') {
+                await page.waitForLoadState('networkidle');
                 await visualModule.takeSnapshot('Responsive - MD Layout', standardWidths);
                 return;
             }
 
             if (projectName === 'viewport-sm') {
                 await headerModule.verifyMobileResponsiveLayout();
+                await page.waitForLoadState('networkidle');
                 await visualModule.takeSnapshot('Responsive - SM Hamburger State', standardWidths);
                 return;
             }
@@ -171,7 +183,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await headerModule.verifyMobileResponsiveLayout();
         });
 
-        await test.step('Capture Mobile Header Snapshot', async () => {
+        await test.step('Capture Mobile Header Snapshot', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await visualModule.takeSnapshot('Responsive - Mobile Header State', standardWidths);
         });
     });
