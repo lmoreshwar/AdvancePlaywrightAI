@@ -20,7 +20,7 @@
     "test:smoke": "playwright test --grep @Smoke",
     "test:regression": "playwright test --grep @Regression",
     "test:p0": "playwright test --grep @P0",
-    "test:visual": "playwright test --grep @Visual",
+    "test:visual": "percy exec -- playwright test src/tests/visual.spec.ts",
     "test:report": "playwright show-report",
     "test:ci": "playwright test --reporter=list,json",
     "test:bstack": "node -r dotenv/config node_modules/browserstack-node-sdk/src/bin/runner.js playwright test",
@@ -52,6 +52,8 @@
   "type": "commonjs",
   "devDependencies": {
     "@eslint/js": "^9.28.0",
+    "@percy/cli": "^1.31.12",
+    "@percy/playwright": "^1.1.0",
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.0.6",
     "browserstack-node-sdk": "^1.52.0",

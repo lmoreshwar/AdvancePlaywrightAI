@@ -6,6 +6,7 @@ import { CustomerStoriesPage } from '../pages/CustomerStoriesPage';
 import { HeaderModule } from '../modules/HeaderModule';
 import { HomepageModule } from '../modules/HomepageModule';
 import { CustomerStoriesModule } from '../modules/CustomerStoriesModule';
+import { VisualModule } from '../modules/VisualModule';
 
 export type TestFixtures = {
     // Page Objects
@@ -17,6 +18,7 @@ export type TestFixtures = {
     headerModule: HeaderModule;
     homepageModule: HomepageModule;
     customerStoriesModule: CustomerStoriesModule;
+    visualModule: VisualModule;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -67,6 +69,13 @@ export const test = base.extend<TestFixtures>({
      */
     customerStoriesModule: async ({ page }, use) => {
         await use(new CustomerStoriesModule(page));
+    },
+
+    /**
+     * Visual Module fixture
+     */
+    visualModule: async ({ page }, use) => {
+        await use(new VisualModule(page));
     },
 
     /**
