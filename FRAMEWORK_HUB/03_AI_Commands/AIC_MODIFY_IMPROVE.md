@@ -134,6 +134,16 @@ After ALL modifications are complete:
   5. Update AIC_DEBUG_REPORT.md if any failures occurred
 ```
 
+### Rule 6: Responsive Modification Safety
+
+```
+When MODIFYING responsive or viewport-specific tests:
+  1. Make layout/viewport changes ONLY inside src/tests/responsive.spec.ts
+  2. Protect viewport-specific changes with conditions (e.g. `if (vp.type === 'mobile')`)
+  3. Verify the change across ALL viewports (XL, LG, MD, SM, XS) so fixing a mobile bug doesn't break the desktop test.
+```
+
+
 ---
 
 ## 📁 4. Quick Reference — Existing Code Map
