@@ -40,12 +40,12 @@ jobs:
           BASE_URL: https://www.opentext.com
           CI: true
 
-      - name: 📊 Upload TTA Report (HTML + AIC Debug Report)
+      - name: 📊 Upload AI Debug Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tta-report
-          path: tta-report/
+          name: ai-debug-report
+          path: ai-debug-report/
           retention-days: 30
 
       - name: 📊 Upload Playwright HTML Report
