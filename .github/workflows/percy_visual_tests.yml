@@ -1,6 +1,10 @@
 name: 👁️ Percy Visual Regression (Weekly)
 
 on:
+  # 0. Trigger on push to make it appear in the UI
+  push:
+    branches: [ main, master, 'feature/*' ]
+
   # 1. Manual trigger from GitHub UI
   workflow_dispatch:
     inputs:
