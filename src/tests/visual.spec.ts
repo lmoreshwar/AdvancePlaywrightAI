@@ -17,7 +17,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Homepage Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Homepage - Full View');
         });
     });
@@ -28,7 +28,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Header Default Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Header - Default State');
         });
     });
@@ -44,7 +44,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Language Modal Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Header - Language Modal Open');
         });
 
@@ -59,7 +59,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Homepage Hero Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Homepage - Hero Section');
         });
     });
@@ -75,7 +75,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Homepage Footer Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Homepage - Footer Section');
         });
     });
@@ -90,7 +90,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Sticky Header Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Homepage - Sticky Header State');
         });
     });
@@ -102,7 +102,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Customer Stories Hero Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Customer Stories - Hero Section');
         });
     });
@@ -113,14 +113,14 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Customer Stories Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Customer Stories - Filters Section');
         });
 
         await test.step('Expand a Filter and Capture', async () => {
             // Visual check of the expanded dropdown state
             await customerStoriesModule.selectFilterOption('By Industry', 'High Tech');
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Customer Stories - Filter Expanded');
         });
     });
@@ -139,7 +139,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Filtered Results Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Customer Stories - Filtered Results');
         });
     });
@@ -153,20 +153,20 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             const projectName = testInfo.project.name;
 
             if (projectName === 'viewport-xl') {
-                await page.waitForLoadState('networkidle');
+                await page.waitForLoadState('load');
                 await visualModule.takeSnapshot('Responsive - XL Header+Hero');
                 return;
             }
 
             if (projectName === 'viewport-md') {
-                await page.waitForLoadState('networkidle');
+                await page.waitForLoadState('load');
                 await visualModule.takeSnapshot('Responsive - MD Layout');
                 return;
             }
 
             if (projectName === 'viewport-sm') {
                 await headerModule.verifyMobileResponsiveLayout();
-                await page.waitForLoadState('networkidle');
+                await page.waitForLoadState('load');
                 await visualModule.takeSnapshot('Responsive - SM Hamburger State');
                 return;
             }
@@ -184,7 +184,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Mobile Header Snapshot', async () => {
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Responsive - Mobile Header State');
         });
     });
