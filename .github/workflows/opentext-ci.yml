@@ -1,0 +1,111 @@
+name: 🚀 OpenText Unified Automation Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      execution_mode:
+        description: 'Select Test Type'
+        required: true
+        default: 'Functional'
+        type: choice
+        options:
+          - Functional
+          - Visual
+          - Full-Suite
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options: [production, staging, qa, dev]
+      test_suite:
+        description: 'Functional Tag (e.g. @Smoke)'
+        required: false
+        default: '@Smoke'
+      project:
+        description: 'Functional Project (for BrowserStack)'
+        required: false
+        default: 'desktop-chrome'
+      viewports:
+        description: 'Visual Resolutions (for Percy)'
+        required: false
+        default: '1920'
+
+jobs:
+  functional-tests:
+    name: 🎭 Functional Tests (BrowserStack)
+    if: github.event.inputs.execution_mode == 'Functional' || github.event.inputs.execution_mode == 'Full-Suite'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: 🧰 Prepare Folders
+        run: mkdir -p ai-debug-report playwright-report test-results log
+      
+      - name: 🧪 Run Functional Tests
+        run: |
+          npm run test:bstack -- --config=playwright.config.ts --grep "${{ github.event.inputs.test_suite }}" --workers=1
+        env:
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          BROWSERSTACK_CONFIG_FILE: configs/browserstack.yml
+          BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
+          TEST_ENV: ${{ github.event.inputs.environment }}
+          DEBUG: "browserstack-sdk:*"
+          CI: true
+
+      - name: 📊 Upload AI Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional-ai-report
+          path: ai-debug-report/
+
+  visual-tests:
+    name: 👁️ Visual Tests (Percy)
+    if: github.event.inputs.execution_mode == 'Visual' || github.event.inputs.execution_mode == 'Full-Suite'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: 🧰 Prepare Folders
+        run: mkdir -p ai-debug-report playwright-report test-results log
+
+      - name: 🧩 Generate Percy Config
+        run: |
+          cat > configs/percy.yml <<EOF
+          version: 2
+          snapshot:
+            widths: [${{ github.event.inputs.viewports }}]
+            minHeight: 1024
+            percy-css: |
+              iframe { display: none !important; }
+              #onetrust-banner-sdk, .cookie-banner, [id*='cookie'] { display: none !important; }
+          EOF
+
+      - name: 👁️ Run Visual Tests
+        run: npx percy exec --config configs/percy.yml -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --workers=1
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+          BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
+          TEST_ENV: ${{ github.event.inputs.environment }}
+          CI: true
+
+      - name: 📊 Upload AI Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-ai-report
+          path: ai-debug-report/
