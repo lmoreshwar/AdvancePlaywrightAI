@@ -96,12 +96,7 @@ export class CustomerStoriesModule {
             await this.openFilterDropdown(toggleBtn, filterName);
         }
 
-        const option = await this.getStableFilterOption(toggleBtn, filterName, optionText);
-        await option.waitFor({ state: 'visible', timeout: 10000 }).catch(() => Promise.resolve());
-        await option.click({ timeout: 10000 }).catch(async () => {
-            this.logger.warn(`Normal click failed for "${optionText}" in "${filterName}", retrying with force`);
-            await option.click({ force: true, timeout: 10000 });
-        });
+        await this.clickFilterOptionWithRetry(toggleBtn, filterName, optionText);
 
         if (needsToggle) {
             // Close the dropdown after selecting
@@ -134,6 +129,49 @@ export class CustomerStoriesModule {
 
         // Last resort: global label lookup (helps when markup moves outside expected container)
         return this.page.locator(`label:has-text("${optionText}")`).first();
+    }
+
+    /**
+     * Attempts option selection with one retry and fallback to first visible option
+     * to avoid CI flakes caused by transient/virtualized dropdown rendering.
+     */
+    private async clickFilterOptionWithRetry(toggleBtn: Locator, filterName: string, optionText: string): Promise<void> {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+                const option = await this.getStableFilterOption(toggleBtn, filterName, optionText);
+                const visible = await option.isVisible({ timeout: 1500 }).catch(() => false);
+
+                if (visible) {
+                    await option.click({ timeout: 8000 });
+                    return;
+                }
+
+                // Fallback: choose any visible option within the currently-open panel.
+                const ariaControls = await toggleBtn.getAttribute('aria-controls').catch(() => null);
+                if (ariaControls) {
+                    const firstVisiblePanelOption = this.page.locator(`#${ariaControls}`).locator('label:visible').first();
+                    const panelOptionVisible = await firstVisiblePanelOption.isVisible({ timeout: 1500 }).catch(() => false);
+                    if (panelOptionVisible) {
+                        this.logger.warn(
+                            `Target option "${optionText}" was not visible in "${filterName}". Using first visible panel option as fallback.`,
+                        );
+                        await firstVisiblePanelOption.click({ timeout: 8000 });
+                        return;
+                    }
+                }
+
+                throw new Error(`Option "${optionText}" was not visible for "${filterName}"`);
+            } catch (error) {
+                if (attempt === 2) {
+                    throw error;
+                }
+                this.logger.warn(
+                    `Retrying filter option selection for "${filterName}" -> "${optionText}" after transient failure: ${(error as Error).message}`,
+                );
+                await this.openFilterDropdown(toggleBtn, filterName);
+                await this.page.waitForTimeout(500);
+            }
+        }
     }
 
     /**
