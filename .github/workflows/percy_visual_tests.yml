@@ -17,13 +17,12 @@ on:
       viewports:
         description: 'Resolutions to capture'
         required: true
-        default: '375,768,1280,1920'
+        default: '1920'
         type: choice
         options:
+          - '1920'              # Large Desktop Only (Fastest)
           - '375,768,1280,1920' # Full Suite (Mobile, Tablet, Laptop, Desktop)
           - '1280,1920'         # Desktop/Laptop Only
-          - '375,768'           # Mobile/Tablet Only
-          - '1920'              # Large Desktop Only (4K/HD)
           - '375'               # Mobile Only (Portrait)
 
   # 2. Scheduled trigger (Every Monday at 00:00 UTC)
@@ -52,12 +51,20 @@ jobs:
       - name: 🎭 Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
+      - name: 🧰 Ensure Report Directories Exist
+        if: always()
+        run: |
+          mkdir -p ai-debug-report
+          mkdir -p playwright-report
+          mkdir -p test-results
+          mkdir -p log
+
       - name: 🧩 Generate Percy Config from Input Widths
         run: |
           cat > .percy.yml <<EOF
           version: 2
           snapshot:
-            widths: [${{ github.event.inputs.viewports || '375,768,1280,1920' }}]
+            widths: [${{ github.event.inputs.viewports || '1920' }}]
             minHeight: 1024
             percy-css: |
               iframe {
@@ -68,19 +75,16 @@ jobs:
               }
           EOF
 
-      - name: 🧰 Ensure Report Directories Exist
-        if: always()
+      - name: 🔍 List Visual Tests (Dry Run)
         run: |
-          mkdir -p ai-debug-report
-          mkdir -p playwright-report
-          mkdir -p test-results
-          mkdir -p log
+          echo "Checking for visual tests (excluding @Responsive for speed)..."
+          npx playwright test src/tests/visual.spec.ts --list --grep-invert @Responsive
 
       - name: 👁️ Execute Percy Visual Tests
-        run: npx percy exec -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive
+        run: npx percy exec -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --workers=1
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-          BASE_URL: https://www.opentext.com
+          BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
           TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
           CI: true
 
@@ -88,6 +92,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-debug-report
+          name: visual-ai-report
           path: ai-debug-report/
           retention-days: 7
