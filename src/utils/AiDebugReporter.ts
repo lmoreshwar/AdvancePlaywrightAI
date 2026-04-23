@@ -125,6 +125,12 @@ class AiDebugReporter implements Reporter {
     onEnd(result: FullResult): void {
         const totalTime = Date.now() - this.startTime;
 
+        // Suppress summary if no tests were actually executed (e.g., in a dry run/--list)
+        if (this.passedTests === 0 && this.failedTests === 0 && this.skippedTests === 0 && this.totalTests > 0) {
+            console.log(`\n📋 Dry Run Complete: ${this.totalTests} tests verified.\n`);
+            return;
+        }
+
         console.log(`\n${'═'.repeat(60)}`);
         console.log(`📊 OpenText AI Debug Report Summary`);
         console.log(`${'═'.repeat(60)}`);
