@@ -96,8 +96,8 @@ export class CustomerStoriesModule {
             await this.openFilterDropdown(toggleBtn, filterName);
         }
 
-        const option = this.pageObj.getFilterOption(filterName, optionText);
-        await option.scrollIntoViewIfNeeded();
+        const option = await this.getStableFilterOption(toggleBtn, filterName, optionText);
+        await option.waitFor({ state: 'visible', timeout: 10000 }).catch(() => Promise.resolve());
         await option.click({ timeout: 10000 }).catch(async () => {
             this.logger.warn(`Normal click failed for "${optionText}" in "${filterName}", retrying with force`);
             await option.click({ force: true, timeout: 10000 });
@@ -108,6 +108,32 @@ export class CustomerStoriesModule {
             await this.page.keyboard.press('Escape');
             await this.page.waitForTimeout(500);
         }
+    }
+
+    /**
+     * Resolves a stable option locator. Some OpenText dropdowns render options in a panel/portal
+     * referenced by aria-controls (not directly visible inside the fieldset).
+     */
+    private async getStableFilterOption(toggleBtn: Locator, filterName: string, optionText: string): Promise<Locator> {
+        // Default (works for non-dropdown filters)
+        const fieldsetOption = this.pageObj.getFilterOption(filterName, optionText).first();
+
+        const ariaControls = await toggleBtn.getAttribute('aria-controls').catch(() => null);
+        if (ariaControls) {
+            const panelOption = this.page.locator(`#${ariaControls}`).locator(`label:has-text("${optionText}")`).first();
+            const visibleInPanel = await panelOption.isVisible({ timeout: 1000 }).catch(() => false);
+            if (visibleInPanel) {
+                return panelOption;
+            }
+        }
+
+        const visibleInFieldset = await fieldsetOption.isVisible({ timeout: 1000 }).catch(() => false);
+        if (visibleInFieldset) {
+            return fieldsetOption;
+        }
+
+        // Last resort: global label lookup (helps when markup moves outside expected container)
+        return this.page.locator(`label:has-text("${optionText}")`).first();
     }
 
     /**
@@ -132,6 +158,15 @@ export class CustomerStoriesModule {
         await expect(toggleBtn)
             .toHaveAttribute('aria-expanded', 'true', { timeout: 3000 })
             .catch(() => this.page.waitForTimeout(700));
+
+        // If a panel is referenced, wait briefly for it to attach/render.
+        const ariaControls = await toggleBtn.getAttribute('aria-controls').catch(() => null);
+        if (ariaControls) {
+            await this.page
+                .locator(`#${ariaControls}`)
+                .waitFor({ state: 'attached', timeout: 3000 })
+                .catch(() => Promise.resolve());
+        }
     }
 
     /**
