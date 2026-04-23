@@ -87,59 +87,17 @@ jobs:
 
       - name: 👁️ Execute Percy Visual Tests
         run: |
-          npx percy exec --config configs/percy.yml -- bash -c 'echo $PERCY_BUILD_ID > percy_build_id.txt && npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --project=desktop-chrome --workers=4'
+          npx percy exec --config configs/percy.yml -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --project=desktop-chrome --workers=4
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
           TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
           CI: true
 
-      - name: 🧠 Generate Percy Decision Report
-        if: always()
-        run: |
-          node scripts/percy-review-report.cjs | tee ai-debug-report/percy-review-report.console.log
-          cat ai-debug-report/percy-review-report.env >> "$GITHUB_ENV"
-          cat ai-debug-report/percy-review-report.md >> "$GITHUB_STEP_SUMMARY"
-        env:
-          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-          PERCY_API_TOKEN: ${{ secrets.PERCY_API_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-
-      - name: ✅ Auto-Approve Percy Build (Safe Mode)
-        if: always() && github.event_name == 'workflow_dispatch' && github.event.inputs.auto_approve == 'true'
-        run: |
-          echo "Auto-approve requested. Percy recommendation: $PERCY_RECOMMENDATION"
-          if [ "$PERCY_RECOMMENDATION" != "AUTO-APPROVE SAFE" ]; then
-            echo "Skipping auto-approve: recommendation is not AUTO-APPROVE SAFE."
-            echo "- Auto-approve: skipped" >> "$GITHUB_STEP_SUMMARY"
-            echo "- Reason: recommendation is '$PERCY_RECOMMENDATION'" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          if [ -z "$PERCY_APPROVE_LINK" ]; then
-            echo "Skipping auto-approve: missing approve link."
-            echo "- Auto-approve: skipped" >> "$GITHUB_STEP_SUMMARY"
-            echo "- Reason: Percy approve link missing" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          curl -sS -X POST "$PERCY_APPROVE_LINK" \
-            -H "Authorization: Token token=$PERCY_TOKEN" \
-            -H "Accept: application/json"
-
-          echo "- Auto-approve: completed" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Approved build: $PERCY_BUILD_URL" >> "$GITHUB_STEP_SUMMARY"
-        env:
-          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-          PERCY_API_TOKEN: ${{ secrets.PERCY_API_TOKEN }}
-
-      - name: 📊 Upload AI Report
+      - name: 🎭 Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-ai-report
-          path: ai-debug-report/
+          name: playwright-report
+          path: playwright-report/
           retention-days: 7
