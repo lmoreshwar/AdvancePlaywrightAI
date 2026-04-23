@@ -46,14 +46,16 @@ class AiDebugReporter implements Reporter {
 
     onBegin(config: FullConfig, suite: Suite): void {
         this.startTime = Date.now();
-        this.totalTests = suite.allTests().length;
+        
+        // Count only the tests that will actually be executed (matching the grep filter)
+        this.totalTests = suite.allTests().filter(t => t.expectedStatus !== 'skipped').length;
 
         // Create report directory
         if (!fs.existsSync(this.reportDir)) {
             fs.mkdirSync(this.reportDir, { recursive: true });
         }
 
-        console.log(`\n🚀 OpenText AI Debug Reporter — Running ${this.totalTests} tests\n`);
+        console.log(`\n🚀 OpenText AI Debug Reporter — Running ${this.totalTests} tests (Filtered from ${suite.allTests().length})\n`);
     }
 
     onTestBegin(test: TestCase): void {
@@ -61,11 +63,12 @@ class AiDebugReporter implements Reporter {
     }
 
     onTestEnd(test: TestCase, result: TestResult): void {
-        const icon = result.status === 'passed' ? '✅' : result.status === 'failed' ? '❌' : '⏭️';
-        console.log(`  ${icon} ${test.title} (${result.duration}ms)`);
+        const status = result.status;
+        const icon = status === 'passed' ? '✅' : (status === 'failed' || status === 'timedOut') ? '❌' : '⏭️';
+        console.log(`  ${icon} ${test.title} (${result.duration}ms) [${status.toUpperCase()}]`);
 
-        if (result.status === 'passed') this.passedTests++;
-        else if (result.status === 'failed') this.failedTests++;
+        if (status === 'passed') this.passedTests++;
+        else if (status === 'failed' || status === 'timedOut' || status === 'interrupted') this.failedTests++;
         else this.skippedTests++;
 
         // Extract screenshot and trace paths from attachments
@@ -96,8 +99,8 @@ class AiDebugReporter implements Reporter {
             tracePath,
         });
 
-        // If the test failed, categorize and track the failure
-        if (result.status === 'failed' && result.errors.length > 0) {
+        // If the test failed or timed out, categorize and track the failure
+        if ((result.status === 'failed' || result.status === 'timedOut') && result.errors.length > 0) {
             const errorMsg = result.errors[0].message || '';
             const errorLocation = this.extractErrorLocation(result.errors[0]);
 
@@ -166,7 +169,7 @@ class AiDebugReporter implements Reporter {
             (msg.includes('element(s) not found') ||
                 msg.includes('waiting for locator') ||
                 msg.includes('waiting for getby')) &&
-            (msg.includes('tobevisible') || msg.includes('timeout'))
+            (msg.includes('tobevisible') || msg.includes('timeout') || msg.includes('visible'))
         ) {
             return 'Locator Change';
         }
@@ -175,10 +178,12 @@ class AiDebugReporter implements Reporter {
         if (
             msg.includes('navigation timeout') ||
             msg.includes('net::err_') ||
+            msg.includes('browserstack') ||
             (msg.includes('page.goto') && msg.includes('timeout')) ||
             msg.includes('browsercontext.close') ||
             msg.includes('target closed') ||
-            msg.includes('econnrefused')
+            msg.includes('econnrefused') ||
+            msg.includes('timeout') // Catch-all for generic timeouts
         ) {
             return 'Environment Issue';
         }
