@@ -1,4 +1,4 @@
-name: 🎭 Playwright Tests on BrowserStack
+name: 👁️ Percy Visual Regression (Weekly)
 
 on:
   workflow_dispatch:
@@ -13,27 +13,25 @@ on:
           - staging
           - qa
           - dev
-      test_suite:
-        description: 'Test suite to execute'
+      viewports:
+        description: 'Resolutions to capture'
         required: true
-        default: '@Smoke'
+        default: '1920'
         type: choice
         options:
-          - '@Smoke'
-          - '@Regression'
-          - '@P0'
-          - '@Header'
-          - '@Homepage'
-          - '@Responsive'
+          - '1920'              # Large Desktop Only (Fastest)
+          - '375,768,1280,1920' # Full Suite (Mobile, Tablet, Laptop, Desktop)
+          - '1280,1920'         # Desktop/Laptop Only
+          - '375'               # Mobile Only (Portrait)
 
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 0 * * 1'
 
 jobs:
-  test-browserstack:
-    name: 🧪 Run Tests on BrowserStack
+  visual-regression:
+    name: 🧪 Run Visual Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
 
     steps:
       - name: 📥 Checkout Code
@@ -59,31 +57,35 @@ jobs:
           mkdir -p test-results
           mkdir -p log
 
-      - name: 🔍 List Matching Tests (Dry Run)
+      - name: 🧩 Generate Percy Config from Input Widths
         run: |
-          TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
-          echo "Checking for tests matching: $TAG_TO_RUN"
-          npx playwright test --list --config=playwright.config.ts --grep "$TAG_TO_RUN"
+          cat > configs/percy.yml <<EOF
+          version: 2
+          snapshot:
+            widths: [${{ github.event.inputs.viewports || '1920' }}]
+            minHeight: 1024
+            percy-css: |
+              iframe { display: none !important; }
+              #onetrust-banner-sdk, .cookie-banner, [id*='cookie'] { display: none !important; }
+          EOF
 
-      - name: 🧪 Run Tests on BrowserStack
-        id: test
+      - name: 🔍 List Visual Tests (Dry Run)
         run: |
-          TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
-          npm run test:bstack -- --config=playwright.config.ts --grep "$TAG_TO_RUN" --workers=1
+          echo "Checking for visual tests (excluding @Responsive for speed)..."
+          npx playwright test src/tests/visual.spec.ts --list --grep-invert @Responsive
+
+      - name: 👁️ Execute Percy Visual Tests
+        run: npx percy exec --config configs/percy.yml -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --project=desktop-chrome --workers=1
         env:
-          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-          BROWSERSTACK_CONFIG_FILE: configs/browserstack.yml
-          BROWSERSTACK_BUILD_NAME: "Functional - ${{ github.event.inputs.test_suite || '@Smoke' }} | Build #${{ github.run_number }}"
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
           TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
-          DEBUG: "browserstack-sdk:*"
           CI: true
 
       - name: 📊 Upload AI Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: functional-ai-report
+          name: visual-ai-report
           path: ai-debug-report/
-          retention-days: 30
+          retention-days: 7
