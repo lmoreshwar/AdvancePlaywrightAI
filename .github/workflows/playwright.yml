@@ -13,18 +13,70 @@ on:
           - staging
           - qa
           - dev
-      test_suite:
-        description: 'Test suite to execute'
+      execution_profile:
+        description: 'Execution profile (medium recommended)'
         required: true
-        default: '@Smoke'
+        default: 'medium'
         type: choice
         options:
-          - '@Smoke'
-          - '@Regression'
-          - '@P0'
-          - '@Header'
-          - '@Homepage'
-          - '@Responsive'
+          - 'fast'
+          - 'medium'
+          - 'full'
+      test_scope:
+        description: 'Which functional scope to run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - 'smoke'
+          - 'regression'
+          - 'responsive'
+          - 'all'
+      project_target:
+        description: 'Browser/device target'
+        required: true
+        default: 'desktop-chrome'
+        type: choice
+        options:
+          - 'desktop-chrome'
+          - 'desktop-edge'
+          - 'desktop-firefox'
+          - 'desktop-safari'
+          - 'mobile-chrome'
+          - 'mobile-safari'
+          - 'tablet-chrome'
+          - 'tablet-safari'
+          - 'responsive-matrix'
+          - 'cross-browser'
+          - 'real-devices'
+          - 'all'
+      custom_grep:
+        description: 'Optional custom grep (overrides scope), e.g. @P0|@Header'
+        required: false
+        default: ''
+        type: string
+      worker_count:
+        description: 'Playwright workers (auto uses profile defaults)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - '2'
+          - '3'
+          - '4'
+          - '5'
+          - '6'
+      max_minutes:
+        description: 'Execution timeout in minutes'
+        required: true
+        default: '45'
+        type: choice
+        options:
+          - '30'
+          - '45'
+          - '60'
+          - '90'
 
   schedule:
     - cron: '0 2 * * *'
@@ -33,7 +85,7 @@ jobs:
   test-browserstack:
     name: 🧪 Run Tests on BrowserStack
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: ${{ fromJSON(github.event.inputs.max_minutes || '45') }}
 
     steps:
       - name: 📥 Checkout Code
@@ -61,20 +113,123 @@ jobs:
 
       - name: 🔍 List Matching Tests (Dry Run)
         run: |
-          TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
-          echo "Checking for tests matching: $TAG_TO_RUN"
-          npx playwright test --list --config=playwright.config.ts --grep "$TAG_TO_RUN"
+          PROFILE="${{ github.event.inputs.execution_profile || 'medium' }}"
+          TARGET="${{ github.event.inputs.project_target || 'desktop-chrome' }}"
+          SCOPE="${{ github.event.inputs.test_scope || 'smoke' }}"
+          CUSTOM_GREP="${{ github.event.inputs.custom_grep || '' }}"
+
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
+            TARGET="all"
+            SCOPE="all"
+          fi
+
+          case "${TARGET}" in
+            "responsive-matrix")
+              PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
+              ;;
+            "cross-browser")
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari"
+              ;;
+            "real-devices")
+              PROJECT_FLAGS="--project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari"
+              ;;
+            "all")
+              PROJECT_FLAGS=""
+              ;;
+            *)
+              PROJECT_FLAGS="--project=${TARGET}"
+              ;;
+          esac
+
+          if [ -n "${CUSTOM_GREP}" ]; then
+            GREP_FLAGS="--grep ${CUSTOM_GREP}"
+          else
+            case "${SCOPE}" in
+              "smoke")
+                GREP_FLAGS="--grep @Smoke"
+                ;;
+              "regression")
+                GREP_FLAGS="--grep @Regression|@P0"
+                ;;
+              "responsive")
+                GREP_FLAGS="--grep @Responsive"
+                ;;
+              *)
+                GREP_FLAGS=""
+                ;;
+            esac
+          fi
+
+          echo "Listing tests with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}"
+          npx playwright test --list --config=playwright.config.ts ${PROJECT_FLAGS} ${GREP_FLAGS}
 
       - name: 🧪 Run Tests on BrowserStack
         id: test
         run: |
-          TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
-          npm run test:bstack -- --config=playwright.config.ts --grep "$TAG_TO_RUN" --workers=1
+          PROFILE="${{ github.event.inputs.execution_profile || 'medium' }}"
+          TARGET="${{ github.event.inputs.project_target || 'desktop-chrome' }}"
+          SCOPE="${{ github.event.inputs.test_scope || 'smoke' }}"
+          CUSTOM_GREP="${{ github.event.inputs.custom_grep || '' }}"
+          WORKER_OVERRIDE="${{ github.event.inputs.worker_count || 'auto' }}"
+
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
+            TARGET="all"
+            SCOPE="all"
+            WORKERS=4
+          elif [ "${PROFILE}" = "fast" ]; then
+            WORKERS=3
+          else
+            WORKERS=4
+          fi
+
+          case "${TARGET}" in
+            "responsive-matrix")
+              PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
+              ;;
+            "cross-browser")
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari"
+              ;;
+            "real-devices")
+              PROJECT_FLAGS="--project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari"
+              ;;
+            "all")
+              PROJECT_FLAGS=""
+              ;;
+            *)
+              PROJECT_FLAGS="--project=${TARGET}"
+              ;;
+          esac
+
+          if [ -n "${CUSTOM_GREP}" ]; then
+            GREP_FLAGS="--grep ${CUSTOM_GREP}"
+          else
+            case "${SCOPE}" in
+              "smoke")
+                GREP_FLAGS="--grep @Smoke"
+                ;;
+              "regression")
+                GREP_FLAGS="--grep @Regression|@P0"
+                ;;
+              "responsive")
+                GREP_FLAGS="--grep @Responsive"
+                ;;
+              *)
+                GREP_FLAGS=""
+                ;;
+            esac
+          fi
+
+          if [ "${WORKER_OVERRIDE}" != "auto" ]; then
+            WORKERS="${WORKER_OVERRIDE}"
+          fi
+
+          echo "Running BrowserStack with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}, workers=${WORKERS}"
+          npm run test:bstack -- --config=playwright.config.ts ${PROJECT_FLAGS} ${GREP_FLAGS} --workers=${WORKERS}
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           BROWSERSTACK_CONFIG_FILE: configs/browserstack.yml
-          BROWSERSTACK_BUILD_NAME: "Functional - ${{ github.event.inputs.test_suite || '@Smoke' }} | Build #${{ github.run_number }}"
+          BROWSERSTACK_BUILD_NAME: "Functional - ${{ github.event.inputs.test_scope || 'smoke' }} | Build #${{ github.run_number }}"
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
           TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
           DEBUG: "browserstack-sdk:*"
