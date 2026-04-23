@@ -43,6 +43,9 @@ class AiDebugReporter implements Reporter {
     private passedTests: number = 0;
     private failedTests: number = 0;
     private skippedTests: number = 0;
+    private finalized: boolean = false;
+    private runCompleted: boolean = false;
+    private processGuardsRegistered: boolean = false;
 
     onBegin(config: FullConfig, suite: Suite): void {
         this.startTime = Date.now();
@@ -54,6 +57,8 @@ class AiDebugReporter implements Reporter {
         if (!fs.existsSync(this.reportDir)) {
             fs.mkdirSync(this.reportDir, { recursive: true });
         }
+
+        this.registerProcessGuards();
 
         console.log(`\n🚀 OpenText AI Debug Reporter — Running ${this.totalTests} tests (Filtered from ${suite.allTests().length})\n`);
     }
@@ -120,9 +125,13 @@ class AiDebugReporter implements Reporter {
                 tracePath,
             });
         }
+
+        // Keep a rolling checkpoint so interrupted runs still have a usable report.
+        this.writeCheckpointReport();
     }
 
     onEnd(result: FullResult): void {
+        this.runCompleted = true;
         const totalTime = Date.now() - this.startTime;
 
         // Suppress summary if no tests were actually executed (e.g., in a dry run/--list)
@@ -142,14 +151,48 @@ class AiDebugReporter implements Reporter {
         console.log(`  Status:  ${result.status.toUpperCase()}`);
         console.log(`${'═'.repeat(60)}\n`);
 
-        this.generateHtmlReport(totalTime);
-        this.generateJsonReport(totalTime);
-        this.generateDebugReport(totalTime);
+        this.finalizeReports(totalTime, result.status, false, 'Completed run');
 
         console.log(`🔍 AI Debug Report generated successfully at ${this.reportDir}`);
 
         // Write GitHub Actions step summary if in CI
         this.writeGitHubSummary(totalTime);
+    }
+
+    private registerProcessGuards(): void {
+        if (this.processGuardsRegistered) return;
+        this.processGuardsRegistered = true;
+
+        const flushPartial = (reason: string) => {
+            if (this.runCompleted || this.finalized) return;
+            const totalTime = Date.now() - this.startTime;
+            this.finalizeReports(totalTime, 'interrupted', true, reason);
+        };
+
+        process.once('SIGINT', () => flushPartial('Interrupted by SIGINT'));
+        process.once('SIGTERM', () => flushPartial('Interrupted by SIGTERM'));
+        process.once('uncaughtException', () => flushPartial('Uncaught exception'));
+        process.once('unhandledRejection', () => flushPartial('Unhandled promise rejection'));
+    }
+
+    private writeCheckpointReport(): void {
+        if (this.finalized) return;
+        const totalTime = Date.now() - this.startTime;
+        this.generateJsonReport(totalTime);
+        this.generateDebugReport(totalTime, true, 'Checkpoint report (run in progress)');
+    }
+
+    private finalizeReports(totalTime: number, status: string, isPartial: boolean, reason: string): void {
+        if (this.finalized) return;
+        this.finalized = true;
+
+        this.generateHtmlReport(totalTime);
+        this.generateJsonReport(totalTime);
+        this.generateDebugReport(totalTime, isPartial, reason);
+
+        if (isPartial) {
+            console.warn(`⚠️ Partial AI Debug Report generated due to interruption: ${reason} (${status})`);
+        }
     }
 
     // ═══════════════════════════════════════
@@ -254,7 +297,7 @@ class AiDebugReporter implements Reporter {
     /**
      * Generate the AIC_DEBUG_REPORT.md with categorized failures
      */
-    private generateDebugReport(totalTime: number): void {
+    private generateDebugReport(totalTime: number, isPartial: boolean = false, runNote: string = ''): void {
         const categoryEmoji: Record<FailureCategory, string> = {
             'Locator Change': '🔗',
             'Script Issue': '📝',
@@ -272,6 +315,10 @@ class AiDebugReporter implements Reporter {
         let md = `# 🔍 AIC Debug Report — Auto-Generated\n\n`;
         md += `**Generated**: ${new Date().toLocaleString()}  \n`;
         md += `**Duration**: ${(totalTime / 1000).toFixed(1)}s  \n`;
+        md += `**Run Mode**: ${isPartial ? 'Partial (Interrupted/In Progress)' : 'Complete'}  \n`;
+        if (runNote) {
+            md += `**Run Note**: ${runNote}  \n`;
+        }
         md += `**Percy Visuals**: [👁️ View on Percy Dashboard](https://percy.io/opentext/opentext-tta/)\n\n`;
 
         if (this.failures.length === 0) {

@@ -31,15 +31,44 @@ on:
         options:
           - 'false'
           - 'true'
+      execution_profile:
+        description: 'Visual execution scope'
+        required: true
+        default: 'fast'
+        type: choice
+        options:
+          - 'fast'
+          - 'full'
+      worker_count:
+        description: 'Playwright workers (auto uses profile defaults)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - '2'
+          - '3'
+          - '4'
+          - '5'
+      max_minutes:
+        description: 'Execution timeout in minutes'
+        required: true
+        default: '45'
+        type: choice
+        options:
+          - '30'
+          - '45'
+          - '60'
 
   schedule:
-    - cron: '0 0 * * 1'
+    # Weekly run (Monday 02:00 UTC) with full visual matrix.
+    - cron: '0 2 * * 1'
 
 jobs:
   visual-regression:
     name: 🧪 Run Visual Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: ${{ fromJSON(github.event.inputs.max_minutes || '45') }}
 
     steps:
       - name: 📥 Checkout Code
@@ -82,12 +111,41 @@ jobs:
 
       - name: 🔍 List Visual Tests (Dry Run)
         run: |
-          echo "Checking for visual tests (excluding @Responsive for speed)..."
-          npx playwright test src/tests/visual.spec.ts --list --grep-invert @Responsive
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.execution_profile || 'fast' }}" = "full" ]; then
+            PROJECT_FLAGS="--project=desktop-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm --project=mobile-chrome"
+            GREP_FLAGS=""
+            echo "Weekly/full mode: listing full visual suite on visual matrix."
+          else
+            PROJECT_FLAGS="--project=desktop-chrome"
+            GREP_FLAGS="--grep-invert @Responsive"
+            echo "Fast mode: listing non-responsive visual suite on desktop-chrome."
+          fi
+          npx playwright test src/tests/visual.spec.ts --list ${PROJECT_FLAGS} ${GREP_FLAGS}
 
       - name: 👁️ Execute Percy Visual Tests
         run: |
-          npx percy exec --config configs/percy.yml -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --project=desktop-chrome --workers=4
+          MAX_MINUTES="${{ github.event.inputs.max_minutes || '45' }}"
+          WORKER_OVERRIDE="${{ github.event.inputs.worker_count || 'auto' }}"
+
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.execution_profile || 'fast' }}" = "full" ]; then
+            PROJECT_FLAGS="--project=desktop-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm --project=mobile-chrome"
+            GREP_FLAGS=""
+            WORKERS=3
+            echo "Running weekly/full Percy visual matrix."
+          else
+            PROJECT_FLAGS="--project=desktop-chrome"
+            GREP_FLAGS="--grep-invert @Responsive"
+            WORKERS=4
+            echo "Running fast Percy visual validation."
+          fi
+
+          if [ "${WORKER_OVERRIDE}" != "auto" ]; then
+            WORKERS="${WORKER_OVERRIDE}"
+          fi
+
+          echo "Selected workers: ${WORKERS}"
+          echo "Job timeout: ${MAX_MINUTES} minutes"
+          npx percy exec --config configs/percy.yml -- npx playwright test src/tests/visual.spec.ts ${PROJECT_FLAGS} ${GREP_FLAGS} --workers=${WORKERS}
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}

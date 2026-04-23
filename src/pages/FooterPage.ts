@@ -63,8 +63,9 @@ export class FooterPage {
     }
 
     async expectFooterLinksPresent(): Promise<void> {
-        // Wait for first link to be present to handle lazy-loaded footers
-        await this.footerLinks().first().waitFor({ state: 'visible' });
+        // In responsive layouts some footer links can be collapsed/hidden.
+        // For sticky-header verification we only need to ensure footer links exist in DOM.
+        await this.footerLinks().first().waitFor({ state: 'attached' });
         const count = await this.getFooterLinkCount();
         expect(count).toBeGreaterThan(0);
     }

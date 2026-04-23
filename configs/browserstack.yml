@@ -25,7 +25,8 @@ platforms:
   #   resolution: 1920x1080
 
 # ─── Parallel Execution ───
-parallelsPerPlatform: 2
+# Increase parallel sessions for faster BrowserStack execution.
+parallelsPerPlatform: 4
 
 browserstackLocal: false
 buildName: "OpenText Playwright Framework Build"
