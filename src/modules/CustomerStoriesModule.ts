@@ -205,13 +205,13 @@ export class CustomerStoriesModule {
         // Wait for dropdown to open (check both aria-expanded and panel visibility).
         const ariaControls = await toggleBtn.getAttribute('aria-controls').catch(() => null);
         
-        await this.page.waitForFunction(async (btnSelector, panelId) => {
+        await this.page.waitForFunction(({ btnSelector, panelId }: { btnSelector: string, panelId: string | null }) => {
             const btn = document.querySelector(btnSelector);
             const panel = panelId ? document.getElementById(panelId) : null;
             const isExpanded = btn?.getAttribute('aria-expanded') === 'true';
-            const isPanelVisible = panel && !panel.classList.contains('d-none') && panel.offsetHeight > 0;
+            const isPanelVisible = panel && !panel.classList.contains('d-none') && (panel as HTMLElement).offsetHeight > 0;
             return isExpanded || isPanelVisible;
-        }, `button[aria-controls="${ariaControls}"]`, ariaControls, { timeout: 8000 }).catch(() => {
+        }, { btnSelector: `button[aria-controls="${ariaControls}"]`, panelId: ariaControls }, { timeout: 8000 }).catch(() => {
             this.logger.warn(`Dropdown state did not change visually for "${filterName}", proceeding anyway`);
         });
 
@@ -246,8 +246,8 @@ export class CustomerStoriesModule {
                 `
             });
             this.logger.info('Obstructions (chat widget, cookie banner) hidden via CSS injection');
-        } catch (e) {
-            this.logger.warn('Failed to inject CSS to hide obstructions');
+        } catch (error: unknown) {
+            this.logger.error(`Failed to inject CSS to hide obstructions: ${(error as Error).message}`);
         }
     }
 

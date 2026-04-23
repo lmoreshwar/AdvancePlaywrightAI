@@ -41,7 +41,7 @@ export class VisualModule {
             await percySnapshot(this.page, name, options);
             
             this.logger.info(`Snapshot "${name}" successfully sent to Percy.`);
-        } catch (error) {
+        } catch (error: any) {
             this.logger.error(`Failed to capture Percy snapshot "${name}": ${error.message}`);
             // We don't throw here to avoid failing functional runs if Percy is down/missing token
         }
