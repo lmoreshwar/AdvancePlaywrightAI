@@ -203,6 +203,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Contact Us Page Snapshot', async () => {
+            // Wait for the form container specifically to ensure it's loaded
+            await page.locator('form, .hs-form-iframe').first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
             await visualModule.takeSnapshot('Page - Contact Us');
         });
     });

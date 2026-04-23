@@ -130,7 +130,20 @@ export class VisualModule {
             }
         });
 
-        // 5. Final settle time for animations or JS-driven layout shifts
-        await this.page.waitForTimeout(1000);
+        // 5. Wait for all iframes to finish loading (crucial for HubSpot forms, etc.)
+        const frames = this.page.frames();
+        await Promise.all(frames.map(frame => frame.waitForLoadState('load').catch(() => {})));
+
+        // 6. Smart Wait: Wait for common loading spinners to disappear
+        await this.page.waitForFunction(() => {
+            const loaders = document.querySelectorAll('[class*="loader"], [class*="spinner"], [id*="loader"], [id*="spinner"]');
+            return Array.from(loaders).every(el => {
+                const style = window.getComputedStyle(el);
+                return style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0';
+            });
+        }, { timeout: 5000 }).catch(() => this.logger.warn('Some loading spinners are still present, proceeding with snapshot...'));
+
+        // 7. Final settle time for animations or JS-driven layout shifts
+        await this.page.waitForTimeout(2000);
     }
 }
