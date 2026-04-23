@@ -23,6 +23,14 @@ on:
           - '375,768,1280,1920' # Full Suite (Mobile, Tablet, Laptop, Desktop)
           - '1280,1920'         # Desktop/Laptop Only
           - '375'               # Mobile Only (Portrait)
+      auto_approve:
+        description: 'Auto-approve Percy build only when recommendation is AUTO-APPROVE SAFE'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
   schedule:
     - cron: '0 0 * * 1'
@@ -67,6 +75,9 @@ jobs:
             percy-css: |
               iframe { display: none !important; }
               #onetrust-banner-sdk, .cookie-banner, [id*='cookie'] { display: none !important; }
+              [id*='ot-agent'], [class*='ot-agent'], [data-testid*='agent'] { display: none !important; }
+              [id*='chat-widget'], [class*='chat-widget'], [aria-label*='chat' i], [aria-label*='assistant' i] { display: none !important; }
+              [id*='summit'], [class*='summit'], [id*='region-selector'], [class*='region-selector'] { display: none !important; }
           EOF
 
       - name: 🔍 List Visual Tests (Dry Run)
@@ -81,6 +92,46 @@ jobs:
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
           TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
           CI: true
+
+      - name: 🧠 Generate Percy Decision Report
+        if: always()
+        run: |
+          node scripts/percy-review-report.cjs | tee ai-debug-report/percy-review-report.console.log
+          cat ai-debug-report/percy-review-report.env >> "$GITHUB_ENV"
+          cat ai-debug-report/percy-review-report.md >> "$GITHUB_STEP_SUMMARY"
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+
+      - name: ✅ Auto-Approve Percy Build (Safe Mode)
+        if: always() && github.event_name == 'workflow_dispatch' && github.event.inputs.auto_approve == 'true'
+        run: |
+          echo "Auto-approve requested. Percy recommendation: $PERCY_RECOMMENDATION"
+          if [ "$PERCY_RECOMMENDATION" != "AUTO-APPROVE SAFE" ]; then
+            echo "Skipping auto-approve: recommendation is not AUTO-APPROVE SAFE."
+            echo "- Auto-approve: skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Reason: recommendation is '$PERCY_RECOMMENDATION'" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ -z "$PERCY_APPROVE_LINK" ]; then
+            echo "Skipping auto-approve: missing approve link."
+            echo "- Auto-approve: skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Reason: Percy approve link missing" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          curl -sS -X POST "$PERCY_APPROVE_LINK" \
+            -H "Authorization: Token token=$PERCY_TOKEN" \
+            -H "Accept: application/json"
+
+          echo "- Auto-approve: completed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Approved build: $PERCY_BUILD_URL" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
       - name: 📊 Upload AI Report
         if: always()
