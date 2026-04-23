@@ -8,6 +8,7 @@ const REPORT_FILE = path.join(REPORT_DIR, 'percy-review-report.md');
 const REPORT_ENV_FILE = path.join(REPORT_DIR, 'percy-review-report.env');
 
 const token = process.env.PERCY_API_TOKEN || process.env.PERCY_TOKEN;
+const projectSlug = process.env.PERCY_PROJECT || 'opentext/opentext-tta';
 const sha = process.env.GITHUB_SHA;
 const branch = process.env.GITHUB_REF_NAME;
 const runUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
@@ -59,7 +60,15 @@ async function percyGet(pathname, query = {}) {
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Percy API ${res.status} ${res.statusText}: ${body.slice(0, 500)}`);
+    let errorMessage = `Percy API ${res.status} ${res.statusText}: ${body.slice(0, 500)}`;
+    
+    if (res.status === 403) {
+      const isProjectToken = token?.startsWith('web_');
+      errorMessage += `\n\n[PROBABLE CAUSE] A 403 Forbidden error usually indicates that the PERCY_TOKEN being used is a 'Project Token' (Write-only). ` +
+                      `To read build data via the API, you should ideally use an 'Organization API Token' as PERCY_API_TOKEN. ` +
+                      `Current token starts with: ${token ? token.slice(0, 8) + '...' : 'MISSING'}`;
+    }
+    throw new Error(errorMessage);
   }
 
   return res.json();
@@ -206,10 +215,22 @@ async function main() {
     return;
   }
 
-  const buildsPayload = await percyGet('/builds', {
+  // Try searching for builds within the specific project first (more compatible with Project Tokens)
+  const buildsPayload = await percyGet(`/projects/${encodeURIComponent(projectSlug)}/builds`, {
     'filter[sha]': sha,
     'filter[branch]': branch,
     'page[limit]': 30,
+  }).catch(async (err) => {
+    // If project-specific fails with 404/403, fallback to global builds search (requires Org token)
+    if (err.message.includes('403') || err.message.includes('404')) {
+      console.warn(`Project-specific build search failed for ${projectSlug}, falling back to global search...`);
+      return percyGet('/builds', {
+        'filter[sha]': sha,
+        'filter[branch]': branch,
+        'page[limit]': 30,
+      });
+    }
+    throw err;
   });
 
   const builds = buildsPayload.data || [];
