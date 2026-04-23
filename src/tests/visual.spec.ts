@@ -190,7 +190,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
     test('Search Overlay Visual @Regression', async ({ page, headerPage, visualModule }) => {
         await test.step('Navigate and Open Search', async () => {
             await page.goto('/');
-            await headerPage.clickSearchIcon();
+            await headerPage.clickSearch();
         });
 
         await test.step('Capture Search Overlay Snapshot', async () => {
@@ -202,7 +202,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
     test('Products Mega-Menu Visual @Regression', async ({ page, headerPage, visualModule }) => {
         await test.step('Navigate and Open Products Menu', async () => {
             await page.goto('/');
-            await headerPage.hoverProductsMenu();
+            await headerPage.hoverMainMenu('Products');
         });
 
         await test.step('Capture Products Menu Snapshot', async () => {
