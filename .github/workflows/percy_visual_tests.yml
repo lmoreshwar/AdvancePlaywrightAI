@@ -86,7 +86,8 @@ jobs:
           npx playwright test src/tests/visual.spec.ts --list --grep-invert @Responsive
 
       - name: 👁️ Execute Percy Visual Tests
-        run: npx percy exec --config configs/percy.yml -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --project=desktop-chrome --workers=4
+        run: |
+          npx percy exec --config configs/percy.yml -- bash -c 'echo $PERCY_BUILD_ID > percy_build_id.txt && npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive --project=desktop-chrome --workers=4'
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}

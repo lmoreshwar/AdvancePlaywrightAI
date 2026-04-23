@@ -215,40 +215,59 @@ async function main() {
     return;
   }
 
-  // Try searching for builds within the specific project first (more compatible with Project Tokens)
-  const buildsPayload = await percyGet(`/projects/${encodeURIComponent(projectSlug)}/builds`, {
-    'filter[sha]': sha,
-    'filter[branch]': branch,
-    'page[limit]': 30,
-  }).catch(async (err) => {
-    // If project-specific fails with 404/403, fallback to global builds search (requires Org token)
-    if (err.message.includes('403') || err.message.includes('404')) {
-      console.warn(`Project-specific build search failed for ${projectSlug}, falling back to global search...`);
-      return percyGet('/builds', {
-        'filter[sha]': sha,
-        'filter[branch]': branch,
-        'page[limit]': 30,
+  let build = null;
+  const buildIdFile = path.join(process.cwd(), 'percy_build_id.txt');
+  
+  if (fs.existsSync(buildIdFile)) {
+    const buildId = fs.readFileSync(buildIdFile, 'utf8').trim();
+    if (buildId) {
+      console.log(`Found Percy Build ID in file: ${buildId}. Fetching directly...`);
+      const buildPayload = await percyGet(`/builds/${buildId}`).catch(err => {
+        console.warn(`Failed to fetch build ${buildId} directly: ${err.message}`);
+        return null;
       });
+      if (buildPayload && buildPayload.data) {
+        build = buildPayload.data;
+      }
     }
-    throw err;
-  });
-
-  const builds = buildsPayload.data || [];
-  if (!builds.length) {
-    const message = `# Percy Automated Review Report\n\nNo Percy build found for SHA \`${sha}\` on branch \`${branch}\`.\n`;
-    fs.writeFileSync(REPORT_FILE, message, 'utf8');
-    fs.writeFileSync(
-      REPORT_ENV_FILE,
-      ['PERCY_BUILD_ID=', 'PERCY_BUILD_URL=', 'PERCY_APPROVE_LINK=', 'PERCY_RECOMMENDATION=REVIEW REQUIRED'].join(
-        '\n',
-      ),
-      'utf8',
-    );
-    console.log(message);
-    return;
   }
 
-  const build = builds[0];
+  if (!build) {
+    console.log('No Build ID file found or fetch failed, searching via API...');
+    // Try searching for builds within the specific project first (more compatible with Project Tokens)
+    const buildsPayload = await percyGet(`/projects/${encodeURIComponent(projectSlug)}/builds`, {
+      'filter[sha]': sha,
+      'filter[branch]': branch,
+      'page[limit]': 30,
+    }).catch(async (err) => {
+      // If project-specific fails with 404/403, fallback to global builds search (requires Org token)
+      if (err.message.includes('403') || err.message.includes('404')) {
+        console.warn(`Project-specific build search failed for ${projectSlug}, falling back to global search...`);
+        return percyGet('/builds', {
+          'filter[sha]': sha,
+          'filter[branch]': branch,
+          'page[limit]': 30,
+        });
+      }
+      throw err;
+    });
+
+    const builds = buildsPayload.data || [];
+    if (!builds.length) {
+      const message = `# Percy Automated Review Report\n\nNo Percy build found for SHA \`${sha}\` on branch \`${branch}\`.\n`;
+      fs.writeFileSync(REPORT_FILE, message, 'utf8');
+      fs.writeFileSync(
+        REPORT_ENV_FILE,
+        ['PERCY_BUILD_ID=', 'PERCY_BUILD_URL=', 'PERCY_APPROVE_LINK=', 'PERCY_RECOMMENDATION=REVIEW REQUIRED'].join(
+          '\n',
+        ),
+        'utf8',
+      );
+      console.log(message);
+      return;
+    }
+    build = builds[0];
+  }
   const rows = await getAllSnapshots(build.id);
   const recommendation = deriveBuildRecommendation(rows, build.attributes || {});
   const markdown = buildMarkdown(build, rows, recommendation);
