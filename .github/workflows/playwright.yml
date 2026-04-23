@@ -87,29 +87,17 @@ jobs:
       - name: 🧪 Run Tests on BrowserStack
         id: test
         run: |
-          # Logic to handle batch project selections
-          PROJECT_SELECTION="${{ github.event.inputs.project || 'desktop-chrome' }}"
-          
-          if [ "$PROJECT_SELECTION" == "all-projects" ]; then
-            PROJECT_FLAG=""
-          elif [ "$PROJECT_SELECTION" == "all-desktop" ]; then
-            PROJECT_FLAG="--project=desktop-chrome --project=desktop-firefox --project=desktop-safari --project=desktop-edge"
-          elif [ "$PROJECT_SELECTION" == "all-mobile" ]; then
-            PROJECT_FLAG="--project=mobile-chrome --project=mobile-safari"
-          else
-            PROJECT_FLAG="--project=$PROJECT_SELECTION"
-          fi
-
           TAG_TO_RUN="${{ github.event.inputs.test_suite || '@Smoke' }}"
           
-          # Run tests using the BrowserStack SDK runner
-          npm run test:bstack -- --config=playwright.config.ts --grep "$TAG_TO_RUN" $PROJECT_FLAG --workers=1
+          # Simplified: Let the SDK handle the project/platform mapping
+          npm run test:bstack -- --config=playwright.config.ts --grep "$TAG_TO_RUN" --workers=1
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           BROWSERSTACK_BUILD_NAME: "Functional - ${{ github.event.inputs.test_suite || '@Smoke' }} | Build #${{ github.run_number }}"
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
           TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
+          DEBUG: "browserstack-sdk:*"
           CI: true
 
       - name: 🔎 Debug Generated Files
