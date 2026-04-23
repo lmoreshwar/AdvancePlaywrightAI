@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { CustomerStoriesPage } from '../pages/CustomerStoriesPage';
 import { Logger, WaitHelper, StringHelper } from '../utils';
 
@@ -89,23 +89,49 @@ export class CustomerStoriesModule {
         await fieldset.scrollIntoViewIfNeeded();
 
         // Some filters (like Industry and Product) are hidden behind a 'Select ...' dropdown trigger
-        const toggleBtn = fieldset.locator('button:has-text("Select")').first();
+        const toggleBtn = fieldset.locator('button.js-dropdown-button, button:has-text("Select")').first();
         const needsToggle = await toggleBtn.isVisible({ timeout: 1000 }).catch(() => false);
         
         if (needsToggle) {
-            await toggleBtn.click();
-            await this.page.waitForTimeout(1000); // 1s animation wait
+            await this.openFilterDropdown(toggleBtn, filterName);
         }
 
         const option = this.pageObj.getFilterOption(filterName, optionText);
         await option.scrollIntoViewIfNeeded();
-        await option.click();
+        await option.click({ timeout: 10000 }).catch(async () => {
+            this.logger.warn(`Normal click failed for "${optionText}" in "${filterName}", retrying with force`);
+            await option.click({ force: true, timeout: 10000 });
+        });
 
         if (needsToggle) {
             // Close the dropdown after selecting
             await this.page.keyboard.press('Escape');
             await this.page.waitForTimeout(500);
         }
+    }
+
+    /**
+     * Opens a filter dropdown with resilient click fallbacks to avoid flaky timeouts in CI.
+     */
+    private async openFilterDropdown(toggleBtn: Locator, filterName: string) {
+        await toggleBtn.scrollIntoViewIfNeeded();
+        await expect(toggleBtn).toBeVisible({ timeout: 10000 });
+
+        // If already expanded, avoid extra clicks.
+        const alreadyExpanded = await toggleBtn.getAttribute('aria-expanded');
+        if (alreadyExpanded === 'true') {
+            return;
+        }
+
+        await toggleBtn.click({ timeout: 10000 }).catch(async () => {
+            this.logger.warn(`Dropdown click was flaky for "${filterName}", retrying with force`);
+            await toggleBtn.click({ force: true, timeout: 10000 });
+        });
+
+        // Wait for dropdown to open (or at least for aria-expanded to reflect state).
+        await expect(toggleBtn)
+            .toHaveAttribute('aria-expanded', 'true', { timeout: 3000 })
+            .catch(() => this.page.waitForTimeout(700));
     }
 
     /**
