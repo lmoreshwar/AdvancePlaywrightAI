@@ -93,57 +93,64 @@ export class VisualModule {
     private async ensurePageFullyLoaded(): Promise<void> {
         this.logger.info('Ensuring page is fully loaded and stabilized...');
         
-        // 1. Wait for standard load states
-        await this.page.waitForLoadState('load');
-        await this.page.waitForLoadState('domcontentloaded');
-        
-        // 2. Force lazy-loading by scrolling to the bottom and back
-        await this.page.evaluate(async () => {
-            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-            const scrollStep = 800;
-            const scrollDelay = 150;
+        try {
+            // 1. Wait for standard load states (briefly)
+            await this.page.waitForLoadState('load', { timeout: 10000 }).catch(() => {});
             
-            for (let i = 0; i < document.body.scrollHeight; i += scrollStep) {
-                window.scrollTo(0, i);
-                await delay(scrollDelay);
-            }
-            window.scrollTo(0, 0);
-            await delay(200);
-        });
+            // 2. Force lazy-loading with a FAST scroll (capped at 5000px or total height)
+            await this.page.evaluate(async () => {
+                const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+                const scrollStep = 1200;
+                const scrollDelay = 100;
+                const maxScroll = Math.min(document.body.scrollHeight, 6000);
+                
+                for (let i = 0; i < maxScroll; i += scrollStep) {
+                    window.scrollTo(0, i);
+                    await delay(scrollDelay);
+                }
+                window.scrollTo(0, 0);
+            }).catch(() => {});
 
-        // 3. Wait for all images to be decoded and loaded
-        await this.page.evaluate(async () => {
-            const images = Array.from(document.querySelectorAll('img'));
-            await Promise.all(images.map(img => {
-                if (img.complete) return Promise.resolve();
-                return new Promise(resolve => {
-                    img.addEventListener('load', resolve);
-                    img.addEventListener('error', resolve);
+            // 3. Wait for all visible images to be decoded (with 5s timeout)
+            await this.page.evaluate(async () => {
+                const images = Array.from(document.querySelectorAll('img'));
+                const imagePromises = images.map(img => {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.addEventListener('load', resolve);
+                        img.addEventListener('error', resolve);
+                        setTimeout(resolve, 5000); // Internal timeout per image
+                    });
                 });
-            }));
-        });
+                await Promise.race([
+                    Promise.all(imagePromises),
+                    new Promise(resolve => setTimeout(resolve, 5000)) // Global timeout for this step
+                ]);
+            }).catch(() => {});
 
-        // 4. Wait for web fonts to be ready
-        await this.page.evaluate(async () => {
-            if ('fonts' in document) {
-                await (document as any).fonts.ready;
-            }
-        });
+            // 4. Wait for web fonts to be ready (with 3s timeout)
+            await Promise.race([
+                this.page.evaluate(() => (document as any).fonts?.ready),
+                this.page.waitForTimeout(3000)
+            ]).catch(() => {});
 
-        // 5. Wait for all iframes to finish loading (crucial for HubSpot forms, etc.)
-        const frames = this.page.frames();
-        await Promise.all(frames.map(frame => frame.waitForLoadState('load').catch(() => {})));
+            // 5. Wait for all iframes (briefly)
+            const frames = this.page.frames();
+            await Promise.all(frames.slice(0, 5).map(frame => frame.waitForLoadState('load', { timeout: 3000 }).catch(() => {}))).catch(() => {});
 
-        // 6. Smart Wait: Wait for common loading spinners to disappear
-        await this.page.waitForFunction(() => {
-            const loaders = document.querySelectorAll('[class*="loader"], [class*="spinner"], [id*="loader"], [id*="spinner"]');
-            return Array.from(loaders).every(el => {
-                const style = window.getComputedStyle(el);
-                return style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0';
-            });
-        }, { timeout: 5000 }).catch(() => this.logger.warn('Some loading spinners are still present, proceeding with snapshot...'));
+            // 6. Smart Wait: Look for loaders (briefly)
+            await this.page.waitForFunction(() => {
+                const loaders = document.querySelectorAll('[class*="loader"], [class*="spinner"], [id*="loader"], [id*="spinner"]');
+                return Array.from(loaders).every(el => {
+                    const style = window.getComputedStyle(el);
+                    return style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0';
+                });
+            }, { timeout: 3000 }).catch(() => {});
 
-        // 7. Final settle time for animations or JS-driven layout shifts
-        await this.page.waitForTimeout(2000);
+            // 7. Final brief settle time
+            await this.page.waitForTimeout(1000);
+        } catch (error) {
+            this.logger.warn(`Stabilization incomplete: ${error.message}. Proceeding with snapshot.`);
+        }
     }
 }
