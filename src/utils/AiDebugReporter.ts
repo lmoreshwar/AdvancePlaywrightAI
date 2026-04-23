@@ -144,12 +144,9 @@ class AiDebugReporter implements Reporter {
 
         this.generateHtmlReport(totalTime);
         this.generateJsonReport(totalTime);
+        this.generateDebugReport(totalTime);
 
-        // Generate AIC Debug Report if there are failures
-        if (this.failures.length > 0) {
-            this.generateDebugReport(totalTime);
-            console.log(`🔍 AIC Debug Report generated with ${this.failures.length} failure(s)`);
-        }
+        console.log(`🔍 AI Debug Report generated successfully at ${this.reportDir}`);
 
         // Write GitHub Actions step summary if in CI
         this.writeGitHubSummary(totalTime);
@@ -274,7 +271,12 @@ class AiDebugReporter implements Reporter {
 
         let md = `# 🔍 AIC Debug Report — Auto-Generated\n\n`;
         md += `**Generated**: ${new Date().toLocaleString()}  \n`;
-        md += `**Duration**: ${(totalTime / 1000).toFixed(1)}s  \n\n`;
+        md += `**Duration**: ${(totalTime / 1000).toFixed(1)}s  \n`;
+        md += `**Percy Visuals**: [👁️ View on Percy Dashboard](https://percy.io/opentext/opentext-tta/)\n\n`;
+
+        if (this.failures.length === 0) {
+            md += `> [!TIP]\n> **All tests passed!** Your baseline is healthy. Review the snapshots on Percy.\n\n`;
+        }
 
         md += `## 📊 Run Summary\n\n`;
         md += `| Metric | Value |\n`;
@@ -459,6 +461,12 @@ class AiDebugReporter implements Reporter {
     <div class="header">
         <h1>📊 OpenText AI Test Report</h1>
         <p style="color:#888">${new Date().toLocaleString()}</p>
+        <div style="margin-top: 15px;">
+            <a href="https://percy.io/opentext/opentext-tta/" target="_blank" 
+               style="background: #5b5fc7; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px;">
+               👁️ View Visuals on Percy
+            </a>
+        </div>
     </div>
     <div class="summary">
         <div class="summary-card total"><div class="value">${this.totalTests}</div><div class="label">Total</div></div>
