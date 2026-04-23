@@ -230,11 +230,31 @@ async function main() {
     if (buildId) {
       console.log(`Found Percy Build ID in file: ${buildId}. Fetching directly...`);
       const buildPayload = await percyGet(`/builds/${buildId}`).catch(err => {
+        if (err.message.includes('403')) {
+          console.warn('--- PERMISSION RESTRICTION ---');
+          console.warn('Percy API returned 403 Forbidden. This confirms your token is a Write-Only Project Token.');
+          console.warn('Detailed snapshot triage is disabled. Generating a simple link-based report instead.');
+          return { data: { id: buildId, attributes: { 'web-url': `https://percy.io/builds/${buildId}` } } };
+        }
         console.warn(`Failed to fetch build ${buildId} directly: ${err.message}`);
         return null;
       });
+      
       if (buildPayload && buildPayload.data) {
         build = buildPayload.data;
+        // If we hit a 403, we won't be able to get snapshots, so we'll simulate an empty snapshot list
+        if (!build.relationships) {
+            console.log('Generating minimal report (Link only)...');
+            const markdown = `# Percy Automated Review Report\n\n` +
+                             `⚠️ **Detailed Triage Disabled**: To see the automated snapshot table here in GitHub, please use an **Organization API Token** as \`PERCY_API_TOKEN\`.\n\n` +
+                             `### [👁️ Review Visual Changes on Percy](${build.attributes['web-url']})\n\n` +
+                             `**Build ID**: \`${build.id}\`\n` +
+                             `**Recommendation**: REVIEW REQUIRED (Open link above)`;
+            
+            fs.writeFileSync(REPORT_FILE, markdown, 'utf8');
+            fs.writeFileSync(REPORT_ENV_FILE, `PERCY_BUILD_ID=${build.id}\nPERCY_BUILD_URL=${build.attributes['web-url']}\nPERCY_RECOMMENDATION=REVIEW REQUIRED`, 'utf8');
+            return;
+        }
       }
     }
   }
