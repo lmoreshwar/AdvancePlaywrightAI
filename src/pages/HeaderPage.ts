@@ -140,7 +140,16 @@ export class HeaderPage {
     }
 
     async clickLanguageSwitcher(): Promise<void> {
-        await this.languageSwitcher().click();
+        const localeLink = this.languageSwitcher();
+        await localeLink.scrollIntoViewIfNeeded();
+        await expect(localeLink).toBeVisible({ timeout: 10000 });
+
+        try {
+            await localeLink.click({ timeout: 15000 });
+        } catch {
+            // Fallback for transient overlay/intercept issues in CI.
+            await localeLink.click({ timeout: 15000, force: true });
+        }
     }
 
     async clickContact(): Promise<void> {

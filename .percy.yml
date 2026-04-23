@@ -1,7 +1,6 @@
 version: 2
 snapshot:
   # Global widths for all snapshots
-  # widths: [375, 768, 1280, 1920]
   widths: [1920]
   minHeight: 1024
   
@@ -15,10 +14,3 @@ snapshot:
     #onetrust-banner-sdk, .cookie-banner, [id*='cookie'] {
       display: none !important;
     }
-
-discovery:
-  # Increase allowed concurrency for faster cloud rendering
-  concurrency: 10
-  allowed-hosts:
-    - '*.opentext.com'
-    - '*.fonts.googleapis.com'

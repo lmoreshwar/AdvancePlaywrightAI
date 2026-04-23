@@ -52,11 +52,36 @@ jobs:
       - name: 🎭 Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
+      - name: 🧩 Generate Percy Config from Input Widths
+        run: |
+          cat > .percy.yml <<EOF
+          version: 2
+          snapshot:
+            widths: [${{ github.event.inputs.viewports || '375,768,1280,1920' }}]
+            minHeight: 1024
+            percy-css: |
+              iframe {
+                display: none !important;
+              }
+              #onetrust-banner-sdk, .cookie-banner, [id*='cookie'] {
+                display: none !important;
+              }
+          EOF
+
+      - name: 🧰 Ensure Report Directories Exist
+        if: always()
+        run: |
+          mkdir -p ai-debug-report
+          mkdir -p playwright-report
+          mkdir -p test-results
+          mkdir -p log
+
       - name: 👁️ Execute Percy Visual Tests
-        run: npx percy exec --widths=${{ github.event.inputs.viewports || '375,768,1280,1920' }} -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive
+        run: npx percy exec -- npx playwright test src/tests/visual.spec.ts --grep-invert @Responsive
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           BASE_URL: https://www.opentext.com
+          TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
           CI: true
 
       - name: 📊 Upload AI Debug Report

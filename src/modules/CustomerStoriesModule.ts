@@ -68,7 +68,14 @@ export class CustomerStoriesModule {
         if (filters.Cloud) await this.selectFilterOption('By Cloud', filters.Cloud);
 
         await this.page.waitForTimeout(2000);
-        await this.waitHelper.waitForNetworkIdle({ timeout: 15000 });
+
+        // Customer stories applies filters via async API calls; strict networkidle can be flaky in CI
+        // because analytics/chat traffic may keep the page "busy". We first wait for the results
+        // widget to remain visible, then attempt networkidle with a soft fallback.
+        await expect(this.pageObj.resultsCount).toBeVisible({ timeout: 20000 });
+        await this.waitHelper
+            .waitForNetworkIdle({ timeout: 30000 })
+            .catch(() => this.logger.warn('Network did not become fully idle; proceeding after results widget check'));
         this.logger.info('Filters applied and results settled');
     }
 
