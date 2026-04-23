@@ -101,6 +101,7 @@ jobs:
           cat ai-debug-report/percy-review-report.md >> "$GITHUB_STEP_SUMMARY"
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+          PERCY_API_TOKEN: ${{ secrets.PERCY_API_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -132,6 +133,7 @@ jobs:
           echo "- Approved build: $PERCY_BUILD_URL" >> "$GITHUB_STEP_SUMMARY"
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+          PERCY_API_TOKEN: ${{ secrets.PERCY_API_TOKEN }}
 
       - name: 📊 Upload AI Report
         if: always()

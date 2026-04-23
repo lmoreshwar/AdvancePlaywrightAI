@@ -7,7 +7,7 @@ const REPORT_DIR = path.join(process.cwd(), 'ai-debug-report');
 const REPORT_FILE = path.join(REPORT_DIR, 'percy-review-report.md');
 const REPORT_ENV_FILE = path.join(REPORT_DIR, 'percy-review-report.env');
 
-const token = process.env.PERCY_TOKEN;
+const token = process.env.PERCY_API_TOKEN || process.env.PERCY_TOKEN;
 const sha = process.env.GITHUB_SHA;
 const branch = process.env.GITHUB_REF_NAME;
 const runUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
@@ -252,6 +252,13 @@ main().catch((error) => {
   const errorReport = `# Percy Automated Review Report\n\nFailed to generate report.\n\n\`\`\`\n${error.stack || error.message}\n\`\`\`\n`;
   fs.mkdirSync(REPORT_DIR, { recursive: true });
   fs.writeFileSync(REPORT_FILE, errorReport, 'utf8');
+  fs.writeFileSync(
+    REPORT_ENV_FILE,
+    ['PERCY_BUILD_ID=', 'PERCY_BUILD_URL=', 'PERCY_APPROVE_LINK=', 'PERCY_RECOMMENDATION=REVIEW REQUIRED'].join(
+      '\n',
+    ),
+    'utf8',
+  );
   console.error(errorReport);
-  process.exitCode = 1;
+  process.exitCode = 0;
 });
