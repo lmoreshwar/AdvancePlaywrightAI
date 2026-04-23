@@ -24,7 +24,7 @@ interface FailureEntry {
 }
 
 /**
- * Custom TTA (Test-Time Analytics) Reporter
+ * Custom AI (Test-Time Analytics) Reporter
  *
  * Features:
  * - Real-time console output with pass/fail icons
@@ -418,7 +418,7 @@ class AiDebugReporter implements Reporter {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenText TTA Test Report</title>
+    <title>OpenText AI Test Report</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0e1a; color: #e4e4e7; padding: 2rem; }
@@ -451,7 +451,7 @@ class AiDebugReporter implements Reporter {
 </head>
 <body>
     <div class="header">
-        <h1>📊 OpenText TTA Test Report</h1>
+        <h1>📊 OpenText AI Test Report</h1>
         <p style="color:#888">${new Date().toLocaleString()}</p>
     </div>
     <div class="summary">
@@ -487,7 +487,7 @@ class AiDebugReporter implements Reporter {
 
         const reportPath = path.join(this.reportDir, 'index.html');
         fs.writeFileSync(reportPath, html, 'utf-8');
-        console.log(`📄 TTA HTML Report: ${path.resolve(reportPath)}`);
+        console.log(`📄 AI HTML Report: ${path.resolve(reportPath)}`);
     }
 
     private getCategoryClass(category: FailureCategory): string {
@@ -534,7 +534,7 @@ class AiDebugReporter implements Reporter {
             ),
             'utf-8',
         );
-        console.log(`📄 TTA JSON Report: ${path.resolve(reportPath)}`);
+        console.log(`📄 AI JSON Report: ${path.resolve(reportPath)}`);
     }
 }
 

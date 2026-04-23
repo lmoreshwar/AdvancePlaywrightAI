@@ -111,7 +111,7 @@ The AI must verify that the script executes correctly headlessly before concludi
    ```bash
    npx playwright test src/tests/header.spec.ts -g "TC-H09"
    ```
-2. **Verify the TTA HTML Report:** Ensure the custom reporter logged all the steps correctly.
+2. **Verify the AI HTML Report:** Ensure the custom reporter logged all the steps correctly.
 3. **Commit Code:** Once passed, the code should be committed referencing the original test case ID.
 
 ---
