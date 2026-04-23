@@ -111,35 +111,62 @@ jobs:
           mkdir -p test-results
           mkdir -p log
 
-      - name: 🔍 List Matching Tests (Dry Run)
+      - name: ⚙️ Build BrowserStack Platform Config
         run: |
           PROFILE="${{ github.event.inputs.execution_profile || 'medium' }}"
           TARGET="${{ github.event.inputs.project_target || 'desktop-chrome' }}"
+
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
+            TARGET="all"
+          fi
+
+          case "${TARGET}" in
+            "desktop-edge")
+              PLATFORMS=$'- os: Windows\n  osVersion: 10\n  browserName: edge\n  browserVersion: latest\n  resolution: 1920x1080'
+              ;;
+            "desktop-firefox")
+              PLATFORMS=$'- os: Windows\n  osVersion: 10\n  browserName: firefox\n  browserVersion: latest\n  resolution: 1920x1080'
+              ;;
+            "desktop-safari")
+              PLATFORMS=$'- os: OS X\n  osVersion: Sonoma\n  browserName: playwright-webkit\n  browserVersion: latest\n  resolution: 1920x1080'
+              ;;
+            "cross-browser"|"all")
+              PLATFORMS=$'- os: Windows\n  osVersion: 10\n  browserName: chrome\n  browserVersion: latest\n  resolution: 1920x1080\n- os: Windows\n  osVersion: 10\n  browserName: edge\n  browserVersion: latest\n  resolution: 1920x1080\n- os: Windows\n  osVersion: 10\n  browserName: firefox\n  browserVersion: latest\n  resolution: 1920x1080\n- os: OS X\n  osVersion: Sonoma\n  browserName: playwright-webkit\n  browserVersion: latest\n  resolution: 1920x1080'
+              ;;
+            *)
+              # For responsive/mobile/tablet targets, keep desktop Chrome platform.
+              # Device behavior is still driven by Playwright tests/tags.
+              PLATFORMS=$'- os: Windows\n  osVersion: 10\n  browserName: chrome\n  browserVersion: latest\n  resolution: 1920x1080'
+              ;;
+          esac
+
+          cat > configs/browserstack.dynamic.yml <<EOF
+          browserstackAuth:
+            userName: \${BROWSERSTACK_USERNAME}
+            accessKey: \${BROWSERSTACK_ACCESS_KEY}
+          platforms:
+          ${PLATFORMS}
+          parallelsPerPlatform: 4
+          browserstackLocal: false
+          buildName: "OpenText Playwright Framework Build"
+          projectName: "OpenText AI Tester"
+          debug: true
+          networkLogs: true
+          consoleLogs: "errors"
+          EOF
+
+          echo "Effective BrowserStack target: ${TARGET}"
+          echo "BROWSERSTACK_CONFIG_FILE=configs/browserstack.dynamic.yml" >> "$GITHUB_ENV"
+
+      - name: 🔍 List Matching Tests (Dry Run)
+        run: |
+          PROFILE="${{ github.event.inputs.execution_profile || 'medium' }}"
           SCOPE="${{ github.event.inputs.test_scope || 'smoke' }}"
           CUSTOM_GREP="${{ github.event.inputs.custom_grep || '' }}"
 
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
-            TARGET="all"
             SCOPE="all"
           fi
-
-          case "${TARGET}" in
-            "responsive-matrix")
-              PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
-              ;;
-            "cross-browser")
-              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari"
-              ;;
-            "real-devices")
-              PROJECT_FLAGS="--project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari"
-              ;;
-            "all")
-              PROJECT_FLAGS=""
-              ;;
-            *)
-              PROJECT_FLAGS="--project=${TARGET}"
-              ;;
-          esac
 
           if [ -n "${CUSTOM_GREP}" ]; then
             GREP_FLAGS="--grep ${CUSTOM_GREP}"
@@ -160,8 +187,8 @@ jobs:
             esac
           fi
 
-          echo "Listing tests with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}"
-          npx playwright test --list --config=playwright.config.ts ${PROJECT_FLAGS} ${GREP_FLAGS}
+          echo "Listing tests with scope=${SCOPE}, profile=${PROFILE}"
+          npx playwright test --list --config=playwright.config.ts ${GREP_FLAGS}
 
       - name: 🧪 Run Tests on BrowserStack
         id: test
@@ -173,7 +200,6 @@ jobs:
           WORKER_OVERRIDE="${{ github.event.inputs.worker_count || 'auto' }}"
 
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
-            TARGET="all"
             SCOPE="all"
             WORKERS=4
           elif [ "${PROFILE}" = "fast" ]; then
@@ -181,24 +207,6 @@ jobs:
           else
             WORKERS=4
           fi
-
-          case "${TARGET}" in
-            "responsive-matrix")
-              PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
-              ;;
-            "cross-browser")
-              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari"
-              ;;
-            "real-devices")
-              PROJECT_FLAGS="--project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari"
-              ;;
-            "all")
-              PROJECT_FLAGS=""
-              ;;
-            *)
-              PROJECT_FLAGS="--project=${TARGET}"
-              ;;
-          esac
 
           if [ -n "${CUSTOM_GREP}" ]; then
             GREP_FLAGS="--grep ${CUSTOM_GREP}"
@@ -224,11 +232,11 @@ jobs:
           fi
 
           echo "Running BrowserStack with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}, workers=${WORKERS}"
-          npm run test:bstack -- --config=playwright.config.ts ${PROJECT_FLAGS} ${GREP_FLAGS} --workers=${WORKERS}
+          npm run test:bstack -- --config=playwright.config.ts ${GREP_FLAGS} --workers=${WORKERS}
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-          BROWSERSTACK_CONFIG_FILE: configs/browserstack.yml
+          BROWSERSTACK_CONFIG_FILE: ${{ env.BROWSERSTACK_CONFIG_FILE || 'configs/browserstack.dynamic.yml' }}
           BROWSERSTACK_BUILD_NAME: "Functional - ${{ github.event.inputs.test_scope || 'smoke' }} | Build #${{ github.run_number }}"
           BASE_URL: ${{ github.event.inputs.environment == 'dev' && 'https://dev.opentext.com' || github.event.inputs.environment == 'qa' && 'https://qa.opentext.com' || github.event.inputs.environment == 'staging' && 'https://staging.opentext.com' || 'https://www.opentext.com' }}
           TEST_ENV: ${{ github.event.inputs.environment || 'production' }}
