@@ -8,6 +8,7 @@ const REPORT_FILE = path.join(REPORT_DIR, 'percy-review-report.md');
 const REPORT_ENV_FILE = path.join(REPORT_DIR, 'percy-review-report.env');
 
 const token = process.env.PERCY_API_TOKEN || process.env.PERCY_TOKEN;
+const hasApiToken = !!process.env.PERCY_API_TOKEN;
 const projectSlug = process.env.PERCY_PROJECT || 'opentext/opentext-tta';
 const sha = process.env.GITHUB_SHA;
 const branch = process.env.GITHUB_REF_NAME;
@@ -200,6 +201,12 @@ function buildMarkdown(build, rows, recommendation) {
 
 async function main() {
   fs.mkdirSync(REPORT_DIR, { recursive: true });
+
+  console.log('--- Percy API Diagnostics ---');
+  console.log(`- PERCY_API_TOKEN present: ${hasApiToken}`);
+  console.log(`- Token type: ${token?.startsWith('web_') ? 'Project Token (Write-Only)' : 'API/Org Token (Read/Write)'}`);
+  console.log(`- Token prefix: ${token ? token.slice(0, 8) + '...' : 'MISSING'}`);
+  console.log('----------------------------');
 
   if (!token) {
     const message = '# Percy Automated Review Report\n\nPERCY_TOKEN is missing. Unable to fetch Percy API data.\n';
