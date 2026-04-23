@@ -187,5 +187,38 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Responsive - Mobile Header State');
         });
+    test('Search Overlay Visual @Regression', async ({ page, headerPage, visualModule }) => {
+        await test.step('Navigate and Open Search', async () => {
+            await page.goto('/');
+            await headerPage.clickSearchIcon();
+        });
+
+        await test.step('Capture Search Overlay Snapshot', async () => {
+            await page.waitForLoadState('load');
+            await visualModule.takeSnapshot('Header - Search Overlay Open');
+        });
+    });
+
+    test('Products Mega-Menu Visual @Regression', async ({ page, headerPage, visualModule }) => {
+        await test.step('Navigate and Open Products Menu', async () => {
+            await page.goto('/');
+            await headerPage.hoverProductsMenu();
+        });
+
+        await test.step('Capture Products Menu Snapshot', async () => {
+            await page.waitForLoadState('load');
+            await visualModule.takeSnapshot('Header - Products Mega Menu');
+        });
+    });
+
+    test('Contact Us Page Visual @Smoke', async ({ page, visualModule }) => {
+        await test.step('Navigate to Contact Us', async () => {
+            await page.goto('/contact');
+        });
+
+        await test.step('Capture Contact Us Page Snapshot', async () => {
+            await page.waitForLoadState('load');
+            await visualModule.takeSnapshot('Page - Contact Us');
+        });
     });
 });
