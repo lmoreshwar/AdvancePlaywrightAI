@@ -187,6 +187,8 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await page.waitForLoadState('load');
             await visualModule.takeSnapshot('Responsive - Mobile Header State');
         });
+    });
+
     test('Search Overlay Visual @Regression', async ({ page, headerPage, visualModule }) => {
         await test.step('Navigate and Open Search', async () => {
             await page.goto('/');
@@ -221,4 +223,5 @@ test.describe('@Visual Visual Regression Testing POC', () => {
             await visualModule.takeSnapshot('Page - Contact Us');
         });
     });
+
 });
