@@ -23,22 +23,40 @@ on:
           - '375,768,1280,1920' # Full Suite (Mobile, Tablet, Laptop, Desktop)
           - '1280,1920'         # Desktop/Laptop Only
           - '375'               # Mobile Only (Portrait)
-      auto_approve:
-        description: 'Auto-approve Percy build only when recommendation is AUTO-APPROVE SAFE'
-        required: true
-        default: 'false'
-        type: choice
-        options:
-          - 'false'
-          - 'true'
       execution_profile:
-        description: 'Visual execution scope'
+        description: 'Execution profile (medium recommended)'
         required: true
-        default: 'fast'
+        default: 'medium'
         type: choice
         options:
           - 'fast'
+          - 'medium'
           - 'full'
+      project_target:
+        description: 'Device/browser target'
+        required: true
+        default: 'desktop-chrome'
+        type: choice
+        options:
+          - 'desktop-chrome'
+          - 'desktop-edge'
+          - 'desktop-firefox'
+          - 'mobile-chrome'
+          - 'mobile-safari'
+          - 'tablet-chrome'
+          - 'responsive-matrix'
+          - 'cross-browser'
+          - 'all-visual'
+      test_scope:
+        description: 'Which visual scope to run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - 'smoke'
+          - 'regression'
+          - 'responsive'
+          - 'all'
       worker_count:
         description: 'Playwright workers (auto uses profile defaults)'
         required: true
@@ -111,32 +129,105 @@ jobs:
 
       - name: 🔍 List Visual Tests (Dry Run)
         run: |
-          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.execution_profile || 'fast' }}" = "full" ]; then
-            PROJECT_FLAGS="--project=desktop-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm --project=mobile-chrome"
-            GREP_FLAGS=""
-            echo "Weekly/full mode: listing full visual suite on visual matrix."
-          else
-            PROJECT_FLAGS="--project=desktop-chrome"
-            GREP_FLAGS="--grep-invert @Responsive"
-            echo "Fast mode: listing non-responsive visual suite on desktop-chrome."
+          PROFILE="${{ github.event.inputs.execution_profile || 'fast' }}"
+          TARGET="${{ github.event.inputs.project_target || 'desktop-chrome' }}"
+          SCOPE="${{ github.event.inputs.test_scope || 'smoke' }}"
+
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
+            TARGET="all-visual"
+            SCOPE="all"
           fi
+
+          case "${TARGET}" in
+            "responsive-matrix")
+              PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
+              ;;
+            "cross-browser")
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox"
+              ;;
+            "all-visual")
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm"
+              ;;
+            *)
+              PROJECT_FLAGS="--project=${TARGET}"
+              ;;
+          esac
+
+          case "${SCOPE}" in
+            "smoke")
+              GREP_FLAGS="--grep @Smoke"
+              ;;
+            "regression")
+              GREP_FLAGS="--grep @Regression"
+              ;;
+            "responsive")
+              GREP_FLAGS="--grep @Responsive"
+              ;;
+            *)
+              GREP_FLAGS=""
+              ;;
+          esac
+
+          if [ "${PROFILE}" = "fast" ] && [ "${SCOPE}" = "all" ] && [ "${TARGET}" = "desktop-chrome" ]; then
+            GREP_FLAGS="--grep-invert @Responsive"
+            echo "Fast mode optimization applied: non-responsive pack on desktop-chrome."
+          else
+            echo "Listing with target=${TARGET}, scope=${SCOPE}."
+          fi
+
           npx playwright test src/tests/visual.spec.ts --list ${PROJECT_FLAGS} ${GREP_FLAGS}
 
       - name: 👁️ Execute Percy Visual Tests
         run: |
           MAX_MINUTES="${{ github.event.inputs.max_minutes || '45' }}"
           WORKER_OVERRIDE="${{ github.event.inputs.worker_count || 'auto' }}"
+          PROFILE="${{ github.event.inputs.execution_profile || 'fast' }}"
+          TARGET="${{ github.event.inputs.project_target || 'desktop-chrome' }}"
+          SCOPE="${{ github.event.inputs.test_scope || 'smoke' }}"
 
-          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.execution_profile || 'fast' }}" = "full" ]; then
-            PROJECT_FLAGS="--project=desktop-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm --project=mobile-chrome"
-            GREP_FLAGS=""
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
+            TARGET="all-visual"
+            SCOPE="all"
             WORKERS=3
-            echo "Running weekly/full Percy visual matrix."
           else
-            PROJECT_FLAGS="--project=desktop-chrome"
-            GREP_FLAGS="--grep-invert @Responsive"
             WORKERS=4
-            echo "Running fast Percy visual validation."
+          fi
+
+          case "${TARGET}" in
+            "responsive-matrix")
+              PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
+              ;;
+            "cross-browser")
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox"
+              ;;
+            "all-visual")
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm"
+              ;;
+            *)
+              PROJECT_FLAGS="--project=${TARGET}"
+              ;;
+          esac
+
+          case "${SCOPE}" in
+            "smoke")
+              GREP_FLAGS="--grep @Smoke"
+              ;;
+            "regression")
+              GREP_FLAGS="--grep @Regression"
+              ;;
+            "responsive")
+              GREP_FLAGS="--grep @Responsive"
+              ;;
+            *)
+              GREP_FLAGS=""
+              ;;
+          esac
+
+          if [ "${PROFILE}" = "fast" ] && [ "${SCOPE}" = "all" ] && [ "${TARGET}" = "desktop-chrome" ]; then
+            GREP_FLAGS="--grep-invert @Responsive"
+            echo "Running fast Percy visual validation (optimized)."
+          else
+            echo "Running Percy with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}."
           fi
 
           if [ "${WORKER_OVERRIDE}" != "auto" ]; then
