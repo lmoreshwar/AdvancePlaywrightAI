@@ -25,6 +25,10 @@ export class VisualModule {
         this.logger.info(`Capturing visual snapshot: ${name}`);
         
         try {
+            // 1. Ensure page is fully rendered and stabilized
+            await this.ensurePageFullyLoaded();
+            
+            // 2. Hide dynamic/noisy elements
             await this.stabilizeDynamicUi();
 
             // Options for Percy snapshot
@@ -50,27 +54,83 @@ export class VisualModule {
     private async stabilizeDynamicUi(): Promise<void> {
         await this.page.addStyleTag({
             content: `
-                #onetrust-banner-sdk,
-                .cookie-banner,
+                #onetrust-banner-sdk, 
+                #onetrust-pc-sdk,
+                .onetrust-pc-dark-filter,
+                .cookie-banner, 
                 [id*='cookie'],
-                [id*='ot-agent'],
-                [class*='ot-agent'],
+                [id*='ot-agent'], 
+                [class*='ot-agent'], 
                 [data-testid*='agent'],
-                [id*='chat-widget'],
-                [class*='chat-widget'],
-                [aria-label*='chat' i],
+                #q-messenger-frame, 
+                .qlfd-messenger-frame, 
+                #qualified-messenger-container,
+                iframe[src*="qualified.com"],
+                [id*='chat-widget'], 
+                [class*='chat-widget'], 
+                [aria-label*='chat' i], 
                 [aria-label*='assistant' i],
-                [id*='summit'],
-                [class*='summit'],
-                [id*='region-selector'],
+                [id*='summit'], 
+                [class*='summit'], 
+                [id*='region-selector'], 
                 [class*='region-selector'] {
                     display: none !important;
                     visibility: hidden !important;
+                    opacity: 0 !important;
+                    pointer-events: none !important;
                 }
             `,
         });
 
         // Give the DOM a brief moment to settle after hiding dynamic elements.
-        await this.page.waitForTimeout(250);
+        await this.page.waitForTimeout(500);
+    }
+
+    /**
+     * Ensures the page is fully loaded, including lazy-loaded images, 
+     * web fonts, and dynamic content.
+     */
+    private async ensurePageFullyLoaded(): Promise<void> {
+        this.logger.info('Ensuring page is fully loaded and stabilized...');
+        
+        // 1. Wait for standard load states
+        await this.page.waitForLoadState('load');
+        await this.page.waitForLoadState('domcontentloaded');
+        
+        // 2. Force lazy-loading by scrolling to the bottom and back
+        await this.page.evaluate(async () => {
+            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+            const scrollStep = 800;
+            const scrollDelay = 150;
+            
+            for (let i = 0; i < document.body.scrollHeight; i += scrollStep) {
+                window.scrollTo(0, i);
+                await delay(scrollDelay);
+            }
+            window.scrollTo(0, 0);
+            await delay(200);
+        });
+
+        // 3. Wait for all images to be decoded and loaded
+        await this.page.evaluate(async () => {
+            const images = Array.from(document.querySelectorAll('img'));
+            await Promise.all(images.map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.addEventListener('load', resolve);
+                    img.addEventListener('error', resolve);
+                });
+            }));
+        });
+
+        // 4. Wait for web fonts to be ready
+        await this.page.evaluate(async () => {
+            if ('fonts' in document) {
+                await (document as any).fonts.ready;
+            }
+        });
+
+        // 5. Final settle time for animations or JS-driven layout shifts
+        await this.page.waitForTimeout(1000);
     }
 }
