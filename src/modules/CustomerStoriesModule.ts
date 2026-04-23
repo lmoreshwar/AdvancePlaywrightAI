@@ -21,6 +21,7 @@ export class CustomerStoriesModule {
     async navigateToCustomerStories() {
         this.logger.step(1, 'Navigate to /customers');
         await this.page.goto('/customers', { waitUntil: 'domcontentloaded' });
+        await this.hideQualifiedChat();
     }
 
     /**
@@ -85,12 +86,13 @@ export class CustomerStoriesModule {
     async selectFilterOption(filterName: string, optionText: string) {
         this.logger.info(`Selecting "${optionText}" in "${filterName}"`);
         
+        await this.hideQualifiedChat();
         const fieldset = this.pageObj.getFilterFieldset(filterName);
         await fieldset.scrollIntoViewIfNeeded();
 
         // Some filters (like Industry and Product) are hidden behind a 'Select ...' dropdown trigger
         const toggleBtn = fieldset.locator('button.js-dropdown-button, button:has-text("Select")').first();
-        const needsToggle = await toggleBtn.isVisible({ timeout: 1000 }).catch(() => false);
+        const needsToggle = await toggleBtn.isVisible({ timeout: 1500 }).catch(() => false);
         
         if (needsToggle) {
             await this.openFilterDropdown(toggleBtn, filterName);
@@ -179,31 +181,73 @@ export class CustomerStoriesModule {
      */
     private async openFilterDropdown(toggleBtn: Locator, filterName: string) {
         await toggleBtn.scrollIntoViewIfNeeded();
-        await expect(toggleBtn).toBeVisible({ timeout: 10000 });
+        await expect(toggleBtn).toBeVisible({ timeout: 15000 });
 
         // If already expanded, avoid extra clicks.
-        const alreadyExpanded = await toggleBtn.getAttribute('aria-expanded');
+        const alreadyExpanded = await toggleBtn.getAttribute('aria-expanded').catch(() => null);
         if (alreadyExpanded === 'true') {
             return;
         }
 
-        await toggleBtn.click({ timeout: 10000 }).catch(async () => {
-            this.logger.warn(`Dropdown click was flaky for "${filterName}", retrying with force`);
-            await toggleBtn.click({ force: true, timeout: 10000 });
+        this.logger.info(`Clicking dropdown toggle for "${filterName}"`);
+        
+        // Try multiple click strategies for resilience
+        try {
+            await toggleBtn.click({ timeout: 8000 });
+        } catch (error) {
+            this.logger.warn(`Standard click failed for "${filterName}", trying force click: ${(error as Error).message}`);
+            await toggleBtn.click({ force: true, timeout: 8000 }).catch(async (err) => {
+                this.logger.warn(`Force click also failed, trying JS click: ${err.message}`);
+                await toggleBtn.evaluate((el: HTMLElement) => el.click());
+            });
+        }
+
+        // Wait for dropdown to open (check both aria-expanded and panel visibility).
+        const ariaControls = await toggleBtn.getAttribute('aria-controls').catch(() => null);
+        
+        await this.page.waitForFunction(async (btnSelector, panelId) => {
+            const btn = document.querySelector(btnSelector);
+            const panel = panelId ? document.getElementById(panelId) : null;
+            const isExpanded = btn?.getAttribute('aria-expanded') === 'true';
+            const isPanelVisible = panel && !panel.classList.contains('d-none') && panel.offsetHeight > 0;
+            return isExpanded || isPanelVisible;
+        }, `button[aria-controls="${ariaControls}"]`, ariaControls, { timeout: 8000 }).catch(() => {
+            this.logger.warn(`Dropdown state did not change visually for "${filterName}", proceeding anyway`);
         });
 
-        // Wait for dropdown to open (or at least for aria-expanded to reflect state).
-        await expect(toggleBtn)
-            .toHaveAttribute('aria-expanded', 'true', { timeout: 3000 })
-            .catch(() => this.page.waitForTimeout(700));
-
         // If a panel is referenced, wait briefly for it to attach/render.
-        const ariaControls = await toggleBtn.getAttribute('aria-controls').catch(() => null);
         if (ariaControls) {
             await this.page
                 .locator(`#${ariaControls}`)
-                .waitFor({ state: 'attached', timeout: 3000 })
-                .catch(() => Promise.resolve());
+                .waitFor({ state: 'visible', timeout: 5000 })
+                .catch(() => this.logger.warn(`Dropdown panel #${ariaControls} not visible after click`));
+        }
+    }
+
+    /**
+     * Hides the Qualified chat widget and other potential obstructions
+     */
+    private async hideQualifiedChat() {
+        try {
+            await this.page.addStyleTag({
+                content: `
+                    #q-messenger-frame, 
+                    .qlfd-messenger-frame, 
+                    #qualified-messenger-container,
+                    iframe[src*="qualified.com"],
+                    .ot-cookie-banner,
+                    #ot-sdk-btn-container,
+                    #onetrust-consent-sdk,
+                    .onetrust-pc-dark-filter { 
+                        display: none !important; 
+                        visibility: hidden !important; 
+                        pointer-events: none !important;
+                    }
+                `
+            });
+            this.logger.info('Obstructions (chat widget, cookie banner) hidden via CSS injection');
+        } catch (e) {
+            this.logger.warn('Failed to inject CSS to hide obstructions');
         }
     }
 
