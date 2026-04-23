@@ -42,7 +42,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Language Modal Snapshot', async () => {
-            await visualModule.takeSnapshot('Header - Language Modal Open');
+            await visualModule.takeSnapshot('Header - Language Modal Open', { skipStabilization: true });
         });
 
         await test.step('Close Language Modal', async () => {
@@ -112,7 +112,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         await test.step('Expand a Filter and Capture', async () => {
             // Visual check of the expanded dropdown state
             await customerStoriesModule.selectFilterOption('By Industry', 'High Tech');
-            await visualModule.takeSnapshot('Customer Stories - Filter Expanded');
+            await visualModule.takeSnapshot('Customer Stories - Filter Expanded', { skipStabilization: true });
         });
     });
 
@@ -182,7 +182,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Search Overlay Snapshot', async () => {
-            await visualModule.takeSnapshot('Header - Search Overlay Open');
+            await visualModule.takeSnapshot('Header - Search Overlay Open', { skipStabilization: true });
         });
     });
 
@@ -193,7 +193,7 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
 
         await test.step('Capture Products Menu Snapshot', async () => {
-            await visualModule.takeSnapshot('Header - Products Mega Menu');
+            await visualModule.takeSnapshot('Header - Products Mega Menu', { skipStabilization: true });
         });
     });
 

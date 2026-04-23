@@ -19,26 +19,30 @@ export class VisualModule {
     /**
      * Captures a visual snapshot of the current page and sends it to Percy.
      * @param name Unique name for the snapshot
-     * @param widths Optional array of widths to capture (e.g. [375, 768, 1280])
+     * @param options Configuration for the snapshot (widths, skipStabilization)
      */
-    async takeSnapshot(name: string, widths?: number[]): Promise<void> {
+    async takeSnapshot(name: string, options: { widths?: number[], skipStabilization?: boolean } = {}): Promise<void> {
         this.logger.info(`Capturing visual snapshot: ${name}`);
         
         try {
-            // 1. Ensure page is fully rendered and stabilized
-            await this.ensurePageFullyLoaded();
+            if (!options.skipStabilization) {
+                // 1. Ensure page is fully rendered and stabilized
+                await this.ensurePageFullyLoaded();
+            } else {
+                this.logger.info('Skipping stabilization for interactive state.');
+            }
             
             // 2. Hide dynamic/noisy elements
             await this.stabilizeDynamicUi();
 
-            // Options for Percy snapshot
-            const options: any = {};
-            if (widths && widths.length > 0) {
-                options.widths = widths;
+            // Percy options
+            const percyOptions: any = {};
+            if (options.widths && options.widths.length > 0) {
+                percyOptions.widths = options.widths;
             }
 
             // Capture the snapshot
-            await percySnapshot(this.page, name, options);
+            await percySnapshot(this.page, name, percyOptions);
             
             this.logger.info(`Snapshot "${name}" successfully sent to Percy.`);
         } catch (error: any) {
@@ -149,7 +153,7 @@ export class VisualModule {
 
             // 7. Final brief settle time
             await this.page.waitForTimeout(1000);
-        } catch (error) {
+        } catch (error: any) {
             this.logger.warn(`Stabilization incomplete: ${error.message}. Proceeding with snapshot.`);
         }
     }
