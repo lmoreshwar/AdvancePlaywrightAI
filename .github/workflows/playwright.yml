@@ -161,34 +161,60 @@ jobs:
       - name: 🔍 List Matching Tests (Dry Run)
         run: |
           PROFILE="${{ github.event.inputs.execution_profile || 'medium' }}"
+          TARGET="${{ github.event.inputs.project_target || 'desktop-chrome' }}"
           SCOPE="${{ github.event.inputs.test_scope || 'smoke' }}"
           CUSTOM_GREP="${{ github.event.inputs.custom_grep || '' }}"
 
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
+            TARGET="all"
             SCOPE="all"
           fi
 
+          if [ "${SCOPE}" = "responsive" ] && [ "${TARGET}" = "desktop-chrome" ]; then
+            TARGET="responsive-matrix"
+          fi
+
+          case "${TARGET}" in
+            "responsive-matrix")
+              PROJECT_FLAGS=(--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs)
+              ;;
+            "cross-browser")
+              PROJECT_FLAGS=(--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari)
+              ;;
+            "real-devices")
+              PROJECT_FLAGS=(--project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari)
+              ;;
+            "all")
+              PROJECT_FLAGS=(--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari --project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari)
+              ;;
+            *)
+              PROJECT_FLAGS=(--project="${TARGET}")
+              ;;
+          esac
+
           if [ -n "${CUSTOM_GREP}" ]; then
-            GREP_FLAGS="--grep ${CUSTOM_GREP}"
+            GREP_FLAGS=(--grep "${CUSTOM_GREP}")
           else
             case "${SCOPE}" in
               "smoke")
-                GREP_FLAGS="--grep @Smoke"
+                GREP_FLAGS=(--grep "@Smoke")
                 ;;
               "regression")
-                GREP_FLAGS="--grep @Regression|@P0"
+                GREP_FLAGS=(--grep "@Regression|@P0")
                 ;;
               "responsive")
-                GREP_FLAGS="--grep @Responsive"
+                GREP_FLAGS=(--grep "@Responsive")
                 ;;
               *)
-                GREP_FLAGS=""
+                GREP_FLAGS=()
                 ;;
             esac
           fi
 
-          echo "Listing tests with scope=${SCOPE}, profile=${PROFILE}"
-          npx playwright test --list --config=playwright.config.ts ${GREP_FLAGS}
+          INVERT_FLAGS=(--grep-invert "@Visual")
+
+          echo "Listing tests with scope=${SCOPE}, target=${TARGET}, profile=${PROFILE}"
+          npx playwright test --list --config=playwright.config.ts "${PROJECT_FLAGS[@]}" "${GREP_FLAGS[@]}" "${INVERT_FLAGS[@]}"
 
       - name: 🧪 Run Tests on BrowserStack
         id: test
@@ -200,6 +226,7 @@ jobs:
           WORKER_OVERRIDE="${{ github.event.inputs.worker_count || 'auto' }}"
 
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
+            TARGET="all"
             SCOPE="all"
             WORKERS=4
           elif [ "${PROFILE}" = "fast" ]; then
@@ -208,31 +235,55 @@ jobs:
             WORKERS=4
           fi
 
+          if [ "${SCOPE}" = "responsive" ] && [ "${TARGET}" = "desktop-chrome" ]; then
+            TARGET="responsive-matrix"
+          fi
+
+          case "${TARGET}" in
+            "responsive-matrix")
+              PROJECT_FLAGS=(--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs)
+              ;;
+            "cross-browser")
+              PROJECT_FLAGS=(--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari)
+              ;;
+            "real-devices")
+              PROJECT_FLAGS=(--project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari)
+              ;;
+            "all")
+              PROJECT_FLAGS=(--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari --project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari)
+              ;;
+            *)
+              PROJECT_FLAGS=(--project="${TARGET}")
+              ;;
+          esac
+
           if [ -n "${CUSTOM_GREP}" ]; then
-            GREP_FLAGS="--grep ${CUSTOM_GREP}"
+            GREP_FLAGS=(--grep "${CUSTOM_GREP}")
           else
             case "${SCOPE}" in
               "smoke")
-                GREP_FLAGS="--grep @Smoke"
+                GREP_FLAGS=(--grep "@Smoke")
                 ;;
               "regression")
-                GREP_FLAGS="--grep @Regression|@P0"
+                GREP_FLAGS=(--grep "@Regression|@P0")
                 ;;
               "responsive")
-                GREP_FLAGS="--grep @Responsive"
+                GREP_FLAGS=(--grep "@Responsive")
                 ;;
               *)
-                GREP_FLAGS=""
+                GREP_FLAGS=()
                 ;;
             esac
           fi
+
+          INVERT_FLAGS=(--grep-invert "@Visual")
 
           if [ "${WORKER_OVERRIDE}" != "auto" ]; then
             WORKERS="${WORKER_OVERRIDE}"
           fi
 
           echo "Running BrowserStack with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}, workers=${WORKERS}"
-          npm run test:bstack -- --config=playwright.config.ts ${GREP_FLAGS} --workers=${WORKERS}
+          npm run test:bstack -- --config=playwright.config.ts "${PROJECT_FLAGS[@]}" "${GREP_FLAGS[@]}" "${INVERT_FLAGS[@]}" --workers=${WORKERS}
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}

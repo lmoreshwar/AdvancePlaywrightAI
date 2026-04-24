@@ -41,9 +41,11 @@ on:
           - 'desktop-chrome'
           - 'desktop-edge'
           - 'desktop-firefox'
+          - 'desktop-safari'
           - 'mobile-chrome'
           - 'mobile-safari'
           - 'tablet-chrome'
+          - 'tablet-safari'
           - 'responsive-matrix'
           - 'cross-browser'
           - 'all-visual'
@@ -138,15 +140,19 @@ jobs:
             SCOPE="all"
           fi
 
+          if [ "${SCOPE}" = "responsive" ] && [ "${TARGET}" = "desktop-chrome" ]; then
+            TARGET="responsive-matrix"
+          fi
+
           case "${TARGET}" in
             "responsive-matrix")
               PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
               ;;
             "cross-browser")
-              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox"
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari"
               ;;
             "all-visual")
-              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm"
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari --project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
               ;;
             *)
               PROJECT_FLAGS="--project=${TARGET}"
@@ -193,15 +199,19 @@ jobs:
             WORKERS=4
           fi
 
+          if [ "${SCOPE}" = "responsive" ] && [ "${TARGET}" = "desktop-chrome" ]; then
+            TARGET="responsive-matrix"
+          fi
+
           case "${TARGET}" in
             "responsive-matrix")
               PROJECT_FLAGS="--project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
               ;;
             "cross-browser")
-              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox"
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari"
               ;;
             "all-visual")
-              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=viewport-xl --project=viewport-md --project=viewport-sm"
+              PROJECT_FLAGS="--project=desktop-chrome --project=desktop-edge --project=desktop-firefox --project=desktop-safari --project=mobile-chrome --project=mobile-safari --project=tablet-chrome --project=tablet-safari --project=viewport-xl --project=viewport-lg --project=viewport-md --project=viewport-sm --project=viewport-xs"
               ;;
             *)
               PROJECT_FLAGS="--project=${TARGET}"
