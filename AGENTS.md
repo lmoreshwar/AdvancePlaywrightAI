@@ -68,6 +68,47 @@ Every test case must satisfy ALL FIVE depth checks below. A test that only partl
 - Use `@playwright/cli` (`playwright-cli` or `npx playwright-cli`) for browser-driven diagnosis, locator validation, and UI troubleshooting.
 - For AIC workflows, do not use MCP-based browser automation.
 
+## Viewport-Resilient Coding Standard (MANDATORY)
+
+Tests run across local machines, BrowserStack, and CI — each with different effective viewport sizes. Every functional test MUST be resilient across all possible viewports.
+
+### V1. Runtime Viewport Detection — "Never assume, always detect"
+- If an element's visibility depends on a CSS breakpoint (e.g., nav links hidden below XL, hamburger shown on mobile), the Module method MUST query the runtime viewport before asserting:
+  ```typescript
+  const vpWidth = await this.page.evaluate(() => window.innerWidth);
+  if (vpWidth >= 1376) { /* XL: links visible */ } else { /* toggle visible */ }
+  ```
+- NEVER hardcode viewport assumptions. BrowserStack sessions may render at a smaller effective viewport than the configured resolution.
+
+### V2. DOM-Based vs Role-Based Locators — "Hidden elements need CSS locators"
+- `getByRole()` excludes elements hidden from the accessibility tree (display:none, aria-hidden). If you need to count or find elements that may be hidden at some viewports, use CSS locators instead:
+  - CORRECT: `this.page.locator('nav.navbar-secondary a[href]')` — finds all links in DOM
+  - WRONG: `this.secondaryNav().getByRole('link')` — returns 0 if links are hidden
+- Use `getByRole()` for visible-element assertions; use `locator()` with CSS for DOM-presence or count checks.
+
+### V3. Toggle-Before-Interact — "Expand collapsed sections before clicking"
+- When a Module method clicks links inside a collapsible section (hamburger nav, accordion), it MUST expand the section first at smaller viewports before interacting with the child elements.
+
+### V4. Breakpoint Reference
+| Breakpoint | Min Width | Viewport Project |
+|------------|-----------|-----------------|
+| XL         | ≥ 1376px  | viewport-xl     |
+| LG         | ≥ 968px   | viewport-lg     |
+| MD         | ≥ 720px   | viewport-md     |
+| SM         | ≥ 576px   | viewport-sm     |
+| XS         | ≥ 440px   | viewport-xs     |
+
+### V5. CLI Evidence at Multiple Viewports
+- When a page has responsive elements, run `playwright-cli snapshot` at BOTH desktop (1440x900) and a smaller size (1024x768) before writing locators. Document which elements appear/disappear at each breakpoint.
+
+## Console Error Resilience Standard (MANDATORY)
+
+Cloud environments (BrowserStack, GitHub Actions, Jenkins) route traffic through proxies. Third-party scripts frequently fail with network errors that NEVER appear locally.
+
+- Every `assertNoUnexpectedConsoleErrors()` method MUST include ignore patterns for known infrastructure noise: `ERR_TUNNEL_CONNECTION_FAILED`, `ERR_FAILED`, `qualified.com`, `WebSocket.*failed`, `wisepops`, `go-mpulse.net`, `Prohibited read from data layer`, etc.
+- When creating a NEW module with console error assertions, ALWAYS copy the full ignore list from an existing module (e.g., `AviatorAiModule.ts`) as the baseline. Never start with an empty ignore list.
+- When a debug report shows "Environment Issue" failures caused by console errors, ADD the new error pattern to the ignore list — do NOT mark these as application defects.
+
 ## Execution Standard
 
 1. Reproduce only the failed scenario(s) first.
@@ -86,6 +127,21 @@ Every test case must satisfy ALL FIVE depth checks below. A test that only partl
 
 - If multiple assistant-specific instruction files exist, this file takes precedence.
 - Detailed CLI enforcement rules: `FRAMEWORK_HUB/02_Execution_Guides/MASTER_EXECUTION_GUIDE.md`
+
+## File Map Auto-Update Standard (MANDATORY)
+
+Whenever the AI creates a **NEW** file in `src/` (Page, Module, Spec, Util, TestData, or Config), it **MUST** update the Existing File Map table in ALL prompt files that contain one:
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` → Section 4 "Existing File Map"
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` → Section 4 "Quick Reference — Existing Code Map"
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` → "Files the AI Must Read"
+
+**Rules:**
+1. Add the new file's row to the correct layer group (Pages, Modules, Tests, Utils, TestData) in ALL applicable files.
+2. Include an accurate description of what the file contains.
+3. This update MUST happen in the same edit session that creates the file — not as a follow-up.
+4. If the AI discovers a file in `src/` that is NOT listed in the map, it must add it before proceeding with any other work.
+5. Failure to update the file map is a rule violation equivalent to forgetting to register a fixture.
+6. The AI must NOT leave stale file maps that omit recently created files — stale maps cause the AI to miss existing code and duplicate it.
 
 ## Requirement Traceability Standard — ZERO GAP TOLERANCE (MANDATORY)
 

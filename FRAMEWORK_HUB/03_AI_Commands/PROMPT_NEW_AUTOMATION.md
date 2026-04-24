@@ -303,6 +303,111 @@ SELF-CHECK BEFORE DECLARING COVERAGE COMPLETE:
    If ANY answer is NO → the TC is incomplete. Fix before proceeding.
 ```
 
+#### Rule 12: Viewport-Resilient Coding (MANDATORY)
+```
+BrowserStack, CI runners, and different Playwright projects run tests at different
+viewport sizes. The effective viewport may NOT match what you see locally.
+Every functional test MUST be resilient across all possible viewports.
+
+1. VIEWPORT-AWARE LOCATORS:
+   - If an element is ONLY visible above a certain breakpoint (e.g., desktop nav
+     links hidden on mobile behind a hamburger toggle), the Module method MUST
+     query the runtime viewport and branch:
+
+     const vpWidth = await this.page.evaluate(() => window.innerWidth);
+     if (vpWidth >= 1376) {
+         // XL desktop: links are expanded and visible
+         await expect(this.page.locator('.nav-link')).toBeVisible();
+     } else {
+         // Below XL: hamburger toggle is shown instead
+         await expect(this.page.getByRole('button', { name: /Toggle/i })).toBeVisible();
+     }
+
+   - NEVER assume a specific viewport. Always detect at runtime.
+
+2. DOM-BASED vs ROLE-BASED LOCATORS FOR HIDDEN ELEMENTS:
+   - getByRole() only returns elements visible in the accessibility tree.
+     Hidden elements (display:none, visibility:hidden, aria-hidden) are EXCLUDED.
+   - If you need to count or interact with elements that may be hidden at some
+     viewports (e.g., nav links behind a collapsed hamburger), use CSS locators:
+     CORRECT: this.page.locator('nav.navbar-secondary a[href]')  — finds all links in DOM
+     WRONG:   this.secondaryNav().getByRole('link')               — returns 0 if links are hidden
+   - Use getByRole() for visible-only assertions.
+   - Use locator() with CSS for DOM-presence or count assertions.
+
+3. BREAKPOINT REFERENCE TABLE:
+   | Breakpoint | Min Width | CSS Class Suffix | Viewport Project   |
+   |------------|-----------|------------------|--------------------|  
+   | XL         | ≥ 1376px  | -xl              | viewport-xl        |
+   | LG         | ≥ 968px   | -lg              | viewport-lg        |
+   | MD         | ≥ 720px   | -md              | viewport-md        |
+   | SM         | ≥ 576px   | -sm              | viewport-sm        |
+   | XS         | ≥ 440px   | -xs              | viewport-xs        |
+
+4. BROWSERSTACK VIEWPORT CAVEAT:
+   BrowserStack sessions may have a smaller effective viewport than the
+   resolution in browserstack.yml (e.g., 1920x1080 resolution does NOT mean
+   1920px wide viewport — OS chrome, taskbar, and DevTools reduce it).
+   Always code defensively — never hardcode viewport assumptions.
+
+5. CLI EVIDENCE AT MULTIPLE VIEWPORTS:
+   When a page has responsive elements (hamburger, collapsible nav, show/hide
+   sections), run playwright-cli snapshot at BOTH desktop AND a smaller viewport
+   before writing locators:
+     playwright-cli resize 1440 900
+     playwright-cli snapshot --depth=4
+     playwright-cli resize 1024 768
+     playwright-cli snapshot --depth=4
+   Document which elements appear/disappear at each breakpoint.
+
+6. TOGGLE-BEFORE-INTERACT PATTERN:
+   When a Module method needs to click links inside a collapsible section
+   (e.g., secondary nav links), it MUST expand the section first at smaller viewports:
+
+     const vpWidth = await this.page.evaluate(() => window.innerWidth);
+     if (vpWidth < 1376) {
+         const toggle = this.aviatorAiPage.secondaryToggle();
+         if (await toggle.isVisible({ timeout: 2000 }).catch(() => false)) {
+             await toggle.click();
+             await this.page.waitForTimeout(500);
+         }
+     }
+```
+
+#### Rule 13: Console Error Resilience for Cloud/CI Environments (MANDATORY)
+```
+Cloud environments (BrowserStack, GitHub Actions, Jenkins) route traffic through
+proxies and tunnels. Third-party scripts (analytics, chat widgets, marketing pixels)
+frequently fail with network errors that NEVER appear locally.
+
+Every assertNoUnexpectedConsoleErrors() method MUST include ignore patterns for:
+
+1. NETWORK/TUNNEL ERRORS (appear in BrowserStack due to proxy):
+   /ERR_TUNNEL_CONNECTION_FAILED/i
+   /ERR_CONNECTION_RESET/i
+   /ERR_NAME_NOT_RESOLVED/i
+   /ERR_FAILED/i
+
+2. THIRD-PARTY SERVICE FAILURES:
+   /qualified\.com/i              — Qualified chat widget
+   /go-mpulse\.net/i              — Akamai mPulse
+   /clarity\.ms/i                 — Microsoft Clarity
+   /px\.ads\.linkedin\.com/i      — LinkedIn pixel
+   /wisepops/i                    — WisePops marketing
+   /insitez\.blob\.core/i         — InSiteZ analytics
+   /WebSocket.*failed/i           — WebSocket handshake failures
+   /Unexpected response code/i    — WebSocket proxy rejects
+
+3. CMS/FRAMEWORK NOISE:
+   /Prohibited read from data layer/i  — GTM data layer conflicts
+   /Failed to fetch/i                  — Generic fetch failures (CDN)
+   /bp-aviator-scenario-library/i      — CMS script load failures
+
+When creating a NEW module with console error assertions, ALWAYS copy the full
+ignore list from an existing module (e.g., AviatorAiModule.ts) as the baseline.
+Never start with an empty ignore list.
+```
+
 #### Rule 7: Responsive Test Case Routing
 ```
 When analyzing test cases, decide where they belong BEFORE writing code:
@@ -314,20 +419,39 @@ When analyzing test cases, decide where they belong BEFORE writing code:
 
 ## 📁 4. Existing File Map (AI: Read These First!)
 
+> **MAINTENANCE RULE (AUTO-UPDATE — MANDATORY)**: Whenever the AI creates a NEW\n> Page, Module, Spec, Util, or TestData file, it **MUST** add a row to this table\n> in the same edit session. This map must always reflect the actual files in `src/`.\n> If you find a file in the project that is not listed here, add it before proceeding.\n> **Failure to update this table when creating a new file is a rule violation\n> equivalent to forgetting to register a fixture.**\n> The AI must ALSO update the matching table in `PROMPT_MODIFY_IMPROVE.md` Section 4.
+
 | Layer | File | Contains |
 |---|---|---|
-| **Config** | `src/config/index.ts` | baseUrl, viewportBreakpoints, mainMenuItems |
+| **Config** | `src/config/index.ts` | baseUrl, defaultTimeout, navigationTimeout, environment config |
 | **Fixtures** | `src/fixtures/index.ts` | All test fixtures + global popup handlers |
 | **Pages** | `src/pages/HeaderPage.ts` | Header locators (logo, nav, menus, search, language, contact) |
-| **Pages** | `src/pages/HomepagePage.ts` | Homepage component locators |
-| **Pages** | `src/pages/FooterPage.ts` | Footer locators |
+| **Pages** | `src/pages/HomepagePage.ts` | Homepage component locators (hero, cards, sections) |
+| **Pages** | `src/pages/FooterPage.ts` | Footer locators (links, navigation, social) |
+| **Pages** | `src/pages/CustomerStoriesPage.ts` | Customer Stories page locators (filters, cards, pagination) |
+| **Pages** | `src/pages/AviatorAiPage.ts` | Aviator AI page locators (hero, secondary nav, bento, flip cards, FAQ, Limitless, MyAviator) |
 | **Modules** | `src/modules/HeaderModule.ts` | Header workflows (navigate, verify menus, language switcher) |
-| **Modules** | `src/modules/HomepageModule.ts` | Homepage workflows |
-| **Tests** | `src/tests/header.spec.ts` | 14 header tests (smoke + regression) |
+| **Modules** | `src/modules/HomepageModule.ts` | Homepage workflows (hero, components) |
+| **Modules** | `src/modules/CustomerStoriesModule.ts` | Customer Stories workflows (filters, pagination, cards) |
+| **Modules** | `src/modules/AviatorAiModule.ts` | Aviator AI workflows (hero, bento, Scenario Library, Limitless, MyAviator) |
+| **Modules** | `src/modules/VisualModule.ts` | Percy visual regression snapshot capture module |
+| **Tests** | `src/tests/header.spec.ts` | 7 header tests (smoke + regression) |
 | **Tests** | `src/tests/homepage.spec.ts` | Homepage component tests |
 | **Tests** | `src/tests/responsive.spec.ts` | Cross-viewport responsive tests |
+| **Tests** | `src/tests/customer-stories.spec.ts` | 4 Customer Stories regression tests |
+| **Tests** | `src/tests/aviator-ai.spec.ts` | 10 Aviator AI regression tests (3 sub-pages: Aviator, Limitless, MyAviator) |
+| **Tests** | `src/tests/visual.spec.ts` | 15 Percy visual regression snapshot tests |
+| **TestData** | `src/testdata/menus.json` | Menu items, headers, viewport configuration data |
+| **TestData** | `src/testdata/types.ts` | TypeScript type definitions for test data |
 | **Utils** | `src/utils/SmartLocator.ts` | Self-healing locator utility |
 | **Utils** | `src/utils/Logger.ts` | Step-based logger |
+| **Utils** | `src/utils/AiDebugReporter.ts` | Playwright reporter generating AI debug reports |
+| **Utils** | `src/utils/WindowHelper.ts` | Multi-tab/window browser management |
+| **Utils** | `src/utils/WaitHelper.ts` | Custom waits and retry logic |
+| **Utils** | `src/utils/StringHelper.ts` | Text parsing and sanitization |
+| **Utils** | `src/utils/IframeHelper.ts` | Cross-domain iframe interactions |
+| **Utils** | `src/utils/FileHelper.ts` | File upload/download automation |
+| **Utils** | `src/utils/DataGenerator.ts` | Random test data generation |
 
 ---
 

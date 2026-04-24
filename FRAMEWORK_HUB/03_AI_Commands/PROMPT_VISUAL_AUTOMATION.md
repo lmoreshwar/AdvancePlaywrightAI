@@ -483,13 +483,21 @@ Rules:
 
 ## 📁 Files the AI Must Read Before Writing
 
+> **MAINTENANCE RULE (AUTO-UPDATE — MANDATORY)**: When the AI creates a NEW
+> Module, Page, or Spec file, it **MUST** add a row here in the same edit session.
+> This table must always reflect the actual files in `src/`.
+> The AI must ALSO update the matching tables in `PROMPT_NEW_AUTOMATION.md` Section 4
+> and `PROMPT_MODIFY_IMPROVE.md` Section 4.
+
 | File | Why |
 |---|---|
 | `src/tests/visual.spec.ts` | Avoid duplicate snapshot names |
 | `src/modules/HeaderModule.ts` | Navigation methods for header tests |
 | `src/modules/HomepageModule.ts` | Navigation methods for homepage tests |
 | `src/modules/CustomerStoriesModule.ts` | Navigation + filter methods |
+| `src/modules/AviatorAiModule.ts` | Navigation + verification methods for Aviator AI pages |
 | `src/modules/VisualModule.ts` | Understand the `takeSnapshot()` API |
+| `src/fixtures/index.ts` | Available fixture names for visual tests |
 | `src/fixtures/index.ts` | Available fixture names |
 | `configs/percy.yml` | Global Percy viewport configuration |
 

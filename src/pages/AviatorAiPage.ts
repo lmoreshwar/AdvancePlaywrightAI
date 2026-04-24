@@ -11,15 +11,12 @@ export class AviatorAiPage {
     mainMenuNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
     mainMenuButton = (name: string) => this.mainMenuNav().getByRole('button', { name }).first();
 
-    // Secondary nav: on desktop it is always expanded (no toggle button); use the 'Aviator AI' link as the anchor element
-    secondaryNav = () =>
-        this.page
-            .locator('nav')
-            .filter({ has: this.page.getByRole('link', { name: /Aviator AI/i }) })
-            .first();
-    // secondaryToggle exists only on mobile breakpoints — kept for completeness but not asserted on desktop
-    secondaryToggle = () => this.page.getByRole('button', { name: /Toggle navigation/i }).first();
-    secondaryLink = (name: string) => this.secondaryNav().getByRole('link', { name: new RegExp(name, 'i') }).first();
+    // Secondary nav: uses CSS class which is reliable across all viewports
+    // At XL (>=1376px) the links are visible; below XL only the toggle button is visible
+    secondaryNav = () => this.page.locator('nav.navbar-secondary').first();
+    // secondaryToggle is the hamburger shown at non-XL viewports
+    secondaryToggle = () => this.secondaryNav().getByRole('button', { name: /Toggle navigation/i }).first();
+    secondaryLink = (name: string) => this.secondaryNav().locator('a').filter({ hasText: new RegExp(name, 'i') }).first();
     // Direct page-level text search so it works without a wrapper nav filter
     secondaryText = (name: string) => this.page.getByText(name, { exact: false }).first();
 
@@ -47,8 +44,10 @@ export class AviatorAiPage {
             .getByRole('link')
             .filter({ hasText: /Explore/i });
 
-    limitlessPrimarySection = () => this.page.locator('div,section').filter({ has: this.page.getByRole('heading', { level: 1, name: /Limitless with AI/i }) }).first();
-    limitlessCtas = () => this.limitlessPrimarySection().getByRole('link').filter({ hasText: /Get started|Try|Sign up|Learn more|Explore/i });
+    // Limitless hero section — use the iw_component wrapper closest to the H1 to avoid selecting the full page
+    limitlessPrimarySection = () =>
+        this.page.locator('.iw_component').filter({ has: this.page.getByRole('heading', { level: 1, name: /Limitless with AI/i }) }).first();
+    limitlessCtas = () => this.limitlessPrimarySection().getByRole('link').filter({ hasText: /Get started|Try|Sign up|Learn more|Explore|Play|Learn/i });
 
     limitlessAdditionalHeadings = () =>
         this.page
@@ -97,8 +96,8 @@ export class AviatorAiPage {
     featuredCardDescription = () => this.featuredCard().locator('.card-text, p').first();
     featuredCardCtas = () => this.featuredCard().getByRole('link');
 
-    // ── Secondary nav link set — all links within the secondary nav bar ──
-    secondaryNavAllLinks = () => this.secondaryNav().getByRole('link');
+    // ── Secondary nav link set — use CSS locator so hidden links at non-XL viewports are counted ──
+    secondaryNavAllLinks = () => this.secondaryNav().locator('a[href]');
 
     // ── MyAviator Scenario Library section (CLI evidence: heading + collapse-control buttons) ──
     myAviatorScenarioHeading = () =>

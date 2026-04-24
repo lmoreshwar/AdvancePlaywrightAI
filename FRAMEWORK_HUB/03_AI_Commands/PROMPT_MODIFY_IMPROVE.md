@@ -169,10 +169,61 @@ When MODIFYING responsive or viewport-specific tests:
   3. Verify the change across ALL viewports (XL, LG, MD, SM, XS) so fixing a mobile bug doesn't break the desktop test.
 ```
 
+### Rule 7: Viewport-Resilient Coding (MANDATORY)
+
+```
+BrowserStack, CI runners, and different Playwright projects run tests at different
+viewport sizes. The effective viewport may NOT match what you see locally.
+
+When MODIFYING locators or Module methods that target elements affected by
+responsive breakpoints (nav links, hamburger menus, collapsible sections):
+
+1. ALWAYS query the runtime viewport width before asserting visibility:
+   const vpWidth = await this.page.evaluate(() => window.innerWidth);
+
+2. For elements hidden below certain breakpoints, use CSS locators for
+   DOM-presence checks instead of getByRole() (which excludes hidden elements):
+   CORRECT: this.page.locator('nav.navbar-secondary a[href]')
+   WRONG:   this.secondaryNav().getByRole('link')  — returns 0 if links are hidden
+
+3. When modifying a method that clicks links inside a collapsible section,
+   add toggle-expand logic for smaller viewports BEFORE clicking:
+   if (vpWidth < 1376) { await toggle.click(); }
+
+4. BREAKPOINT REFERENCE:
+   XL ≥ 1376px | LG ≥ 968px | MD ≥ 720px | SM ≥ 576px | XS ≥ 440px
+
+5. After modifying any locator used across viewports, verify it works at BOTH
+   desktop (1440x900) and a smaller viewport (1024x768 or 768x1024).
+```
+
+### Rule 8: Console Error Resilience for Cloud/CI Environments
+
+```
+When MODIFYING or ADDING assertNoUnexpectedConsoleErrors() methods:
+
+1. ALWAYS copy the full ignore pattern list from an existing module
+   (e.g., AviatorAiModule.ts) as the baseline. Never start with an empty list.
+
+2. Cloud environments produce network errors that never appear locally:
+   - ERR_TUNNEL_CONNECTION_FAILED (BrowserStack proxy)
+   - ERR_FAILED (CDN/third-party blocked by proxy)
+   - WebSocket handshake failures (qualified.com, analytics)
+   - CORS errors (wisepops.net, marketing tools)
+
+3. When a debug report shows "Environment Issue" failures with console errors,
+   ADD the new error pattern to the ignore list — do NOT mark these as defects.
+```
+
 
 ---
 
 ## 📁 4. Quick Reference — Existing Code Map
+
+> **MAINTENANCE RULE (AUTO-UPDATE — MANDATORY)**: Whenever the AI creates a NEW
+> Page, Module, Spec, Util, or TestData file, it **MUST** add a row to the
+> appropriate table below in the same edit. This map must always reflect the
+> actual files in `src/`. Failure to update this table is a rule violation.
 
 ### Page Objects (Locators)
 | File | Key Locators |
@@ -180,19 +231,42 @@ When MODIFYING responsive or viewport-specific tests:
 | `HeaderPage.ts` | `logoLink`, `headerNav`, `hamburgerBtn`, `menuItemByText()`, `searchIcon`, `languageSwitcher`, `contactButton`, `acceptCookiesBtn` |
 | `HomepagePage.ts` | Homepage component locators (hero, cards, sections) |
 | `FooterPage.ts` | Footer links and navigation |
+| `CustomerStoriesPage.ts` | Customer Stories locators (filters, cards, pagination, hero) |
+| `AviatorAiPage.ts` | Aviator AI locators (hero, secondary nav, bento, flip cards, featured card, FAQ, Limitless, MyAviator) |
 
 ### Modules (Business Logic)
 | File | Key Methods |
 |---|---|
 | `HeaderModule.ts` | `setupHeaderPage()`, `verifyMenu()`, `verifyLanguageSwitcher()`, `verifyContactButton()`, `verifyHeaderVisibility()`, `verifyAllMenuItems()` |
 | `HomepageModule.ts` | `setupHomepage()`, `verifyHero()`, `verifyComponents()` |
+| `CustomerStoriesModule.ts` | Customer Stories workflows (filters, pagination, card verification) |
+| `AviatorAiModule.ts` | Aviator AI workflows (hero, bento, Scenario Library, flip cards, Limitless, MyAviator) |
+| `VisualModule.ts` | Percy visual regression snapshot capture |
 
 ### Test Specs
 | File | Tests | Tags |
 |---|---|---|
-| `header.spec.ts` | 14 tests | @P0 @Smoke, @P1 @Regression |
+| `header.spec.ts` | 7 header tests | @P0 @Smoke, @P1 @Regression |
 | `homepage.spec.ts` | Homepage tests | @P0 @Smoke, @P1 @Regression |
 | `responsive.spec.ts` | Cross-viewport tests | @P1 @Regression |
+| `customer-stories.spec.ts` | 4 Customer Stories tests | @P0 @Smoke, @P1 @Regression |
+| `aviator-ai.spec.ts` | 10 Aviator AI tests | @P0 @Smoke, @P1 @Regression |
+| `visual.spec.ts` | 15 Percy visual tests | @Visual @Smoke, @Regression, @Responsive |
+
+### Test Data & Utils
+| File | Contains |
+|---|---|
+| `src/testdata/menus.json` | Menu items, headers, viewport configuration |
+| `src/testdata/types.ts` | TypeScript type definitions for test data |
+| `src/utils/SmartLocator.ts` | Self-healing locator utility |
+| `src/utils/Logger.ts` | Step-based logger |
+| `src/utils/AiDebugReporter.ts` | Playwright reporter generating AI debug reports |
+| `src/utils/WindowHelper.ts` | Multi-tab/window browser management |
+| `src/utils/WaitHelper.ts` | Custom waits and retry logic |
+| `src/utils/StringHelper.ts` | Text parsing and sanitization |
+| `src/utils/IframeHelper.ts` | Cross-domain iframe interactions |
+| `src/utils/FileHelper.ts` | File upload/download automation |
+| `src/utils/DataGenerator.ts` | Random test data generation |
 
 ---
 
