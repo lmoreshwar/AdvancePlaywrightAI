@@ -1,4 +1,4 @@
-# 🧾 AIC Prompt Shortcuts (Simple English)
+﻿# 🧾 Prompt Shortcuts (Simple English)
 
 This file is for **humans**.
 
@@ -21,10 +21,10 @@ Why: it forces the agent to list what it will change before it changes anything.
 ### Step 1 — Attach the right reference file(s)
 
 Attach ONE or more of these (drag & drop into chat):
-- `FRAMEWORK_HUB/03_AI_Commands/AIC_NEW_AUTOMATION.md` (create new tests)
-- `FRAMEWORK_HUB/03_AI_Commands/AIC_MODIFY_IMPROVE.md` (update/modify existing tests)
-- `FRAMEWORK_HUB/03_AI_Commands/AIC_VISUAL_AUTOMATION.md` (create/extend visual tests)
-- The latest generated debug report: `ai-debug-report/AIC_DEBUG_REPORT.md`
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` (create new tests)
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` (update/modify existing tests)
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` (create/extend visual tests)
+- The latest generated debug report: `ai-debug-report/PROMPT_DEBUG_REPORT.md`
 
 ### Step 2 — Send a short instruction (simple English)
 
@@ -43,21 +43,41 @@ You reply: **"Proceed"**.
 
 ## 1) 🆕 Create Functional Tests (New Automation)
 
-### Minimal prompt
+### From Requirements (requirement.md)
 
-```
-Create functional tests for: <feature or test case>.
-Reference: AIC_NEW_AUTOMATION.md (attached).
+```text
+Review the attached requirement.md for: <Feature Name>.
+Generate test cases ensuring 100% RICE-POT coverage, then automate them.
+Reference: PROMPT_NEW_AUTOMATION.md (attached).
 Show the plan first before writing code.
 ```
 
-### Better prompt (recommended)
+### From User Stories (user_stories.md)
 
+```text
+Review the attached user_stories.md for: <Feature Name>.
+Generate test cases based on the acceptance criteria, then automate them.
+Reference: PROMPT_NEW_AUTOMATION.md (attached).
+Show the plan first before writing code.
 ```
+
+### From Test Cases (testcases.md)
+
+#### Minimal prompt
+
+```text
+Create functional tests for: <Test Case ID or Description>.
+Reference: PROMPT_NEW_AUTOMATION.md (attached).
+Show the plan first before writing code.
+```
+
+#### Better prompt (recommended)
+
+```text
 Create functional tests for the following test cases from testcases.md:
 - <paste test case rows or plain English>
 
-Reference: AIC_NEW_AUTOMATION.md (attached)
+Reference: PROMPT_NEW_AUTOMATION.md (attached)
 Project: desktop-chrome
 BrowserStack: Yes
 Tags: @P0 @Smoke
@@ -81,7 +101,7 @@ Show the plan first before writing code.
 Update these existing tests:
 - <file + what to change>
 
-Reference: AIC_MODIFY_IMPROVE.md (attached)
+Reference: PROMPT_MODIFY_IMPROVE.md (attached)
 Show the impact analysis + plan first before writing code.
 ```
 
@@ -91,7 +111,7 @@ Show the impact analysis + plan first before writing code.
 Update src/pages/HeaderPage.ts locators for the header logo.
 Update any broken tests that depend on that locator.
 
-Reference: AIC_MODIFY_IMPROVE.md (attached)
+Reference: PROMPT_MODIFY_IMPROVE.md (attached)
 Show the impact analysis + plan first before writing code.
 ```
 
@@ -103,7 +123,7 @@ Show the impact analysis + plan first before writing code.
 
 ```
 Create visual tests for src/tests/<YOUR_SPEC_FILE>.spec.ts.
-Reference: AIC_VISUAL_AUTOMATION.md (attached)
+Reference: PROMPT_VISUAL_AUTOMATION.md (attached)
 Show plan first before writing code.
 ```
 
@@ -113,7 +133,7 @@ Show plan first before writing code.
 I finished functional spec: src/tests/<YOUR_SPEC_FILE>.spec.ts.
 Derive visual tests into src/tests/visual.spec.ts based on those scenarios.
 
-Reference: AIC_VISUAL_AUTOMATION.md (attached)
+Reference: PROMPT_VISUAL_AUTOMATION.md (attached)
 Show plan first (test names + snapshot names) before writing code.
 ```
 
@@ -130,7 +150,7 @@ Show plan first (test names + snapshot names) before writing code.
 ### Minimal prompt
 
 ```
-Fix the failures in the attached AIC_DEBUG_REPORT.md.
+Fix the failures in the attached PROMPT_DEBUG_REPORT.md.
 Use playwright-cli for DOM evidence where needed.
 Show the plan first before writing code.
 ```
@@ -138,7 +158,7 @@ Show the plan first before writing code.
 ### Better prompt (recommended)
 
 ```
-Here is the latest ai-debug-report/AIC_DEBUG_REPORT.md (attached).
+Here is the latest ai-debug-report/PROMPT_DEBUG_REPORT.md (attached).
 
 Do this:
 1) Identify the top 1–2 root causes
@@ -201,27 +221,28 @@ After code changes:
 ### New tests
 ```
 Create new tests for <requirement>.
-Use AIC_NEW_AUTOMATION.md.
+Use PROMPT_NEW_AUTOMATION.md.
 Plan first.
 ```
 
 ### Modify tests
 ```
 Update <file> to <change>.
-Use AIC_MODIFY_IMPROVE.md.
+Use PROMPT_MODIFY_IMPROVE.md.
 Plan + impact analysis first.
 ```
 
 ### Visual tests
 ```
 Create visual tests for src/tests/<spec>.spec.ts.
-Use AIC_VISUAL_AUTOMATION.md.
+Use PROMPT_VISUAL_AUTOMATION.md.
 Plan first.
 ```
 
 ### Debug report
 ```
-Fix failures from attached AIC_DEBUG_REPORT.md.
+Fix failures from attached PROMPT_DEBUG_REPORT.md.
 Use playwright-cli.
 Plan first.
 ```
+

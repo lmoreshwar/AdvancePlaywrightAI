@@ -1,4 +1,4 @@
-# 👁️ AIC Visual Automation — Creating Visual Tests from Functional Test Cases
+﻿# 👁️ Prompt Visual Automation — Creating Visual Tests from Functional Test Cases
 
 **Author**: Framework Architecture (15-year automation architect standard)  
 **Purpose**: Step-by-step instructions for an AI agent to generate `visual.spec.ts` entries from existing functional test cases.
@@ -9,11 +9,11 @@ Attach this file and send a short prompt like:
 
 ```
 Create visual tests for src/tests/<YOUR_SPEC_FILE>.spec.ts.
-Reference: AIC_VISUAL_AUTOMATION.md (attached)
+Reference: PROMPT_VISUAL_AUTOMATION.md (attached)
 Show plan first before writing code.
 ```
 
-More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
+More examples: `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md`
 
 ---
 
@@ -75,7 +75,7 @@ Mark them mentally:
 Use the exact template below. Copy it, fill in the gaps:
 
 ```
-Process AIC_VISUAL_AUTOMATION.md.
+Process PROMPT_VISUAL_AUTOMATION.md.
 
 I have completed the following functional spec files:
 - src/tests/[your-spec-file].spec.ts
@@ -113,7 +113,7 @@ Verify:
    → All new tests appear in the list, zero errors
 □ Run: npx playwright test visual.spec.ts --project=desktop-chrome
    → Tests pass locally (Percy token not needed locally — snapshots are silently skipped)
-□ If any test fails, refer to AIC_DEBUG_REPORT.md workflow
+□ If any test fails, refer to PROMPT_DEBUG_REPORT.md workflow
 □ Commit and push to trigger Percy in CI
 ```
 
@@ -155,7 +155,7 @@ The methods `navigateAndVerifyHeader()`, `clickLanguageSwitcher()`, and `expectL
 ### Your Prompt to the Agent
 
 ```
-Process AIC_VISUAL_AUTOMATION.md.
+Process PROMPT_VISUAL_AUTOMATION.md.
 
 I have completed the functional spec: src/tests/header.spec.ts
 
@@ -465,7 +465,7 @@ test('Header Language Modal Visual @Regression', async ({ page, headerModule, he
 To generate visual tests from your functional test cases, give exactly this command:
 
 ```
-Process AIC_VISUAL_AUTOMATION.md.
+Process PROMPT_VISUAL_AUTOMATION.md.
 
 Generate visual tests in src/tests/visual.spec.ts for the following functional test cases from testcases.md:
 [paste the test case rows here]
@@ -492,3 +492,4 @@ Rules:
 | `src/modules/VisualModule.ts` | Understand the `takeSnapshot()` API |
 | `src/fixtures/index.ts` | Available fixture names |
 | `configs/percy.yml` | Global Percy viewport configuration |
+

@@ -3,10 +3,12 @@ import { HeaderPage } from '../pages/HeaderPage';
 import { HomepagePage } from '../pages/HomepagePage';
 import { FooterPage } from '../pages/FooterPage';
 import { CustomerStoriesPage } from '../pages/CustomerStoriesPage';
+import { AviatorAiPage } from '../pages/AviatorAiPage';
 import { HeaderModule } from '../modules/HeaderModule';
 import { HomepageModule } from '../modules/HomepageModule';
 import { CustomerStoriesModule } from '../modules/CustomerStoriesModule';
 import { VisualModule } from '../modules/VisualModule';
+import { AviatorAiModule } from '../modules/AviatorAiModule';
 
 export type TestFixtures = {
     // Page Objects
@@ -14,11 +16,13 @@ export type TestFixtures = {
     homepagePage: HomepagePage;
     footerPage: FooterPage;
     customerStoriesPage: CustomerStoriesPage;
+    aviatorAiPage: AviatorAiPage;
     // Modules
     headerModule: HeaderModule;
     homepageModule: HomepageModule;
     customerStoriesModule: CustomerStoriesModule;
     visualModule: VisualModule;
+    aviatorAiModule: AviatorAiModule;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -65,6 +69,13 @@ export const test = base.extend<TestFixtures>({
     },
 
     /**
+     * Aviator AI Page fixture
+     */
+    aviatorAiPage: async ({ page }, use) => {
+        await use(new AviatorAiPage(page));
+    },
+
+    /**
      * Customer Stories Module fixture
      */
     customerStoriesModule: async ({ page }, use) => {
@@ -76,6 +87,13 @@ export const test = base.extend<TestFixtures>({
      */
     visualModule: async ({ page }, use) => {
         await use(new VisualModule(page));
+    },
+
+    /**
+     * Aviator AI Module fixture
+     */
+    aviatorAiModule: async ({ page }, use) => {
+        await use(new AviatorAiModule(page));
     },
 
     /**

@@ -1,4 +1,4 @@
-# 🤖 AI Test Automation Playbook
+﻿# 🤖 AI Test Automation Playbook
 
 **Project:** OpenText Playwright Framework  
 **Toolset:** Playwright, `@playwright/cli`, AI Coding Agents (Cursor, Claude Code, Gemini, etc.)
@@ -8,9 +8,9 @@ This document is the official, tracked procedure for converting manual test case
 ## ✅ Quick Prompt (Simple English)
 
 Attach the relevant workflow file (recommended):
-- `FRAMEWORK_HUB/03_AI_Commands/AIC_NEW_AUTOMATION.md` for new tests
-- `FRAMEWORK_HUB/03_AI_Commands/AIC_MODIFY_IMPROVE.md` for updates
-- `FRAMEWORK_HUB/03_AI_Commands/AIC_VISUAL_AUTOMATION.md` for visual tests
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` for new tests
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` for updates
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` for visual tests
 
 Then send a short prompt like:
 
@@ -20,7 +20,7 @@ Use playwright-cli for DOM evidence.
 Show the plan first before writing code.
 ```
 
-More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
+More examples: `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md`
 
 ---
 
@@ -146,15 +146,36 @@ To prevent test suite bloat and redundant execution, follow these strict rules f
 
 ---
 
+## 📝 Spec File Formatting
+
+**All test spec files MUST follow the pattern in `header.spec.ts`:**
+
+✅ **REQUIRED Structure:**
+- Test describe block with tags (@P0, @Smoke, @Regression, @Feature)
+- Module initialization in beforeEach
+- Visual separator lines before each test case (═══════════════════════════════════════)
+- TC mapping (TC-H01, TC-A99, etc.) from testcases.md
+- test.step() for each logical action group
+- console.log() for step tracking
+- expect() for assertions
+- One test.describe() per spec file (no nested describes)
+
+**See:** `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` → **Rule 9: Spec File Formatting Standard** for the complete mandatory format and code example.
+
+---
+
 ## 📝 Example Prompt to give to the AI Agent (Cursor/Claude Code)
 
 To start automating a specific test case, you can paste this exact prompt to your AI assistant:
 
 > "I want to automate test case **[TC-ID]** from `FRAMEWORK_HUB/01_Requirements/testcases.md`. 
 > 
-> Please strictly follow the process in `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md`:
+> Please strictly follow the process in `FRAMEWORK_HUB/02_Execution_Guides/MASTER_EXECUTION_GUIDE.md`:
 > 1. Start by using `npx playwright-cli open https://www.opentext.com`
 > 2. Use `snapshot` to find the exact accessibility locators. DO NOT guess HTML classes.
 > 3. Perform the test flow using `click`, `hover`, etc. in the CLI.
 > 4. Once verified, update the Page Object, Module, and Spec files.
-> 5. Run the new test and confirm it passes."
+> 5. Run the new test and confirm it passes.
+>
+> **IMPORTANT:** All test specs MUST follow the formatting standard in `PROMPT_NEW_AUTOMATION.md` Rule 9 (see header.spec.ts as reference)."
+

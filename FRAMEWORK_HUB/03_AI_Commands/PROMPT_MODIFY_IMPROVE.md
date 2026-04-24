@@ -1,4 +1,4 @@
-# 🛠️ AI Script Modification & Improvement
+﻿# 🛠️ AI Script Modification & Improvement
 
 ## Goal: Safely Modify Existing Test Scripts
 
@@ -10,14 +10,14 @@ Attach this file and send a short prompt like:
 Update these existing tests:
 - <file + what to change>
 
-Reference: AIC_MODIFY_IMPROVE.md (attached)
+Reference: PROMPT_MODIFY_IMPROVE.md (attached)
 Show the impact analysis + plan first before writing code.
 ```
 
-More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
+More examples: `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md`
 
 **How to use**: Fill out the fields below, then tell the AI Agent:
-> *"Process AIC_MODIFY_IMPROVE.md"*
+> *"Process PROMPT_MODIFY_IMPROVE.md"*
 
 ---
 
@@ -58,6 +58,18 @@ More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
 ---
 
 ## 🔒 3. AI Agent Safety Rules (DO NOT MODIFY)
+
+### CRITICAL: Anti-Hallucination & Coverage Analysis
+
+```
+BEFORE modifying ANY file based on requirements, test cases, or bug reports, the AI Agent MUST:
+
+1. Read `AGENTS.md`.
+2. Read `FRAMEWORK_HUB/04_Framework_Standards/AI_COVERAGE_STANDARDS.md`.
+3. Base every change only on explicitly provided facts.
+4. Do not invent missing UI behavior, locators, defaults, or expected outcomes.
+5. Validate that the requested change preserves or improves test coverage for the affected scenario.
+```
 
 ### CRITICAL: Impact Analysis Before ANY Edit
 
@@ -145,7 +157,7 @@ After ALL modifications are complete:
   2. Verify ZERO regressions
   3. If BrowserStack=Yes: run `npm run test:bstack -- <affected-spec>`
   4. Show a diff summary of all changes made
-  5. Update AIC_DEBUG_REPORT.md if any failures occurred
+  5. Update PROMPT_DEBUG_REPORT.md if any failures occurred
 ```
 
 ### Rule 6: Responsive Modification Safety
@@ -204,3 +216,4 @@ After modification, the AI Agent will produce:
 ✅ Diff Summary:
   [show key diffs]
 ```
+

@@ -40,3 +40,12 @@ Runs tests on the BrowserStack grid using `browserstack.yml` for infrastructure 
 - **Combining Flags**: You can combine filters, for example:
   `npm run test:bstack -- src/tests/header.spec.ts --project=viewport-xs`
   *(This runs only the Header test, only in the extra-small viewport, on the BrowserStack cloud).*
+
+## 4. AI Prompts & Shortcuts (Platform Agnostic)
+Attach the relevant prompt guide and source document into your AI chat, and copy-paste these shortcuts. More details are in `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md`.
+
+| Source Document | Prompt Example |
+| :--- | :--- |
+| **Requirements** | `Review requirement.md for [Feature]. Generate 100% coverage plan, then automate. Ref: PROMPT_NEW_AUTOMATION.md. Show plan first.` |
+| **User Stories** | `Review user_stories.md for [Story]. Automate tests based on acceptance criteria. Ref: PROMPT_NEW_AUTOMATION.md. Show plan first.` |
+| **Test Cases**   | `Create functional tests for the following from testcases.md: [TC data]. Ref: PROMPT_NEW_AUTOMATION.md. Show plan first.` |
