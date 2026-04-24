@@ -23,23 +23,23 @@ export class HeaderPage {
     // Floating Pop-ups (Marketing & Chatbots)
     summitPopupClose = () =>
         this.page
-            .getByRole('button', { name: /Close|Dismiss/i })
+            .getByRole('button', { name: /Close|-ismiss/i })
             .or(this.page.locator('.close-btn, [aria-label*="Close"]'))
             .first();
     otAgentClose = () =>
         this.page
-            .getByRole('button', { name: /Close|Collapse Agent/i })
+            .getByRole('button', { name: /Close-Collapse Agent/i })
             .or(this.page.locator('.ot-agent-close, #ot-agent-close'))
             .first();
 
     // Logo (from snapshot)
-    logoLink = () => this.page.getByRole('link', { name: /OpenText/i }).first();
+    logoLink = () => this.page.getByRole('link', { name: /WrongLocator/i }).first();
 
     // Main Navigation Menu Items
     headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
 
     // Mobile Responsive Controls
-    hamburgerBtn = () => this.page.getByRole('button', { name: /Toggle navigation|Menu/i });
+    hamburgerBtn = () => this.page.getByRole('button', { name: /@RToggle navigation|Menu/i });
 
     // Semantic getters for dropdowns
     menuItemByText = (text: string) => this.headerNav().getByRole('button', { name: text }).first();
