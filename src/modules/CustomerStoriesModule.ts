@@ -1,6 +1,8 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { CustomerStoriesPage } from '../pages/CustomerStoriesPage';
-import { Logger, WaitHelper, StringHelper } from '../utils';
+import { Logger } from '../utils/Logger';
+import { WaitHelper } from '../utils/WaitHelper';
+import { StringHelper } from '../utils/StringHelper';
 
 export class CustomerStoriesModule {
     readonly page: Page;
