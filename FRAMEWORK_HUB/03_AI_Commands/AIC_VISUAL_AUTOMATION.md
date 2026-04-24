@@ -5,6 +5,208 @@
 
 ---
 
+## ⚠️ PREREQUISITE — Read This First
+
+**Visual tests cannot be written before functional tests. This is a hard rule.**
+
+The correct order is always:
+
+```
+STEP 1 → Write requirements in testcases.md
+STEP 2 → Write functional spec (Pages → Modules → Spec file e.g. header.spec.ts)
+STEP 3 → THEN derive visual tests from the SAME modules (visual.spec.ts)
+```
+
+**Why?**  
+Visual tests borrow 100% of their navigation and state-setup logic from the functional module layer.  
+If the functional spec doesn't exist yet, the modules don't exist, so there is nothing for the visual test to reuse.  
+If you write visual tests without functional tests first, you end up duplicating `page.goto()`, locators, and navigation logic in two places — and when the UI changes, you fix the same thing twice.
+
+**Checklist before starting visual test generation:**
+```
+□ Functional spec file exists in src/tests/ (e.g. header.spec.ts)
+□ Module file exists in src/modules/ with navigation methods (e.g. headerModule.navigateAndVerifyHeader())
+□ Page Object file exists in src/pages/ with locators and actions
+□ Fixtures are registered in src/fixtures/index.ts
+□ At least one local run of the functional tests has passed
+```
+
+Only after all boxes are checked, proceed to generate visual tests.
+
+---
+
+## 🗣️ How YOU (the Human) Feed Prompts to the Agent — Step by Step
+
+This section is for **you**, not the AI agent. Follow these steps each time you want to generate visual tests.
+
+### Phase 1 — Confirm Functional Tests Are Done
+
+Before opening the AI agent, verify:
+1. Open `src/tests/` — confirm your spec file exists (e.g. `header.spec.ts`)
+2. Open `src/modules/` — confirm the module has navigate/verify methods
+3. Run `npx playwright test --list` — confirm your functional tests appear in the list
+
+### Phase 2 — Identify Which Test Cases Need Visual Coverage
+
+Open `FRAMEWORK_HUB/01_Requirements/testcases.md`.  
+Go through each functional test case and ask:  
+*"Does this test case verify something a human can SEE on the screen?"*  
+If yes → it needs a visual test.
+
+Mark them mentally:
+- **Default state** (page just loads, no interaction) → `@Smoke`
+- **Interaction required** (click, hover, scroll, open modal, apply filter) → `@Regression`
+- **Different across viewports** (hamburger menu, padding, layout shifts) → `@Responsive`
+
+### Phase 3 — Write Your Prompt to the Agent
+
+Use the exact template below. Copy it, fill in the gaps:
+
+```
+Process AIC_VISUAL_AUTOMATION.md.
+
+I have completed the following functional spec files:
+- src/tests/[your-spec-file].spec.ts
+
+Generate visual tests in src/tests/visual.spec.ts for these test cases:
+
+[PASTE specific test case rows from testcases.md here]
+
+Rules you must follow:
+1. Read src/tests/visual.spec.ts in full FIRST — do not create any snapshot that already exists
+2. Read all files in src/modules/ — reuse existing module methods, never write raw page.goto()
+3. Read src/fixtures/index.ts — use only registered fixture names
+4. Follow the 3-step pattern for every test: Navigate (module) → State setup → takeSnapshot()
+5. @Smoke for default page states, @Regression for interactive states, @Responsive for viewports
+6. Use { skipStabilization: true } for modals, dropdowns, hover overlays
+7. Do NOT write any assertions (expect()) inside visual tests
+8. Snapshot names must follow: 'Area - State Description' in Title Case
+9. Show me the final test count and list of snapshot names before writing any code
+```
+
+### Phase 4 — Review Before the Agent Writes Code
+
+After giving the prompt, the agent should first reply with a **plan**: a list of snapshot names and test count.  
+**Read the plan before saying "proceed".**  
+Check:
+- No snapshot name already exists in `visual.spec.ts`
+- Every test maps to a real module method
+- Tags are correct
+
+### Phase 5 — After the Agent Writes Code
+
+Verify:
+```
+□ Run: npx playwright test visual.spec.ts --project=desktop-chrome --dry-run
+   → All new tests appear in the list, zero errors
+□ Run: npx playwright test visual.spec.ts --project=desktop-chrome
+   → Tests pass locally (Percy token not needed locally — snapshots are silently skipped)
+□ If any test fails, refer to AIC_DEBUG_REPORT.md workflow
+□ Commit and push to trigger Percy in CI
+```
+
+---
+
+## 🎓 Full End-to-End Worked Example
+
+This example walks through the **complete journey** from a functional spec to a visual test.
+
+### The Functional Test That Already Exists
+
+You wrote this in `src/tests/header.spec.ts`:
+
+```typescript
+test('@P1 @Regression should open language switcher modal', async ({ headerModule, headerPage }) => {
+    await test.step('Navigate and verify header', async () => {
+        await headerModule.navigateAndVerifyHeader();
+    });
+
+    await test.step('Click language switcher', async () => {
+        await headerPage.clickLanguageSwitcher();
+    });
+
+    await test.step('Verify modal is visible', async () => {
+        await headerPage.expectLanguageModalVisible();
+    });
+});
+```
+
+The methods `navigateAndVerifyHeader()`, `clickLanguageSwitcher()`, and `expectLanguageModalVisible()` already exist in `HeaderModule` and `HeaderPage`.
+
+### The Test Case in testcases.md
+
+```
+| Click on the language switcher and verify that the Language switcher modal shows up |
+| Language switcher modal should show up |
+```
+
+### Your Prompt to the Agent
+
+```
+Process AIC_VISUAL_AUTOMATION.md.
+
+I have completed the functional spec: src/tests/header.spec.ts
+
+Generate a visual test in src/tests/visual.spec.ts for this test case:
+"Click on the language switcher and verify that the Language switcher modal shows up"
+
+Rules:
+1. Read visual.spec.ts in full first — do not duplicate existing snapshots
+2. Reuse headerModule.navigateAndVerifyHeader() and headerPage.clickLanguageSwitcher()
+3. This is an interactive state (modal overlay) — use skipStabilization: true
+4. Tag: @Regression
+5. Show me the snapshot name and test name BEFORE writing code
+```
+
+### The Agent's Plan (What It Should Reply First)
+
+```
+Planned addition to visual.spec.ts:
+
+Test name    : 'Header Language Modal Visual @Regression'
+Snapshot name: 'Header - Language Modal Open'
+Tag          : @Regression
+Module used  : headerModule.navigateAndVerifyHeader()
+State setup  : headerPage.clickLanguageSwitcher() + headerPage.expectLanguageModalVisible()
+skipStabilization: true (modal overlay)
+
+No duplicate found in existing visual.spec.ts.
+Proceed?
+```
+
+### The Generated Visual Test (What the Agent Writes After You Say "Proceed")
+
+```typescript
+test('Header Language Modal Visual @Regression', async ({ page, headerModule, headerPage, visualModule }) => {
+    await test.step('Navigate to Homepage and Verify Header', async () => {
+        await headerModule.navigateAndVerifyHeader();  // ← borrowed from functional spec
+    });
+
+    await test.step('Open Language Modal', async () => {
+        await headerPage.clickLanguageSwitcher();       // ← borrowed from functional spec
+        await headerPage.expectLanguageModalVisible();  // ← borrowed from functional spec
+    });
+
+    await test.step('Capture Language Modal Snapshot', async () => {
+        await visualModule.takeSnapshot('Header - Language Modal Open', { skipStabilization: true });
+    });
+
+    await test.step('Close Language Modal', async () => {
+        await page.keyboard.press('Escape');
+    });
+});
+```
+
+### What Percy Does With This
+
+1. First run → no baseline exists → Percy **creates** the baseline snapshot
+2. You review it on the Percy dashboard and **approve** it
+3. Every future run → Percy **compares** pixel-by-pixel against the approved baseline
+4. If the modal changes (font, color, layout, spacing) → Percy **flags it** as a visual diff
+5. Your team reviews the diff → approves if intentional, rejects if regression
+
+---
+
 ## 🧠 Core Concept: What Is a Visual Test in This Framework?
 
 A visual test is **NOT** a functional assertion. It does not check `expect(element).toBeVisible()`.
