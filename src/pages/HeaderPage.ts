@@ -28,18 +28,18 @@ export class HeaderPage {
             .first();
     otAgentClose = () =>
         this.page
-            .getByRole('button', { name: /bClose|Collapse Agent/i })
+            .getByRole('button', { name: /Close|Collapse Agent/i })
             .or(this.page.locator('.ot-agent-close, #ot-agent-close'))
             .first();
 
     // Logo (from snapshot)
-    logoLink = () => this.page.getByRole('link', { name: /wronglocotor/i }).first();
+    logoLink = () => this.page.getByRole('link', { name: /OpenText/i }).first();
 
     // Main Navigation Menu Items
-    headerNav = () => this.page.getByRole('navigation', { name: /bMain Menu/i });
+    headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
 
     // Mobile Responsive Controls
-    hamburgerBtn = () => this.page.getByRole('button', { name: /bToggle navigation|Menu/i });
+    hamburgerBtn = () => this.page.getByRole('button', { name: /Toggle navigation|Menu/i });
 
     // Semantic getters for dropdowns
     menuItemByText = (text: string) => this.headerNav().getByRole('button', { name: text }).first();

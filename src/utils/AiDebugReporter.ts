@@ -58,9 +58,16 @@ class AiDebugReporter implements Reporter {
     private passedTests: number = 0;
     private failedTests: number = 0;
     private skippedTests: number = 0;
+    private flakyTests: number = 0;
     private finalized: boolean = false;
     private runCompleted: boolean = false;
     private processGuardsRegistered: boolean = false;
+
+    /**
+     * Track per-test final outcomes to avoid counting retries as separate failures.
+     * Key: test.id, Value: final status of the test across all attempts.
+     */
+    private testOutcomes: Map<string, { status: string; retryCount: number; hadFailure: boolean }> = new Map();
 
     onBegin(config: FullConfig, suite: Suite): void {
         this.startTime = Date.now();
@@ -84,12 +91,19 @@ class AiDebugReporter implements Reporter {
 
     onTestEnd(test: TestCase, result: TestResult): void {
         const status = result.status;
+        const isRetry = result.retry > 0;
+        const retryLabel = isRetry ? ` [Retry #${result.retry}]` : '';
         const icon = status === 'passed' ? '✅' : (status === 'failed' || status === 'timedOut') ? '❌' : '⏭️';
-        console.log(`  ${icon} ${test.title} (${result.duration}ms) [${status.toUpperCase()}]`);
+        console.log(`  ${icon} ${test.title} (${result.duration}ms) [${status.toUpperCase()}]${retryLabel}`);
 
-        if (status === 'passed') this.passedTests++;
-        else if (status === 'failed' || status === 'timedOut' || status === 'interrupted') this.failedTests++;
-        else this.skippedTests++;
+        // Track per-test outcomes — only the FINAL attempt matters for counts
+        const existing = this.testOutcomes.get(test.id);
+        const hadPriorFailure = existing?.hadFailure || false;
+        this.testOutcomes.set(test.id, {
+            status,
+            retryCount: result.retry,
+            hadFailure: hadPriorFailure || status === 'failed' || status === 'timedOut',
+        });
 
         // Extract screenshot and trace paths from attachments
         let screenshotPath: string | undefined;
@@ -120,6 +134,7 @@ class AiDebugReporter implements Reporter {
         });
 
         // If the test failed or timed out, categorize and track the failure
+        // Only track the FINAL attempt's failure (avoid duplicates from retries)
         if ((result.status === 'failed' || result.status === 'timedOut') && result.errors.length > 0) {
             const errorMsg = result.errors[0].message || '';
             const errorLocation = this.extractErrorLocation(result.errors[0]);
@@ -130,10 +145,10 @@ class AiDebugReporter implements Reporter {
             let mcpSuggestion = '';
             // Only call MCP for Locator Change or Unknown
             if (category === 'Unknown' || category === 'Locator Change') {
-                mcpSuggestion = '[MCP integration skipped: Playwright custom reporters require onTestEnd to be synchronous. Run MCP analysis after the test run.]';
+                mcpSuggestion = '[MCP analysis pending: feed this report to the AI agent for advanced RCA.]';
             }
 
-            this.failures.push({
+            const failureEntry: FailureEntry = {
                 testTitle: test.title,
                 fullTitle: test.titlePath().join(' > '),
                 project: test.parent?.project()?.name || 'default',
@@ -144,7 +159,22 @@ class AiDebugReporter implements Reporter {
                 suggestion: mcpSuggestion || suggestion,
                 screenshotPath,
                 tracePath,
-            });
+            };
+
+            // Replace existing failure for same test (from prior retry), or add new
+            const existingIdx = this.failures.findIndex((f) => f.fullTitle === failureEntry.fullTitle && f.project === failureEntry.project);
+            if (existingIdx >= 0) {
+                this.failures[existingIdx] = failureEntry; // Update with latest retry's error
+            } else {
+                this.failures.push(failureEntry);
+            }
+        }
+
+        // If a test PASSED on retry, remove it from failures (it self-healed via retry)
+        if (result.status === 'passed' && result.retry > 0) {
+            const fullTitle = test.titlePath().join(' > ');
+            const project = test.parent?.project()?.name || 'default';
+            this.failures = this.failures.filter((f) => !(f.fullTitle === fullTitle && f.project === project));
         }
 
         // Keep a rolling checkpoint so interrupted runs still have a usable report.
@@ -154,6 +184,29 @@ class AiDebugReporter implements Reporter {
     onEnd(result: FullResult): void {
         this.runCompleted = true;
         const totalTime = Date.now() - this.startTime;
+
+        // ═══════════════════════════════════════
+        // COMPUTE FINAL COUNTS FROM UNIQUE TEST OUTCOMES
+        // Each test is counted exactly ONCE based on its final status.
+        // Retries are collapsed: if a test failed then passed on retry → Flaky.
+        // ═══════════════════════════════════════
+        this.passedTests = 0;
+        this.failedTests = 0;
+        this.skippedTests = 0;
+        this.flakyTests = 0;
+
+        for (const [, outcome] of this.testOutcomes) {
+            if (outcome.status === 'passed') {
+                if (outcome.hadFailure && outcome.retryCount > 0) {
+                    this.flakyTests++; // Passed on retry = flaky
+                }
+                this.passedTests++;
+            } else if (outcome.status === 'failed' || outcome.status === 'timedOut' || outcome.status === 'interrupted') {
+                this.failedTests++;
+            } else {
+                this.skippedTests++;
+            }
+        }
 
         // Suppress summary if no tests were actually executed (e.g., in a dry run/--list)
         if (this.passedTests === 0 && this.failedTests === 0 && this.skippedTests === 0 && this.totalTests > 0) {
@@ -167,6 +220,7 @@ class AiDebugReporter implements Reporter {
         console.log(`  Total:   ${this.totalTests}`);
         console.log(`  Passed:  ${this.passedTests} ✅`);
         console.log(`  Failed:  ${this.failedTests} ❌`);
+        console.log(`  Flaky:   ${this.flakyTests} ⚠️`);
         console.log(`  Skipped: ${this.skippedTests} ⏭️`);
         console.log(`  Time:    ${(totalTime / 1000).toFixed(2)}s`);
         console.log(`  Status:  ${result.status.toUpperCase()}`);
@@ -241,11 +295,14 @@ class AiDebugReporter implements Reporter {
             return 'Locator Change';
         }
 
-        // Environment Issues — timeouts, navigation failures
+        // Environment Issues — timeouts, navigation failures, BrowserStack session limits
         if (
             msg.includes('navigation timeout') ||
             msg.includes('net::err_') ||
             msg.includes('browserstack') ||
+            msg.includes('automate testing time expired') ||
+            msg.includes('time expired') ||
+            msg.includes('browsertype.connect') ||
             (msg.includes('page.goto') && msg.includes('timeout')) ||
             msg.includes('browsercontext.close') ||
             msg.includes('target closed') ||
@@ -352,6 +409,7 @@ class AiDebugReporter implements Reporter {
         md += `| Total Tests | ${this.totalTests} |\n`;
         md += `| ✅ Passed | ${this.passedTests} |\n`;
         md += `| ❌ Failed | ${this.failedTests} |\n`;
+        md += `| ⚠️ Flaky (passed on retry) | ${this.flakyTests} |\n`;
         md += `| ⏭️ Skipped | ${this.skippedTests} |\n\n`;
 
         md += `## 🗂️ Failure Breakdown by Category\n\n`;
@@ -430,6 +488,7 @@ class AiDebugReporter implements Reporter {
         summary += `| Total | ${this.totalTests} |\n`;
         summary += `| ✅ Passed | ${this.passedTests} |\n`;
         summary += `| ❌ Failed | ${this.failedTests} |\n`;
+        summary += `| ⚠️ Flaky | ${this.flakyTests} |\n`;
         summary += `| ⏭️ Skipped | ${this.skippedTests} |\n`;
         summary += `| ⏱️ Duration | ${(totalTime / 1000).toFixed(1)}s |\n\n`;
 
@@ -540,6 +599,7 @@ class AiDebugReporter implements Reporter {
         <div class="summary-card total"><div class="value">${this.totalTests}</div><div class="label">Total</div></div>
         <div class="summary-card passed"><div class="value">${this.passedTests}</div><div class="label">Passed</div></div>
         <div class="summary-card failed"><div class="value">${this.failedTests}</div><div class="label">Failed</div></div>
+        <div class="summary-card" style="border-left: 3px solid #f59e0b;"><div class="value" style="color:#f59e0b;">${this.flakyTests}</div><div class="label">Flaky</div></div>
         <div class="summary-card skipped"><div class="value">${this.skippedTests}</div><div class="label">Skipped</div></div>
         <div class="summary-card"><div class="value">${(totalTime / 1000).toFixed(1)}s</div><div class="label">Duration</div></div>
     </div>
@@ -597,6 +657,7 @@ class AiDebugReporter implements Reporter {
                         total: this.totalTests,
                         passed: this.passedTests,
                         failed: this.failedTests,
+                        flaky: this.flakyTests,
                         skipped: this.skippedTests,
                         duration: totalTime,
                         timestamp: new Date().toISOString(),
