@@ -89,7 +89,7 @@ pipeline {
                         }
                     }
 
-                    // Build the project filter
+                    // Build the project filter (local runs only)
                     def projectFilter = ''
                     if (params.BROWSER != 'all') {
                         projectFilter = "--project=${params.BROWSER}"
@@ -99,7 +99,7 @@ pipeline {
                     def exitCode
                     if (params.EXECUTION_PLATFORM == 'browserstack') {
                         exitCode = sh(
-                            script: "npm run test:bstack -- ${projectFilter} ${grepFilter}",
+                            script: "npm run test:bstack -- ${grepFilter}",
                             returnStatus: true
                         )
                     } else {

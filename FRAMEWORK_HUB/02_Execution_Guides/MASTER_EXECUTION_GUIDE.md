@@ -307,8 +307,7 @@ Runs tests on the BrowserStack grid using `browserstack.yml` for infrastructure 
 | :--- | :--- |
 | **Run all tests on BrowserStack** | `npm run test:bstack` |
 | **Run specific file on BS** | `npm run test:bstack -- src/tests/header.spec.ts` |
-| **Run specific project on BS** | `npm run test:bstack -- --project=desktop-chrome` |
-| **Run specific viewport on BS** | `npm run test:bstack -- --project=viewport-md` |
+| **Run tagged tests on BS** | `npm run test:bstack -- --grep @Smoke` |
 | **Force 1 worker on BS** | `npm run test:bstack -- --workers=1` |
 
 ## 3. Useful Shortcuts
@@ -321,8 +320,9 @@ Runs tests on the BrowserStack grid using `browserstack.yml` for infrastructure 
 ---
 
 ### Tips for "Proper" Framework Usage:
-- **Project Names**: Valid project names are defined in `playwright.config.ts` (e.g., `desktop-chrome`, `viewport-xl`, `mobile-chrome`).
+- **Project Names**: Valid project names are defined in `playwright.config.ts` and apply to local runs.
+- **BrowserStack Targets**: Use `configs/browserstack.yml` or workflow inputs to control browser/device targets.
 - **Combining Flags**: You can combine filters, for example:
-  `npm run test:bstack -- src/tests/header.spec.ts --project=viewport-xs`
-  *(This runs only the Header test, only in the extra-small viewport, on the BrowserStack cloud).*
+   `npm run test:bstack -- src/tests/header.spec.ts --grep @Responsive`
+   *(This runs only the Header test on the BrowserStack cloud, filtered by the Responsive tag).* 
 
