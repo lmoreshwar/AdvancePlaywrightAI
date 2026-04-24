@@ -10,6 +10,7 @@ Applies to these automation workflows:
 - `AIC_DEBUG_REPORT`
 - `AIC_MODIFY_IMPROVE`
 - `AIC_NEW_AUTOMATION`
+- `AIC_VISUAL_AUTOMATION`
 
 ## Tooling Standard
 

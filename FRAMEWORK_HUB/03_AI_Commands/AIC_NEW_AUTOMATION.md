@@ -106,9 +106,17 @@ After creating new test code, the AI Agent MUST:
 #### Rule 6: Register New Fixtures
 ```
 If you create a NEW Page Object or Module:
-1. Export it from src/pages/index.ts or src/modules/index.ts
+1. Import it directly in src/fixtures/index.ts (barrel index.ts files do NOT exist — use direct paths)
+   e.g. import { MyNewPage } from '../pages/MyNewPage'
 2. Add its fixture to src/fixtures/index.ts
 3. Add the fixture type to TestFixtures interface
+```
+
+#### Rule 8: Visual Tests
+```
+If the test case involves a visible UI component or state change, ALSO create a visual test.
+Read FRAMEWORK_HUB/03_AI_Commands/AIC_VISUAL_AUTOMATION.md for the full visual test process.
+All visual tests go in src/tests/visual.spec.ts ONLY — no separate visual spec files.
 ```
 
 #### Rule 7: Responsive Test Case Routing
