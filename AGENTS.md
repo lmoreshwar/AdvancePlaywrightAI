@@ -33,3 +33,4 @@ Applies to these automation workflows:
 ## Governance
 
 - If multiple assistant-specific instruction files exist, this file takes precedence.
+- Detailed CLI enforcement rules: `FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md`

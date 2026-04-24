@@ -2,6 +2,21 @@ import type { Reporter, FullConfig, Suite, TestCase, TestResult, FullResult } fr
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Utility to call MCP server for advanced error analysis
+async function callMcpForDebug(errorMessage: string, domSnapshot: string): Promise<{ suggestion: string, newLocator?: string, isDefect?: boolean }> {
+    try {
+        const response = await fetch(process.env.MCP_SERVER_URL || 'http://localhost:8080/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ errorMessage, domSnapshot })
+        });
+        if (!response.ok) throw new Error('MCP server error');
+        return await response.json();
+    } catch (err) {
+        return { suggestion: 'MCP unavailable or error: ' + (err as Error).message };
+    }
+}
+
 /**
  * Failure categories for auto-classification
  */
@@ -51,7 +66,7 @@ class AiDebugReporter implements Reporter {
         this.startTime = Date.now();
         
         // Count only the tests that will actually be executed (matching the grep filter)
-        this.totalTests = suite.allTests().filter(t => t.expectedStatus !== 'skipped').length;
+        this.totalTests = suite.allTests().filter((t: TestCase) => t.expectedStatus !== 'skipped').length;
 
         // Create report directory
         if (!fs.existsSync(this.reportDir)) {
@@ -94,8 +109,8 @@ class AiDebugReporter implements Reporter {
             status: result.status || 'unknown',
             duration: result.duration,
             project: test.parent?.project()?.name || 'default',
-            errors: result.errors.map((e) => e.message || '').filter(Boolean),
-            steps: result.steps.map((s) => ({
+            errors: result.errors.map((e: { message?: string }) => e.message || '').filter(Boolean),
+            steps: result.steps.map((s: { title: string; duration: number; error?: { message?: string } }) => ({
                 title: s.title,
                 duration: s.duration,
                 error: s.error?.message,
@@ -112,6 +127,12 @@ class AiDebugReporter implements Reporter {
             const category = this.categorizeFailure(errorMsg);
             const { selfHealable, suggestion } = this.getSelfHealingInfo(category, errorMsg);
 
+            let mcpSuggestion = '';
+            // Only call MCP for Locator Change or Unknown
+            if (category === 'Unknown' || category === 'Locator Change') {
+                mcpSuggestion = '[MCP integration skipped: Playwright custom reporters require onTestEnd to be synchronous. Run MCP analysis after the test run.]';
+            }
+
             this.failures.push({
                 testTitle: test.title,
                 fullTitle: test.titlePath().join(' > '),
@@ -120,7 +141,7 @@ class AiDebugReporter implements Reporter {
                 errorLocation,
                 category,
                 selfHealable,
-                suggestion,
+                suggestion: mcpSuggestion || suggestion,
                 screenshotPath,
                 tracePath,
             });

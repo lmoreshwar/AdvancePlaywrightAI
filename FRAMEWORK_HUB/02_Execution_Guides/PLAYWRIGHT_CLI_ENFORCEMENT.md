@@ -1,9 +1,6 @@
----
-description: Enforce @playwright/cli over MCP for AIC workflows
-alwaysApply: true
----
-
 # Playwright CLI Enforcement
+
+> **Platform-neutral rule** — applies to all AI coding agents (GitHub Copilot, Cursor, Claude Code, Gemini, etc.)
 
 Use `@playwright/cli` as the primary execution and remediation tool for all AIC workflows in this repository.
 

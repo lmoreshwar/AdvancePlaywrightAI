@@ -62,7 +62,7 @@
     "@percy/cli": "^1.31.12",
     "@percy/playwright": "^1.1.0",
     "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.6",
+    "@types/node": "^25.6.0",
     "browserstack-node-sdk": "^1.52.0",
     "cross-env": "^7.0.3",
     "dotenv": "^17.2.3",
