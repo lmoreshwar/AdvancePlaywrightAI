@@ -2,6 +2,20 @@
 
 ## Goal: Safely Modify Existing Test Scripts
 
+## ✅ Quick Prompt (Simple English)
+
+Attach this file and send a short prompt like:
+
+```
+Update these existing tests:
+- <file + what to change>
+
+Reference: AIC_MODIFY_IMPROVE.md (attached)
+Show the impact analysis + plan first before writing code.
+```
+
+More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
+
 **How to use**: Fill out the fields below, then tell the AI Agent:
 > *"Process AIC_MODIFY_IMPROVE.md"*
 

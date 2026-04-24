@@ -2,6 +2,18 @@
 
 ## Goal: Automate New Test Cases from Requirements
 
+## ✅ Quick Prompt (Simple English)
+
+Attach this file and send a short prompt like:
+
+```
+Create functional tests for: <feature or test case>.
+Reference: AIC_NEW_AUTOMATION.md (attached)
+Show the plan first before writing code.
+```
+
+More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
+
 **How to use**: Fill out the fields below, then tell the AI Agent:
 > *"Process AIC_NEW_AUTOMATION.md"*
 

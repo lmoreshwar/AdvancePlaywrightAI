@@ -3,6 +3,18 @@
 **Author**: Framework Architecture (15-year automation architect standard)  
 **Purpose**: Step-by-step instructions for an AI agent to generate `visual.spec.ts` entries from existing functional test cases.
 
+## ✅ Quick Prompt (Simple English)
+
+Attach this file and send a short prompt like:
+
+```
+Create visual tests for src/tests/<YOUR_SPEC_FILE>.spec.ts.
+Reference: AIC_VISUAL_AUTOMATION.md (attached)
+Show plan first before writing code.
+```
+
+More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
+
 ---
 
 ## ⚠️ PREREQUISITE — Read This First

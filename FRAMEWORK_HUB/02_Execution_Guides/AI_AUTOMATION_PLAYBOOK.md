@@ -5,6 +5,23 @@
 
 This document is the official, tracked procedure for converting manual test cases (from `01_Requirements/testcases.md` or Excel spreadsheets) into robust Playwright automation scripts using the `@playwright/cli` AI skills.
 
+## ✅ Quick Prompt (Simple English)
+
+Attach the relevant workflow file (recommended):
+- `FRAMEWORK_HUB/03_AI_Commands/AIC_NEW_AUTOMATION.md` for new tests
+- `FRAMEWORK_HUB/03_AI_Commands/AIC_MODIFY_IMPROVE.md` for updates
+- `FRAMEWORK_HUB/03_AI_Commands/AIC_VISUAL_AUTOMATION.md` for visual tests
+
+Then send a short prompt like:
+
+```
+Automate this test case from testcases.md: <paste the row or plain English>.
+Use playwright-cli for DOM evidence.
+Show the plan first before writing code.
+```
+
+More examples: `FRAMEWORK_HUB/03_AI_Commands/AIC_PROMPT_SHORTCUTS.md`
+
 ---
 
 ## 📋 The Goal
