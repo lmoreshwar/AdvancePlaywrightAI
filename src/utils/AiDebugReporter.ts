@@ -2,25 +2,33 @@ import type { Reporter, FullConfig, Suite, TestCase, TestResult, FullResult } fr
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Utility to call MCP server for advanced error analysis
-async function callMcpForDebug(errorMessage: string, domSnapshot: string): Promise<{ suggestion: string, newLocator?: string, isDefect?: boolean }> {
-    try {
-        const response = await fetch(process.env.MCP_SERVER_URL || 'http://localhost:8080/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ errorMessage, domSnapshot })
-        });
-        if (!response.ok) throw new Error('MCP server error');
-        return await response.json();
-    } catch (err) {
-        return { suggestion: 'MCP unavailable or error: ' + (err as Error).message };
-    }
-}
+/**
+ * Architecture: @playwright/cli (Playwright MCP Server) Integration
+ *
+ * This reporter does NOT call external services during test execution.
+ * Instead, it generates actionable `playwright-cli` commands in the debug report.
+ *
+ * Post-run workflow:
+ *   1. Reporter generates AIC_DEBUG_REPORT.md with categorized failures + CLI commands
+ *   2. AI agent (Copilot/Cursor) reads the report
+ *   3. Agent executes `playwright-cli` commands to investigate failures against the live DOM
+ *   4. Agent applies fixes based on evidence from DOM snapshots
+ *
+ * The `@playwright/cli` IS the Playwright MCP server — it is used by the AI agent
+ * as an interactive tool for browser-driven diagnosis, NOT as an HTTP API.
+ * See AGENTS.md → Execution Standard for the full workflow.
+ */
 
 /**
  * Failure categories for auto-classification
  */
 type FailureCategory = 'Locator Change' | 'Script Issue' | 'UI Bug' | 'Environment Issue' | 'Unknown';
+
+/**
+ * Defect verdict — determines if a failure is a real application defect
+ * that should be filed as a bug vs a test/infra issue.
+ */
+type DefectVerdict = 'DEFECT' | 'NOT A DEFECT' | 'INVESTIGATE';
 
 /**
  * Categorized failure entry
@@ -34,6 +42,9 @@ interface FailureEntry {
     category: FailureCategory;
     selfHealable: boolean;
     suggestion: string;
+    cliCommands: string[];
+    verdict: DefectVerdict;
+    verdictReason: string;
     screenshotPath?: string;
     tracePath?: string;
 }
@@ -141,12 +152,8 @@ class AiDebugReporter implements Reporter {
 
             const category = this.categorizeFailure(errorMsg);
             const { selfHealable, suggestion } = this.getSelfHealingInfo(category, errorMsg);
-
-            let mcpSuggestion = '';
-            // Only call MCP for Locator Change or Unknown
-            if (category === 'Unknown' || category === 'Locator Change') {
-                mcpSuggestion = '[MCP analysis pending: feed this report to the AI agent for advanced RCA.]';
-            }
+            const cliCommands = this.generateCliCommands(category, test.title, test.parent?.project()?.name || 'default', tracePath);
+            const { verdict, reason: verdictReason } = this.determineDefectVerdict(category, errorMsg, errorLocation);
 
             const failureEntry: FailureEntry = {
                 testTitle: test.title,
@@ -156,7 +163,10 @@ class AiDebugReporter implements Reporter {
                 errorLocation,
                 category,
                 selfHealable,
-                suggestion: mcpSuggestion || suggestion,
+                suggestion,
+                cliCommands,
+                verdict,
+                verdictReason,
                 screenshotPath,
                 tracePath,
             };
@@ -335,37 +345,199 @@ class AiDebugReporter implements Reporter {
      */
     private getSelfHealingInfo(
         category: FailureCategory,
-        errorMsg: string,
+        _errorMsg: string,
     ): { selfHealable: boolean; suggestion: string } {
         switch (category) {
             case 'Locator Change':
                 return {
                     selfHealable: true,
                     suggestion:
-                        'Use SmartLocator with fallback strategies or update the locator to match the current DOM.',
+                        'Run `playwright-cli open <url>` → `snapshot` to find the correct locator in the current DOM. Update the PageObject file.',
                 };
             case 'Script Issue':
                 return {
                     selfHealable: true,
                     suggestion:
-                        'Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion).',
+                        'Fix the script logic (e.g., add .first() for strict mode, increase timeout, fix assertion). Use trace viewer for context.',
                 };
             case 'Environment Issue':
                 return {
                     selfHealable: false,
-                    suggestion: 'Retry the test or check network/server health. Not a code issue.',
+                    suggestion: 'Infrastructure/network issue — not a code defect. Retry the test or check BrowserStack/CI health.',
                 };
             case 'UI Bug':
                 return {
                     selfHealable: false,
-                    suggestion: '⚠️ Possible application bug — the UI behavior has changed. File a bug report.',
+                    suggestion: 'Application behavior changed. Use `playwright-cli snapshot` to capture current state and file a bug report.',
                 };
             default:
                 return {
                     selfHealable: false,
-                    suggestion: 'Manual investigation required. Check the error details and screenshot.',
+                    suggestion: 'Run the investigation commands below to diagnose. Use `playwright-cli snapshot` for DOM evidence.',
                 };
         }
+    }
+
+    // ═══════════════════════════════════════
+    // DEFECT VERDICT ENGINE
+    // ═══════════════════════════════════════
+
+    /**
+     * Determines whether a failure is an actual application DEFECT or a test/infra issue.
+     *
+     * Verdict logic:
+     *   DEFECT          → Application behavior changed (assertion mismatch, UI content wrong)
+     *   NOT A DEFECT    → Test code issue or infrastructure (locator stale, timeout, env failure)
+     *   INVESTIGATE     → Cannot determine automatically — needs manual/CLI investigation
+     */
+    private determineDefectVerdict(
+        category: FailureCategory,
+        errorMsg: string,
+        _errorLocation: string,
+    ): { verdict: DefectVerdict; reason: string } {
+        const msg = errorMsg.toLowerCase();
+
+        // ── DEFINITE NOT-A-DEFECT scenarios ──
+        if (category === 'Environment Issue') {
+            return {
+                verdict: 'NOT A DEFECT',
+                reason: 'Infrastructure/environment failure (timeout, network, BrowserStack session limit). No application code change needed.',
+            };
+        }
+
+        if (category === 'Locator Change') {
+            // Check if the locator was clearly invalid (typo, placeholder like "wronglocotor")
+            if (msg.includes('wronglocotor') || msg.includes('placeholder') || msg.includes('todo')) {
+                return {
+                    verdict: 'NOT A DEFECT',
+                    reason: 'Locator is a placeholder/typo in the test code. Fix the PageObject, not the application.',
+                };
+            }
+            return {
+                verdict: 'INVESTIGATE',
+                reason: 'Element not found in DOM. Could be a UI redesign (DEFECT) or a stale locator. Run `playwright-cli snapshot` to check if the element still exists with a different selector.',
+            };
+        }
+
+        if (category === 'Script Issue') {
+            return {
+                verdict: 'NOT A DEFECT',
+                reason: 'Test script logic error (strict mode violation, missing .first(), bad assertion). Fix the test code.',
+            };
+        }
+
+        // ── DEFINITE DEFECT scenarios (UI Bug category) ──
+        if (category === 'UI Bug') {
+            // Assertion value mismatch = actual application output differs from expected
+            if (msg.includes('expected:') && msg.includes('received:')) {
+                return {
+                    verdict: 'DEFECT',
+                    reason: 'Assertion mismatch — application returned unexpected content. Expected vs Received values differ. File a bug with the actual vs expected comparison.',
+                };
+            }
+            // Element visibility mismatch — something that should be hidden is visible or vice versa
+            if (msg.includes('tobehidden') || msg.includes('tobevisible')) {
+                return {
+                    verdict: 'DEFECT',
+                    reason: 'UI element visibility state is wrong (visible when should be hidden, or vice versa). This indicates a UI behavior regression.',
+                };
+            }
+            // Text content assertion failed
+            if (msg.includes('tohavetext') || msg.includes('tohavecount')) {
+                return {
+                    verdict: 'DEFECT',
+                    reason: 'Text or element count assertion failed. The application content has changed from the expected baseline.',
+                };
+            }
+            return {
+                verdict: 'DEFECT',
+                reason: 'Application behavior does not match the expected test assertion. Likely a UI regression.',
+            };
+        }
+
+        // ── UNKNOWN category → needs investigation ──
+        return {
+            verdict: 'INVESTIGATE',
+            reason: 'Cannot auto-determine. Run the `playwright-cli` investigation commands below to gather DOM evidence and determine root cause.',
+        };
+    }
+
+    // ═══════════════════════════════════════
+    // PLAYWRIGHT-CLI COMMAND GENERATOR
+    // ═══════════════════════════════════════
+
+    /**
+     * Generate actionable `playwright-cli` commands for the AI agent to investigate a failure.
+     * These commands are what the agent will execute via MCP (@playwright/cli) post-run.
+     */
+    private generateCliCommands(
+        category: FailureCategory,
+        _testTitle: string,
+        _project: string,
+        tracePath?: string,
+    ): string[] {
+        const baseUrl = process.env.BASE_URL || 'https://www.opentext.com';
+        const commands: string[] = [];
+
+        // Always start with opening the page and taking a snapshot
+        commands.push(`playwright-cli open ${baseUrl}`);
+        commands.push('playwright-cli snapshot');
+
+        switch (category) {
+            case 'Locator Change':
+                // For locator issues: snapshot the DOM, inspect elements, find the new locator
+                commands.push('# Inspect the area where the element was expected:');
+                commands.push('playwright-cli snapshot --depth=4');
+                commands.push('# Evaluate specific selectors to find the element:');
+                commands.push(`playwright-cli eval "document.querySelectorAll('[role=link],[role=button],[role=navigation]').length"`);
+                commands.push('# Once you find the element ref (e.g., e15), get its attributes:');
+                commands.push('playwright-cli eval "el => el.getAttribute(\'aria-label\')" e15');
+                commands.push('playwright-cli eval "el => el.textContent" e15');
+                break;
+
+            case 'Script Issue':
+                // For script issues: replay via trace if available
+                if (tracePath) {
+                    commands.push(`# View the trace to understand the failure context:`);
+                    commands.push(`npx playwright show-trace ${tracePath}`);
+                }
+                commands.push('# Check how many matching elements exist (strict mode fix):');
+                commands.push(`playwright-cli eval "document.querySelectorAll('button, [role=button]').length"`);
+                break;
+
+            case 'UI Bug':
+                // For UI bugs: capture the current state as evidence for bug report
+                commands.push('# Capture current state as evidence for the bug report:');
+                commands.push('playwright-cli screenshot --filename=defect-evidence.png');
+                commands.push('# Check the actual text/content on the page:');
+                commands.push(`playwright-cli eval "document.title"`);
+                commands.push('playwright-cli snapshot --filename=defect-dom-state.yaml');
+                if (tracePath) {
+                    commands.push(`npx playwright show-trace ${tracePath}`);
+                }
+                break;
+
+            case 'Environment Issue':
+                // For env issues: minimal commands, mainly verify connectivity
+                commands.push('# Verify the site is accessible:');
+                commands.push(`playwright-cli eval "document.readyState"`);
+                commands.push('playwright-cli network');
+                break;
+
+            default:
+                // Unknown: full investigation
+                commands.push('# Full investigation — take deep snapshot and console logs:');
+                commands.push('playwright-cli snapshot --depth=6');
+                commands.push('playwright-cli console');
+                commands.push('playwright-cli network');
+                if (tracePath) {
+                    commands.push(`npx playwright show-trace ${tracePath}`);
+                }
+                break;
+        }
+
+        commands.push('playwright-cli close');
+        return commands;
     }
 
     // ═══════════════════════════════════════
@@ -419,11 +591,34 @@ class AiDebugReporter implements Reporter {
             const healable = cat === 'Locator Change' || cat === 'Script Issue' ? '✅ Yes' : '❌ No';
             md += `| ${categoryEmoji[cat as FailureCategory] || '❓'} ${cat} | ${count} | ${healable} |\n`;
         }
-        md += `\n---\n\n`;
+        md += `\n`;
+
+        // Defect summary
+        const defects = this.failures.filter((f) => f.verdict === 'DEFECT');
+        const notDefects = this.failures.filter((f) => f.verdict === 'NOT A DEFECT');
+        const investigate = this.failures.filter((f) => f.verdict === 'INVESTIGATE');
+
+        if (this.failures.length > 0) {
+            md += `## 🎯 Defect Verdict Summary\n\n`;
+            md += `| Verdict | Count | Action |\n`;
+            md += `|---|---|---|\n`;
+            if (defects.length > 0) md += `| 🚨 **DEFECT** | ${defects.length} | File bug report to dev team |\n`;
+            if (notDefects.length > 0) md += `| ✅ NOT A DEFECT | ${notDefects.length} | Fix test code / retry / ignore |\n`;
+            if (investigate.length > 0) md += `| 🔍 INVESTIGATE | ${investigate.length} | Run CLI commands below to determine |\n`;
+            md += `\n`;
+
+            if (defects.length > 0) {
+                md += `> [!CAUTION]\n> **${defects.length} failure(s) identified as APPLICATION DEFECTS.**\n> These are real bugs in the application, not test issues. See details below.\n\n`;
+            }
+        }
+
+        md += `---\n\n`;
 
         // Individual failure entries
         for (let i = 0; i < this.failures.length; i++) {
             const f = this.failures[i];
+            const verdictEmoji = f.verdict === 'DEFECT' ? '🚨' : f.verdict === 'NOT A DEFECT' ? '✅' : '🔍';
+
             md += `## 🔴 FAILURE #${i + 1}\n\n`;
             md += `### 1. 🚨 Failure Summary\n`;
             md += `- **Test**: \`${f.testTitle}\`\n`;
@@ -433,16 +628,28 @@ class AiDebugReporter implements Reporter {
 
             md += `### 2. 🗂️ Category: **${categoryEmoji[f.category]} ${f.category}**\n\n`;
 
-            md += `### 3. 🤖 Self-Healing\n`;
+            md += `### 3. 🎯 Defect Verdict: **${verdictEmoji} ${f.verdict}**\n`;
+            md += `> ${f.verdictReason}\n\n`;
+
+            md += `### 4. 🤖 Self-Healing\n`;
             md += `- **AI Healable**: ${f.selfHealable ? '✅ Yes' : '❌ No'}\n`;
             md += `- **Suggestion**: ${f.suggestion}\n\n`;
 
+            if (f.cliCommands.length > 0) {
+                md += `### 5. 🔧 Investigation Commands (playwright-cli / MCP)\n`;
+                md += `\`\`\`bash\n`;
+                for (const cmd of f.cliCommands) {
+                    md += `${cmd}\n`;
+                }
+                md += `\`\`\`\n\n`;
+            }
+
             if (f.screenshotPath) {
-                md += `### 4. 📸 Screenshot\n`;
+                md += `### 6. 📸 Screenshot\n`;
                 md += `\`${f.screenshotPath}\`\n\n`;
             }
             if (f.tracePath) {
-                md += `### 5. 🔬 Trace\n`;
+                md += `### 7. 🔬 Trace\n`;
                 md += `\`npx playwright show-trace ${f.tracePath}\`\n\n`;
             }
 
@@ -453,10 +660,17 @@ class AiDebugReporter implements Reporter {
         md += `## 📋 Failure Category Guide\n\n`;
         md += `| Category | What It Means | AI Action |\n`;
         md += `|---|---|---|\n`;
-        md += `| 🔗 Locator Change | DOM structure or element text changed | Self-heal with SmartLocator fallback |\n`;
+        md += `| 🔗 Locator Change | DOM structure or element text changed | AI agent runs \`playwright-cli snapshot\` to find new locator |\n`;
         md += `| 📝 Script Issue | Test code logic error (strict mode, timeout) | Auto-fix the script |\n`;
-        md += `| 🐛 UI Bug | Application behavior changed unexpectedly | ⚠️ Flag as bug to development team |\n`;
-        md += `| 🌐 Environment Issue | Network, server, or infrastructure problem | Retry or check infra health |\n`;
+        md += `| 🐛 UI Bug | Application behavior changed unexpectedly | 🚨 **DEFECT** — File bug to development team |\n`;
+        md += `| 🌐 Environment Issue | Network, server, or infrastructure problem | Retry or check infra health |\n\n`;
+
+        md += `## 🎯 Defect Verdict Guide\n\n`;
+        md += `| Verdict | Meaning | What To Do |\n`;
+        md += `|---|---|---|\n`;
+        md += `| 🚨 DEFECT | Application has a real bug | File a bug report with the error details and evidence screenshots |\n`;
+        md += `| ✅ NOT A DEFECT | Test code, locator, or infra issue | Fix the test, update locator, or retry |\n`;
+        md += `| 🔍 INVESTIGATE | Cannot auto-determine | Run the \`playwright-cli\` commands to gather DOM evidence |\n`;
 
         // Write to ai-debug-report directory
         const reportPath = path.join(this.reportDir, 'AIC_DEBUG_REPORT.md');
@@ -494,10 +708,11 @@ class AiDebugReporter implements Reporter {
 
         if (this.failures.length > 0) {
             summary += `### ❌ Failed Tests\n\n`;
-            summary += `| Test | Category | AI Healable |\n|---|---|---|\n`;
+            summary += `| Test | Category | Verdict | AI Healable |\n|---|---|---|---|\n`;
             for (const f of this.failures) {
                 const healIcon = f.selfHealable ? '✅' : '❌';
-                summary += `| ${f.testTitle} | ${f.category} | ${healIcon} |\n`;
+                const verdictIcon = f.verdict === 'DEFECT' ? '🚨 DEFECT' : f.verdict === 'NOT A DEFECT' ? '✅ Not a defect' : '🔍 Investigate';
+                summary += `| ${f.testTitle} | ${f.category} | ${verdictIcon} | ${healIcon} |\n`;
             }
             summary += `\n> 📄 Download the **AIC Debug Report** from the artifacts for detailed RCA.\n`;
         } else {
@@ -580,6 +795,10 @@ class AiDebugReporter implements Reporter {
         .cat-script { background: #1e1b4b; color: #a5b4fc; }
         .cat-uibug { background: #4c0519; color: #fda4af; }
         .cat-env { background: #052e16; color: #86efac; }
+        .verdict { border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .verdict-defect { background: #7f1d1d; color: #fca5a5; }
+        .verdict-ok { background: #052e16; color: #86efac; }
+        .verdict-investigate { background: #422006; color: #fbbf24; }
         .error { background: #1c1012; border: 1px solid #ef4444; border-radius: 6px; padding: .75rem; margin-top: .5rem; font-size: 0.85rem; color: #fca5a5; white-space: pre-wrap; word-break: break-word; }
         .timestamp { text-align: center; color: #555; font-size: 0.8rem; margin-top: 2rem; }
     </style>
@@ -609,13 +828,16 @@ class AiDebugReporter implements Reporter {
                 const failure = this.failures.find((f) => f.fullTitle === r.fullTitle);
                 const catClass = failure ? this.getCategoryClass(failure.category) : '';
                 const catLabel = failure ? `<span class="category ${catClass}">${failure.category}</span>` : '';
+                const verdictClass = failure ? (failure.verdict === 'DEFECT' ? 'verdict-defect' : failure.verdict === 'NOT A DEFECT' ? 'verdict-ok' : 'verdict-investigate') : '';
+                const verdictLabel = failure ? `<span class="verdict ${verdictClass}">${failure.verdict === 'DEFECT' ? '\u{1F6A8} DEFECT' : failure.verdict === 'NOT A DEFECT' ? '\u2705 Not a Defect' : '\u{1F50D} Investigate'}</span>` : '';
                 return `
         <div class="test-item ${r.status}">
-            <span>${r.status === 'passed' ? '✅' : r.status === 'failed' ? '❌' : '⏭️'}</span>
+            <span>${r.status === 'passed' ? '\u2705' : r.status === 'failed' ? '\u274C' : '\u23ED\uFE0F'}</span>
             <div class="title">
                 ${r.fullTitle}
                 ${r.errors.length > 0 ? `<div class="error">${this.cleanAnsiCodes(r.errors[0]).substring(0, 300)}</div>` : ''}
             </div>
+            ${verdictLabel}
             ${catLabel}
             <span class="project">${r.project}</span>
             <span class="duration">${r.duration}ms</span>
@@ -665,8 +887,11 @@ class AiDebugReporter implements Reporter {
                     failures: this.failures.map((f) => ({
                         test: f.testTitle,
                         category: f.category,
+                        verdict: f.verdict,
+                        verdictReason: f.verdictReason,
                         selfHealable: f.selfHealable,
                         suggestion: f.suggestion,
+                        cliCommands: f.cliCommands,
                         error: f.errorMessage.substring(0, 500),
                         location: f.errorLocation,
                     })),
