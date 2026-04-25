@@ -55,18 +55,6 @@ on:
         required: false
         default: ''
         type: string
-      worker_count:
-        description: 'Playwright workers (auto uses profile defaults)'
-        required: true
-        default: 'auto'
-        type: choice
-        options:
-          - 'auto'
-          - '2'
-          - '3'
-          - '4'
-          - '5'
-          - '6'
       max_minutes:
         description: 'Execution timeout in minutes'
         required: true
@@ -223,7 +211,6 @@ jobs:
           TARGET="${{ github.event.inputs.project_target || 'desktop-chrome' }}"
           SCOPE="${{ github.event.inputs.test_scope || 'smoke' }}"
           CUSTOM_GREP="${{ github.event.inputs.custom_grep || '' }}"
-          WORKER_OVERRIDE="${{ github.event.inputs.worker_count || 'auto' }}"
 
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${PROFILE}" = "full" ]; then
             TARGET="all"
@@ -277,10 +264,6 @@ jobs:
           fi
 
           INVERT_FLAGS=(--grep-invert "@Visual")
-
-          if [ "${WORKER_OVERRIDE}" != "auto" ]; then
-            WORKERS="${WORKER_OVERRIDE}"
-          fi
 
           echo "Running BrowserStack with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}, workers=${WORKERS}"
           npm run test:bstack -- --config=playwright.config.ts "${GREP_FLAGS[@]}" "${INVERT_FLAGS[@]}" --workers=${WORKERS}
