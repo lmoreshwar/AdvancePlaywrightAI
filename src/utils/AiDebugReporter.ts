@@ -73,6 +73,7 @@ class AiDebugReporter implements Reporter {
     private finalized: boolean = false;
     private runCompleted: boolean = false;
     private processGuardsRegistered: boolean = false;
+    private runProjects: string[] = [];
 
     /**
      * Track per-test final outcomes to avoid counting retries as separate failures.
@@ -85,6 +86,14 @@ class AiDebugReporter implements Reporter {
         
         // Count only the tests that will actually be executed (matching the grep filter)
         this.totalTests = suite.allTests().filter((t: TestCase) => t.expectedStatus !== 'skipped').length;
+
+        const projectSet = new Set<string>();
+        for (const test of suite.allTests()) {
+            if (test.expectedStatus === 'skipped') continue;
+            const projectName = test.parent?.project()?.name || 'default';
+            projectSet.add(projectName);
+        }
+        this.runProjects = Array.from(projectSet).sort();
 
         // Create report directory
         if (!fs.existsSync(this.reportDir)) {
@@ -571,6 +580,32 @@ class AiDebugReporter implements Reporter {
         }
         md += `**Percy Visuals**: [👁️ View on Percy Dashboard](https://percy.io/opentext/opentext-tta/)\n\n`;
 
+        const workflowInputs = this.getWorkflowInputs();
+        const baseUrl = process.env.BASE_URL || '';
+        const bstackPlatforms = this.getBrowserstackPlatforms();
+        if (Object.keys(workflowInputs).length > 0 || this.runProjects.length > 0 || baseUrl) {
+            md += `## ⚙️ Run Configuration\n\n`;
+            if (Object.keys(workflowInputs).length > 0) {
+                md += `| Input | Value |\n`;
+                md += `|---|---|\n`;
+                for (const [key, value] of Object.entries(workflowInputs)) {
+                    md += `| ${key} | ${value} |\n`;
+                }
+                md += `\n`;
+            }
+
+            if (this.runProjects.length > 0) {
+                md += `**Projects**: ${this.runProjects.join(', ')}  \n`;
+            }
+            if (bstackPlatforms.length > 0) {
+                md += `**BrowserStack Platforms**: ${bstackPlatforms.join('; ')}  \n`;
+            }
+            if (baseUrl) {
+                md += `**Base URL**: ${baseUrl}  \n`;
+            }
+            md += `\n`;
+        }
+
         if (this.failures.length === 0) {
             md += `> [!TIP]\n> **All tests passed!** Your baseline is healthy. Review the snapshots on Percy.\n\n`;
         }
@@ -683,6 +718,88 @@ class AiDebugReporter implements Reporter {
             fs.writeFileSync(frameworkHubPath, md, 'utf-8');
         } catch {
             // Silently skip if directory doesn't exist in CI
+        }
+    }
+
+    private getWorkflowInputs(): Record<string, string> {
+        const eventPath = process.env.GITHUB_EVENT_PATH;
+        if (!eventPath || !fs.existsSync(eventPath)) return {};
+
+        try {
+            const raw = fs.readFileSync(eventPath, 'utf-8');
+            const payload = JSON.parse(raw) as { inputs?: Record<string, unknown> };
+            const inputs = payload.inputs || {};
+            const normalized: Record<string, string> = {};
+            for (const [key, value] of Object.entries(inputs)) {
+                normalized[key] = String(value ?? '');
+            }
+            return normalized;
+        } catch {
+            return {};
+        }
+    }
+
+    private getBrowserstackPlatforms(): string[] {
+        const candidates = [
+            process.env.BROWSERSTACK_CONFIG_FILE,
+            path.join('configs', 'browserstack.dynamic.yml'),
+            path.join('configs', 'browserstack.yml'),
+        ].filter(Boolean) as string[];
+
+        let configPath: string | undefined;
+        for (const candidate of candidates) {
+            if (candidate && fs.existsSync(candidate)) {
+                configPath = candidate;
+                break;
+            }
+        }
+
+        if (!configPath) return [];
+
+        try {
+            const raw = fs.readFileSync(configPath, 'utf-8');
+            const lines = raw.split(/\r?\n/);
+            const platforms: string[] = [];
+            let current: Record<string, string> = {};
+
+            const flush = () => {
+                if (!current.os && !current.browserName) return;
+                const osPart = [current.os, current.osVersion].filter(Boolean).join(' ');
+                const browserPart = [current.browserName, current.browserVersion].filter(Boolean).join(' ');
+                const resolutionPart = current.resolution ? `@ ${current.resolution}` : '';
+                const combined = [osPart, browserPart, resolutionPart].filter(Boolean).join(' | ');
+                platforms.push(combined.trim());
+                current = {};
+            };
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('- os:')) {
+                    flush();
+                    current.os = trimmed.replace('- os:', '').trim();
+                    continue;
+                }
+                if (trimmed.startsWith('osVersion:')) {
+                    current.osVersion = trimmed.replace('osVersion:', '').trim();
+                    continue;
+                }
+                if (trimmed.startsWith('browserName:')) {
+                    current.browserName = trimmed.replace('browserName:', '').trim();
+                    continue;
+                }
+                if (trimmed.startsWith('browserVersion:')) {
+                    current.browserVersion = trimmed.replace('browserVersion:', '').trim();
+                    continue;
+                }
+                if (trimmed.startsWith('resolution:')) {
+                    current.resolution = trimmed.replace('resolution:', '').trim();
+                }
+            }
+
+            flush();
+            return platforms;
+        } catch {
+            return [];
         }
     }
 
