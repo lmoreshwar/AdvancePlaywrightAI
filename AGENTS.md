@@ -11,6 +11,7 @@ Applies to these automation workflows:
 - `PROMPT_MODIFY_IMPROVE.md`
 - `PROMPT_NEW_AUTOMATION.md`
 - `PROMPT_VISUAL_AUTOMATION.md`
+- `PROMPT_RESPONSIVE_AUTOMATION.md`
 
 ## Requirement Analysis & Test Coverage Standard (MANDATORY)
 

@@ -24,6 +24,7 @@ Attach ONE or more of these (drag & drop into chat):
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` (create new tests)
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` (update/modify existing tests)
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` (create/extend visual tests)
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_RESPONSIVE_AUTOMATION.md` (create responsive viewport tests)
 - The latest generated debug report: `ai-debug-report/PROMPT_DEBUG_REPORT.md`
 
 ### Step 2 — Send a short instruction (simple English)
@@ -145,6 +146,35 @@ Show plan first (test names + snapshot names) before writing code.
 
 ---
 
+## 3.5) 📐 Create Responsive Tests (Viewport Testing)
+
+### Minimal prompt
+
+```
+Create responsive tests for src/tests/<YOUR_SPEC_FILE>.spec.ts.
+Reference: PROMPT_RESPONSIVE_AUTOMATION.md (attached)
+Show plan first before writing code.
+```
+
+### Better prompt
+
+```
+I finished functional spec: src/tests/<YOUR_SPEC_FILE>.spec.ts.
+Derive responsive viewport tests that run across XL/LG/MD/SM/XS breakpoints.
+
+Reference: PROMPT_RESPONSIVE_AUTOMATION.md (attached)
+Show plan first (test list per viewport + total count) before writing code.
+```
+
+### Important rules (simple English)
+- Responsive tests loop over all 5 viewports from menus.json
+- Reuse module methods; do not duplicate navigation
+- Branch by vp.type for mobile/tablet vs desktop behaviors
+- Tag with @Responsive @{VIEWPORT} (e.g., @XL, @SM)
+- Use test.slow() in every responsive describe block
+
+---
+
 ## 4) 🔍 Debug Report → Root Cause → Fix
 
 ### Minimal prompt
@@ -236,6 +266,13 @@ Plan + impact analysis first.
 ```
 Create visual tests for src/tests/<spec>.spec.ts.
 Use PROMPT_VISUAL_AUTOMATION.md.
+Plan first.
+```
+
+### Responsive tests
+```
+Create responsive tests for src/tests/<spec>.spec.ts.
+Use PROMPT_RESPONSIVE_AUTOMATION.md.
 Plan first.
 ```
 
