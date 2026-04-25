@@ -29,36 +29,42 @@ for (const vp of viewports) {
         });
 
         // ─── Common test for all viewports ───
+        // TC-RHP01: Homepage loads at viewport
         test(`should load homepage at ${vp.name.toUpperCase()} viewport`, async () => {
             await test.step(`Verify homepage loads at ${vp.width}px`, async () => {
                 await homepageModule.navigateAndVerifyHomepage();
             });
         });
 
+        // TC-RHP02: Header menus at viewport
         test(`should display header menus correctly at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify header menus at ${vp.width}px`, async () => {
                 await headerModule.verifyMainMenuItems();
             });
         });
 
+        // TC-RHP03: No extra padding at viewport
         test(`should have no extra padding at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify layout at ${vp.width}px`, async () => {
                 await homepageModule.verifyPaddingAndLayout();
             });
         });
 
+        // TC-RHP04: All components render at viewport
         test(`should render all components at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify sections render at ${vp.width}px`, async () => {
                 await homepageModule.verifyHomepageComponents();
             });
         });
 
+        // TC-RHP05: Sticky header at viewport
         test(`should have sticky header at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Scroll and verify sticky header at ${vp.width}px`, async () => {
                 await homepageModule.verifyScrollToBottomAndFooter();
             });
         });
 
+        // TC-RHP06: Footer at viewport
         test(`should display footer correctly at ${vp.name.toUpperCase()}`, async ({ footerPage }) => {
             await test.step(`Verify footer at ${vp.width}px`, async () => {
                 await footerPage.scrollToFooter();
@@ -68,6 +74,7 @@ for (const vp of viewports) {
 
         // ─── Mobile/Tablet specific tests ───
         if (vp.type === 'mobile' || vp.type === 'tablet') {
+            // TC-RHP07: Hamburger menu at mobile/tablet viewport
             test(`should show hamburger menu at ${vp.name.toUpperCase()}`, async () => {
                 await test.step(`Verify hamburger at ${vp.width}px`, async () => {
                     await headerModule.verifyMobileResponsiveLayout();
@@ -77,6 +84,7 @@ for (const vp of viewports) {
 
         // ─── Desktop specific tests ───
         if (vp.type === 'desktop') {
+            // TC-RHP08: Products menu at desktop viewport
             test(`should display Products menu correctly at ${vp.name.toUpperCase()}`, async ({ headerPage }) => {
                 await test.step(`Verify Products menu at ${vp.width}px`, async () => {
                     await headerPage.expectMenuItemVisible('Products');

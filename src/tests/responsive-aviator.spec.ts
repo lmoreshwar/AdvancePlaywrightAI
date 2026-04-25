@@ -45,6 +45,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: page loads with header ───
+        // TC-RAV01: Aviator page loads with header at viewport
         test(`should load Aviator page with header at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify Aviator page loads at ${vp.width}px`, async () => {
                 await aviatorModule.verifyMainHeader();
@@ -52,6 +53,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: secondary nav adapts to viewport ───
+        // TC-RAV02: Secondary nav adapts at viewport
         test(`should display secondary nav correctly at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify secondary nav at ${vp.width}px`, async () => {
                 await aviatorModule.verifySecondaryAviatorNav();
@@ -59,6 +61,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: bento grid renders at viewport ───
+        // TC-RAV03: Bento grid renders at viewport
         test(`should display bento grid at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify bento grid at ${vp.width}px`, async () => {
                 await aviatorModule.verifyAviatorBentoAndCtas();
@@ -66,6 +69,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: flip cards exist at viewport ───
+        // TC-RAV04: Flip cards at viewport
         test(`should display flip cards at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify flip card structure at ${vp.width}px`, async () => {
                 await aviatorModule.verifyFlipCardStructure();
@@ -73,6 +77,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: scenario library tabs work at viewport ───
+        // TC-RAV05: Scenario Library at viewport
         test(`should support Scenario Library at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify Scenario Library interactions at ${vp.width}px`, async () => {
                 await aviatorModule.verifyScenarioLibraryInteractions();
@@ -81,6 +86,7 @@ for (const vp of viewports) {
 
         // ─── Mobile/Tablet: hamburger menu ───
         if (vp.type === 'mobile' || vp.type === 'tablet') {
+            // TC-RAV06: Hamburger menu at mobile/tablet viewport
             test(`should show hamburger menu at ${vp.name.toUpperCase()}`, async () => {
                 await test.step(`Verify hamburger menu at ${vp.width}px`, async () => {
                     await headerModule.verifyMobileResponsiveLayout();
@@ -90,6 +96,7 @@ for (const vp of viewports) {
 
         // ─── Desktop: scroll behavior hides main header ───
         if (vp.type === 'desktop') {
+            // TC-RAV07: Scroll behavior at desktop viewport
             test(`should hide main header on scroll at ${vp.name.toUpperCase()}`, async () => {
                 await test.step(`Verify scroll behavior at ${vp.width}px`, async () => {
                     await aviatorModule.verifyScrollBehaviorMainHeaderHides();
@@ -123,6 +130,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: Limitless page loads ───
+        // TC-RAV08: Limitless page loads at viewport
         test(`should load Limitless page at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify Limitless page at ${vp.width}px`, async () => {
                 await aviatorModule.verifyMainHeader();
@@ -131,6 +139,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: Limitless content sections ───
+        // TC-RAV09: Limitless content sections at viewport
         test(`should display Limitless sections at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify Limitless content at ${vp.width}px`, async () => {
                 await aviatorModule.verifyLimitlessContentAndSections();
@@ -163,6 +172,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: MyAviator hero and video ───
+        // TC-RAV10: MyAviator hero at viewport
         test(`should display MyAviator hero at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify MyAviator hero at ${vp.width}px`, async () => {
                 await aviatorModule.verifyMyAviatorHeroAndActions();
@@ -170,6 +180,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: MyAviator five steps and plans ───
+        // TC-RAV11: MyAviator plans at viewport
         test(`should display MyAviator plans at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify five steps and plans at ${vp.width}px`, async () => {
                 await aviatorModule.verifyMyAviatorFiveStepsAndPlans();
@@ -177,6 +188,7 @@ for (const vp of viewports) {
         });
 
         // ─── Common test: MyAviator Scenario Library accordions ───
+        // TC-RAV12: MyAviator accordions at viewport
         test(`should support MyAviator accordions at ${vp.name.toUpperCase()}`, async () => {
             await test.step(`Verify accordion interactions at ${vp.width}px`, async () => {
                 await aviatorModule.verifyMyAviatorScenarioLibraryAccordions();

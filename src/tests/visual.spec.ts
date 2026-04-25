@@ -11,6 +11,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
     // Note: Viewport widths are now managed globally in .percy.yml
 
 
+    // ═══════════════════════════════════════
+    // TC-VIS01: Homepage default state snapshot
+    // ═══════════════════════════════════════
     test('Homepage Visual @Smoke', async ({ page, homepageModule, visualModule }) => {
         await test.step('Navigate to Homepage', async () => {
             await homepageModule.navigateAndVerifyHomepage();
@@ -21,6 +24,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS02: Header default state snapshot
+    // ═══════════════════════════════════════
     test('Header Visual @Smoke', async ({ page, headerModule, visualModule }) => {
         await test.step('Navigate to Homepage and Verify Header', async () => {
             await headerModule.navigateAndVerifyHeader();
@@ -31,6 +37,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS03: Header language modal open state
+    // ═══════════════════════════════════════
     test('Header Language Modal Visual @Regression', async ({ page, headerModule, headerPage, visualModule }) => {
         await test.step('Navigate to Homepage and Verify Header', async () => {
             await headerModule.navigateAndVerifyHeader();
@@ -50,6 +59,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS04: Homepage hero section snapshot
+    // ═══════════════════════════════════════
     test('Homepage Hero Visual @Smoke', async ({ page, homepageModule, visualModule }) => {
         await test.step('Navigate to Homepage', async () => {
             await homepageModule.navigateAndVerifyHomepage();
@@ -60,6 +72,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS05: Homepage footer section snapshot
+    // ═══════════════════════════════════════
     test('Homepage Footer Visual @Regression', async ({ page, homepageModule, footerPage, visualModule }) => {
         await test.step('Navigate to Homepage', async () => {
             await homepageModule.navigateAndVerifyHomepage();
@@ -75,6 +90,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS06: Homepage sticky header state
+    // ═══════════════════════════════════════
     test('Homepage Sticky Header Visual @Regression', async ({ page, homepageModule, homepagePage, visualModule }) => {
         await test.step('Navigate to Homepage', async () => {
             await homepageModule.navigateAndVerifyHomepage();
@@ -89,6 +107,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS07: Customer Stories hero snapshot
+    // ═══════════════════════════════════════
     test('Customer Stories Hero Visual @Smoke', async ({ page, customerStoriesModule, visualModule }) => {
         await test.step('Navigate to Customer Stories', async () => {
             await customerStoriesModule.navigateToCustomerStories();
@@ -100,6 +121,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS08: Customer Stories filters and expanded state
+    // ═══════════════════════════════════════
     test('Customer Stories Visual @Regression', async ({ page, customerStoriesModule, visualModule }) => {
         await test.step('Navigate to Customer Stories', async () => {
             await customerStoriesModule.navigateToCustomerStories();
@@ -116,6 +140,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS09: Customer Stories filtered results
+    // ═══════════════════════════════════════
     test('Customer Stories Filtered Results Visual @Regression', async ({ page, customerStoriesModule, visualModule }) => {
         await test.step('Navigate to Customer Stories', async () => {
             await customerStoriesModule.navigateToCustomerStories();
@@ -134,6 +161,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS10: Responsive homepage viewport pack
+    // ═══════════════════════════════════════
     test('Responsive Visual Pack @Responsive', async ({ page, homepageModule, headerModule, visualModule }, testInfo) => {
         await test.step('Navigate to Homepage', async () => {
             await homepageModule.navigateAndVerifyHomepage();
@@ -162,6 +192,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS11: Mobile header visual state
+    // ═══════════════════════════════════════
     test('Responsive Mobile Header Visual @Responsive', async ({ page, headerModule, visualModule, isMobile }) => {
         test.skip(!isMobile, 'This visual snapshot is for mobile projects only.');
 
@@ -175,6 +208,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS12: Search overlay open state
+    // ═══════════════════════════════════════
     test('Search Overlay Visual @Regression', async ({ page, headerPage, visualModule }) => {
         await test.step('Navigate and Open Search', async () => {
             await page.goto('/');
@@ -186,6 +222,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS13: Products mega-menu open state
+    // ═══════════════════════════════════════
     test('Products Mega-Menu Visual @Regression', async ({ page, headerPage, visualModule }) => {
         await test.step('Navigate and Open Products Menu', async () => {
             await page.goto('/');
@@ -197,6 +236,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS14: Contact Us page default state
+    // ═══════════════════════════════════════
     test('Contact Us Page Visual @Smoke', async ({ page, visualModule }) => {
         await test.step('Navigate to Contact Us', async () => {
             await page.goto('/contact');
@@ -212,7 +254,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
     // ═══════════════════════════════════════════════════════════════
     // AVIATOR AI VISUAL TESTS
     // ═══════════════════════════════════════════════════════════════
-
+    // ═══════════════════════════════════════
+    // TC-VIS15: Aviator AI full page snapshot
+    // ═══════════════════════════════════════
     test('Aviator AI Page Visual @Smoke', async ({ page, aviatorAiModule, visualModule }) => {
         await test.step('Navigate to Aviator AI page', async () => {
             await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
@@ -223,6 +267,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS16: Aviator AI bento grid section
+    // ═══════════════════════════════════════
     test('Aviator AI Bento Grid Visual @Regression', async ({ page, aviatorAiModule, visualModule }) => {
         await test.step('Navigate to Aviator AI page', async () => {
             await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
@@ -237,6 +284,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS17: Aviator AI scenario library tab switch
+    // ═══════════════════════════════════════
     test('Aviator AI Scenario Library Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
         await test.step('Navigate to Aviator AI page', async () => {
             await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
@@ -258,6 +308,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS18: Aviator AI flip cards section
+    // ═══════════════════════════════════════
     test('Aviator AI Flip Cards Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
         await test.step('Navigate to Aviator AI page', async () => {
             await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
@@ -274,6 +327,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS19: Limitless full page snapshot
+    // ═══════════════════════════════════════
     test('Limitless Page Visual @Smoke', async ({ page, aviatorAiModule, visualModule }) => {
         await test.step('Navigate to Limitless page', async () => {
             await aviatorAiModule.navigate('/limitless', 'Limitless: Enterprise AI-Powered Productivity Solutions | OpenText');
@@ -284,6 +340,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS20: Limitless FAQ accordion expanded state
+    // ═══════════════════════════════════════
     test('Limitless FAQ Accordion Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
         await test.step('Navigate to Limitless page', async () => {
             await aviatorAiModule.navigate('/limitless', 'Limitless: Enterprise AI-Powered Productivity Solutions | OpenText');
@@ -303,6 +362,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS21: MyAviator full page snapshot
+    // ═══════════════════════════════════════
     test('MyAviator Page Visual @Smoke', async ({ page, aviatorAiModule, visualModule }) => {
         await test.step('Navigate to MyAviator page', async () => {
             await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
@@ -313,6 +375,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS22: MyAviator plans table section
+    // ═══════════════════════════════════════
     test('MyAviator Plans Table Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
         await test.step('Navigate to MyAviator page', async () => {
             await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
@@ -328,6 +393,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS23: MyAviator scenario library expanded
+    // ═══════════════════════════════════════
     test('MyAviator Scenario Library Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
         await test.step('Navigate to MyAviator page', async () => {
             await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
@@ -359,7 +427,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
     // ═══════════════════════════════════════════════════════════════
     // AVIATOR AI RESPONSIVE VISUAL TESTS
     // ═══════════════════════════════════════════════════════════════
-
+    // ═══════════════════════════════════════
+    // TC-VIS24: Aviator AI responsive viewport snapshot
+    // ═══════════════════════════════════════
     test('Aviator AI Responsive Visual @Responsive', async ({ page, aviatorAiModule, visualModule }, testInfo) => {
         await test.step('Navigate to Aviator AI page', async () => {
             await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
@@ -387,6 +457,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS25: Limitless responsive viewport snapshot
+    // ═══════════════════════════════════════
     test('Limitless Responsive Visual @Responsive', async ({ page, aviatorAiModule, visualModule }, testInfo) => {
         await test.step('Navigate to Limitless page', async () => {
             await aviatorAiModule.navigate('/limitless', 'Limitless: Enterprise AI-Powered Productivity Solutions | OpenText');
@@ -414,6 +487,9 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════
+    // TC-VIS26: MyAviator responsive viewport snapshot
+    // ═══════════════════════════════════════
     test('MyAviator Responsive Visual @Responsive', async ({ page, aviatorAiModule, visualModule }, testInfo) => {
         await test.step('Navigate to MyAviator page', async () => {
             await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
