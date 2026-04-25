@@ -48,8 +48,17 @@ export class AviatorAiModule {
 
     async verifyMainHeader(): Promise<void> {
         await expect(this.aviatorAiPage.openTextHomeLink()).toBeVisible();
-        for (const menu of ['Products', 'Solutions', 'Support', 'Partners', 'Resources']) {
-            await expect(this.aviatorAiPage.mainMenuButton(menu)).toBeVisible();
+        // V1 Viewport Resilience — nav buttons are hidden at viewports below XL (< 1376px);
+        // at those sizes only the hamburger toggle is rendered instead.
+        const vpWidth = await this.page.evaluate(() => window.innerWidth);
+        if (vpWidth >= 1376) {
+            for (const menu of ['Products', 'Solutions', 'Support', 'Partners', 'Resources']) {
+                await expect(this.aviatorAiPage.mainMenuButton(menu)).toBeVisible();
+            }
+        } else {
+            // At smaller viewports verify the hamburger toggle is present instead
+            const hamburger = this.page.getByRole('button', { name: /Toggle navigation|Menu/i });
+            await expect(hamburger).toBeVisible();
         }
     }
 
@@ -219,9 +228,17 @@ export class AviatorAiModule {
         this.logger.step(1, 'Verify MyAviator hero description text exists');
         await expect(this.page.locator('body')).toContainText(/Say hello to faster decisions/i);
 
-        await expect(this.aviatorAiPage.myAviatorGetAccess()).toBeVisible();
-        await expect(this.aviatorAiPage.myAviatorPrimaryCta()).toBeVisible();
-        await expect(this.aviatorAiPage.myAviatorSecondaryCta()).toBeVisible();
+        // V1 Viewport Resilience — some CTAs stack/hide at SM and XS (< 576px)
+        const vpWidthMyAv = await this.page.evaluate(() => window.innerWidth);
+        if (vpWidthMyAv >= 576) {
+            await expect(this.aviatorAiPage.myAviatorGetAccess()).toBeVisible();
+            await expect(this.aviatorAiPage.myAviatorPrimaryCta()).toBeVisible();
+            await expect(this.aviatorAiPage.myAviatorSecondaryCta()).toBeVisible();
+        } else {
+            // At XS just verify at least one CTA is present in the DOM
+            const ctaCount = await this.page.getByRole('link', { name: /Get access|Try it|Compare plans/i }).count();
+            expect(ctaCount).toBeGreaterThanOrEqual(1);
+        }
         await expect(this.aviatorAiPage.myAviatorVideoFigure()).toBeVisible();
     }
 

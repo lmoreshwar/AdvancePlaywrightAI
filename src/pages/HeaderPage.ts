@@ -32,14 +32,14 @@ export class HeaderPage {
             .or(this.page.locator('.ot-agent-close, #ot-agent-close'))
             .first();
 
-    // Logo (from snapshot)
-    logoLink = () => this.page.getByRole('link', { name: /WrongLocator/i }).first();
+    // Logo (from snapshot) — matches aria-label set on the OpenText home page link
+    logoLink = () => this.page.getByRole('link', { name: /OpenText home page/i }).first();
 
     // Main Navigation Menu Items
     headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
 
     // Mobile Responsive Controls
-    hamburgerBtn = () => this.page.getByRole('button', { name: /@RToggle navigation|Menu/i });
+    hamburgerBtn = () => this.page.getByRole('button', { name: /Toggle navigation|Menu/i });
 
     // Semantic getters for dropdowns
     menuItemByText = (text: string) => this.headerNav().getByRole('button', { name: text }).first();
