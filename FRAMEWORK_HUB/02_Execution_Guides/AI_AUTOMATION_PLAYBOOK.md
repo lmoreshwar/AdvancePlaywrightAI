@@ -170,7 +170,7 @@ To start automating a specific test case, you can paste this exact prompt to you
 
 > "I want to automate test case **[TC-ID]** from `FRAMEWORK_HUB/01_Requirements/testcases.md`. 
 > 
-> Please strictly follow the process in `FRAMEWORK_HUB/02_Execution_Guides/MASTER_EXECUTION_GUIDE.md`:
+> Please strictly follow the process in `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md`:
 > 1. Start by using `npx playwright-cli open https://www.opentext.com`
 > 2. Use `snapshot` to find the exact accessibility locators. DO NOT guess HTML classes.
 > 3. Perform the test flow using `click`, `hover`, etc. in the CLI.

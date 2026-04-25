@@ -127,7 +127,8 @@ Cloud environments (BrowserStack, GitHub Actions, Jenkins) route traffic through
 ## Governance
 
 - If multiple assistant-specific instruction files exist, this file takes precedence.
-- Detailed CLI enforcement rules: `FRAMEWORK_HUB/02_Execution_Guides/MASTER_EXECUTION_GUIDE.md`
+- Automation workflow: `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md`
+- CLI enforcement rules: `FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md`
 
 ## File Map Auto-Update Standard (MANDATORY)
 

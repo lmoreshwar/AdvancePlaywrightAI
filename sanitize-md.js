@@ -4,7 +4,10 @@ const path = require('path');
 const repoRoot = __dirname;
 
 const files = [
-  'FRAMEWORK_HUB/02_Execution_Guides/MASTER_EXECUTION_GUIDE.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/TEST_COMMANDS.md',
   'FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md',
   'FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md',
   'FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md',

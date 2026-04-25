@@ -3,7 +3,10 @@ const path = require('path');
 const base = __dirname;
 
 const files = [
-  'FRAMEWORK_HUB/02_Execution_Guides/MASTER_EXECUTION_GUIDE.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md',
+  'FRAMEWORK_HUB/02_Execution_Guides/TEST_COMMANDS.md',
   'FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md',
   'FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md',
   'FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md',
@@ -54,13 +57,15 @@ files.forEach(f => {
   console.log(f + ': ' + (remaining ? 'REMAINING: ' + remaining.length + ' issues' : 'CLEAN'));
 });
 
-// Fix BOM in MASTER_EXECUTION_GUIDE if present
-const masterPath = path.join(base, files[0]);
-let masterContent = fs.readFileSync(masterPath, 'utf8');
-if (masterContent.charCodeAt(0) === 0xFEFF || masterContent.charCodeAt(0) === 0xFFFF) {
-  masterContent = masterContent.replace(/^\uFEFF/, '');
-  fs.writeFileSync(masterPath, masterContent, 'utf8');
-  console.log('Stripped BOM from MASTER_EXECUTION_GUIDE.md');
+// Fix BOM in any execution guide if present
+for (const f of files) {
+  const fp = path.join(base, f);
+  let c = fs.readFileSync(fp, 'utf8');
+  if (c.charCodeAt(0) === 0xFEFF) {
+    c = c.replace(/^\uFEFF/, '');
+    fs.writeFileSync(fp, c, 'utf8');
+    console.log('Stripped BOM from ' + f);
+  }
 }
 
 console.log('Phase 2 complete!');
