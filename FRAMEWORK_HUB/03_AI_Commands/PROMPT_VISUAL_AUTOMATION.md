@@ -497,6 +497,7 @@ Rules:
 | `src/modules/CustomerStoriesModule.ts` | Navigation + filter methods |
 | `src/modules/AviatorAiModule.ts` | Navigation + verification methods for Aviator AI pages |
 | `src/modules/VisualModule.ts` | Understand the `takeSnapshot()` API |
+| `src/tests/responsive-aviator.spec.ts` | Aviator responsive tests (avoid duplication) |
 | `src/fixtures/index.ts` | Available fixture names for visual tests |
 | `src/fixtures/index.ts` | Available fixture names |
 | `configs/percy.yml` | Global Percy viewport configuration |

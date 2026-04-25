@@ -251,7 +251,8 @@ When MODIFYING or ADDING assertNoUnexpectedConsoleErrors() methods:
 | `responsive.spec.ts` | Cross-viewport tests | @P1 @Regression |
 | `customer-stories.spec.ts` | 4 Customer Stories tests | @P0 @Smoke, @P1 @Regression |
 | `aviator-ai.spec.ts` | 10 Aviator AI tests | @P0 @Smoke, @P1 @Regression |
-| `visual.spec.ts` | 15 Percy visual tests | @Visual @Smoke, @Regression, @Responsive |
+| `responsive-aviator.spec.ts` | 55 Aviator responsive tests | @P0 @Regression @Responsive @Aviator |
+| `visual.spec.ts` | 26 Percy visual tests | @Visual @Smoke, @Regression, @Responsive |
 
 ### Test Data & Utils
 | File | Contains |

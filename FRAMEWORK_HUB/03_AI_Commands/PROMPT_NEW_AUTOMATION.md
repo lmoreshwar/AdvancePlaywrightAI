@@ -440,7 +440,8 @@ When analyzing test cases, decide where they belong BEFORE writing code:
 | **Tests** | `src/tests/responsive.spec.ts` | Cross-viewport responsive tests |
 | **Tests** | `src/tests/customer-stories.spec.ts` | 4 Customer Stories regression tests |
 | **Tests** | `src/tests/aviator-ai.spec.ts` | 10 Aviator AI regression tests (3 sub-pages: Aviator, Limitless, MyAviator) |
-| **Tests** | `src/tests/visual.spec.ts` | 15 Percy visual regression snapshot tests |
+| **Tests** | `src/tests/responsive-aviator.spec.ts` | 55 Aviator AI responsive tests across 5 viewports (3 sub-pages) |
+| **Tests** | `src/tests/visual.spec.ts` | 26 Percy visual regression snapshot tests (homepage, header, footer, customer stories, aviator) |
 | **TestData** | `src/testdata/menus.json` | Menu items, headers, viewport configuration data |
 | **TestData** | `src/testdata/types.ts` | TypeScript type definitions for test data |
 | **Utils** | `src/utils/SmartLocator.ts` | Self-healing locator utility |

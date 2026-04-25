@@ -209,4 +209,236 @@ test.describe('@Visual Visual Regression Testing POC', () => {
         });
     });
 
+    // ═══════════════════════════════════════════════════════════════
+    // AVIATOR AI VISUAL TESTS
+    // ═══════════════════════════════════════════════════════════════
+
+    test('Aviator AI Page Visual @Smoke', async ({ page, aviatorAiModule, visualModule }) => {
+        await test.step('Navigate to Aviator AI page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
+        });
+
+        await test.step('Capture Aviator AI Full Page Snapshot', async () => {
+            await visualModule.takeSnapshot('Aviator AI - Full Page');
+        });
+    });
+
+    test('Aviator AI Bento Grid Visual @Regression', async ({ page, aviatorAiModule, visualModule }) => {
+        await test.step('Navigate to Aviator AI page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
+        });
+
+        await test.step('Verify bento grid is loaded', async () => {
+            await aviatorAiModule.verifyAviatorBentoAndCtas();
+        });
+
+        await test.step('Capture Bento Grid Snapshot', async () => {
+            await visualModule.takeSnapshot('Aviator AI - Bento Grid Section');
+        });
+    });
+
+    test('Aviator AI Scenario Library Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
+        await test.step('Navigate to Aviator AI page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
+        });
+
+        await test.step('Scroll to Scenario Library and switch tab', async () => {
+            await aviatorAiPage.scenarioLibraryHeading().scrollIntoViewIfNeeded();
+            await page.waitForSelector('[role="tab"]', { timeout: 10000 });
+            // Click second tab to show non-default state
+            const tabs = aviatorAiPage.tabs();
+            if (await tabs.count() > 1) {
+                await tabs.nth(1).click();
+                await page.waitForTimeout(500);
+            }
+        });
+
+        await test.step('Capture Scenario Library Snapshot', async () => {
+            await visualModule.takeSnapshot('Aviator AI - Scenario Library Tab Switch', { skipStabilization: true });
+        });
+    });
+
+    test('Aviator AI Flip Cards Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
+        await test.step('Navigate to Aviator AI page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
+        });
+
+        await test.step('Scroll to flip cards section', async () => {
+            const firstWrapper = aviatorAiPage.flipCardWrappers().first();
+            await firstWrapper.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(500);
+        });
+
+        await test.step('Capture Flip Cards Snapshot', async () => {
+            await visualModule.takeSnapshot('Aviator AI - Flip Cards Section');
+        });
+    });
+
+    test('Limitless Page Visual @Smoke', async ({ page, aviatorAiModule, visualModule }) => {
+        await test.step('Navigate to Limitless page', async () => {
+            await aviatorAiModule.navigate('/limitless', 'Limitless: Enterprise AI-Powered Productivity Solutions | OpenText');
+        });
+
+        await test.step('Capture Limitless Full Page Snapshot', async () => {
+            await visualModule.takeSnapshot('Limitless - Full Page');
+        });
+    });
+
+    test('Limitless FAQ Accordion Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
+        await test.step('Navigate to Limitless page', async () => {
+            await aviatorAiModule.navigate('/limitless', 'Limitless: Enterprise AI-Powered Productivity Solutions | OpenText');
+        });
+
+        await test.step('Scroll to FAQ and expand first accordion', async () => {
+            await aviatorAiPage.faqHeading().scrollIntoViewIfNeeded();
+            const faqButtons = aviatorAiPage.limitlessFaqAccordionButtons();
+            if (await faqButtons.count() > 0) {
+                await faqButtons.first().click();
+                await page.waitForTimeout(500);
+            }
+        });
+
+        await test.step('Capture FAQ Accordion Expanded Snapshot', async () => {
+            await visualModule.takeSnapshot('Limitless - FAQ Accordion Expanded', { skipStabilization: true });
+        });
+    });
+
+    test('MyAviator Page Visual @Smoke', async ({ page, aviatorAiModule, visualModule }) => {
+        await test.step('Navigate to MyAviator page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
+        });
+
+        await test.step('Capture MyAviator Full Page Snapshot', async () => {
+            await visualModule.takeSnapshot('MyAviator - Full Page');
+        });
+    });
+
+    test('MyAviator Plans Table Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
+        await test.step('Navigate to MyAviator page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
+        });
+
+        await test.step('Scroll to Plans table', async () => {
+            await aviatorAiPage.plansHeading().scrollIntoViewIfNeeded();
+            await page.waitForTimeout(500);
+        });
+
+        await test.step('Capture Plans Table Snapshot', async () => {
+            await visualModule.takeSnapshot('MyAviator - Plans Table Section');
+        });
+    });
+
+    test('MyAviator Scenario Library Visual @Regression', async ({ page, aviatorAiModule, aviatorAiPage, visualModule }) => {
+        await test.step('Navigate to MyAviator page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
+        });
+
+        await test.step('Scroll to Scenario Library and expand accordion', async () => {
+            await aviatorAiPage.myAviatorScenarioHeading().scrollIntoViewIfNeeded();
+            await page.waitForTimeout(2000);
+            const accordions = aviatorAiPage.myAviatorAccordionButtons();
+            if (await accordions.count() > 0) {
+                // Find a visible accordion and expand it
+                const count = await accordions.count();
+                for (let i = 0; i < count; i++) {
+                    const visible = await accordions.nth(i).isVisible().catch(() => false);
+                    if (visible) {
+                        await accordions.nth(i).evaluate((el: HTMLElement) => el.click());
+                        await page.waitForTimeout(1000);
+                        break;
+                    }
+                }
+            }
+        });
+
+        await test.step('Capture MyAviator Scenario Library Snapshot', async () => {
+            await visualModule.takeSnapshot('MyAviator - Scenario Library Expanded', { skipStabilization: true });
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // AVIATOR AI RESPONSIVE VISUAL TESTS
+    // ═══════════════════════════════════════════════════════════════
+
+    test('Aviator AI Responsive Visual @Responsive', async ({ page, aviatorAiModule, visualModule }, testInfo) => {
+        await test.step('Navigate to Aviator AI page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai', 'AI for Business & Enterprise AI Platform | OpenText');
+        });
+
+        await test.step('Capture Viewport-Specific Aviator Snapshot', async () => {
+            const projectName = testInfo.project.name;
+
+            if (projectName === 'viewport-xl') {
+                await visualModule.takeSnapshot('Responsive - XL Aviator AI Page');
+                return;
+            }
+
+            if (projectName === 'viewport-md') {
+                await visualModule.takeSnapshot('Responsive - MD Aviator AI Page');
+                return;
+            }
+
+            if (projectName === 'viewport-sm') {
+                await visualModule.takeSnapshot('Responsive - SM Aviator AI Page');
+                return;
+            }
+
+            test.skip(true, `Aviator responsive visual scoped to viewport-xl, viewport-md, viewport-sm. Current: ${projectName}`);
+        });
+    });
+
+    test('Limitless Responsive Visual @Responsive', async ({ page, aviatorAiModule, visualModule }, testInfo) => {
+        await test.step('Navigate to Limitless page', async () => {
+            await aviatorAiModule.navigate('/limitless', 'Limitless: Enterprise AI-Powered Productivity Solutions | OpenText');
+        });
+
+        await test.step('Capture Viewport-Specific Limitless Snapshot', async () => {
+            const projectName = testInfo.project.name;
+
+            if (projectName === 'viewport-xl') {
+                await visualModule.takeSnapshot('Responsive - XL Limitless Page');
+                return;
+            }
+
+            if (projectName === 'viewport-md') {
+                await visualModule.takeSnapshot('Responsive - MD Limitless Page');
+                return;
+            }
+
+            if (projectName === 'viewport-sm') {
+                await visualModule.takeSnapshot('Responsive - SM Limitless Page');
+                return;
+            }
+
+            test.skip(true, `Limitless responsive visual scoped to viewport-xl, viewport-md, viewport-sm. Current: ${projectName}`);
+        });
+    });
+
+    test('MyAviator Responsive Visual @Responsive', async ({ page, aviatorAiModule, visualModule }, testInfo) => {
+        await test.step('Navigate to MyAviator page', async () => {
+            await aviatorAiModule.navigate('/aviator-ai/myaviator', 'MyAviator: Your Secure AI Assistant for a Smarter Workplace');
+        });
+
+        await test.step('Capture Viewport-Specific MyAviator Snapshot', async () => {
+            const projectName = testInfo.project.name;
+
+            if (projectName === 'viewport-xl') {
+                await visualModule.takeSnapshot('Responsive - XL MyAviator Page');
+                return;
+            }
+
+            if (projectName === 'viewport-md') {
+                await visualModule.takeSnapshot('Responsive - MD MyAviator Page');
+                return;
+            }
+
+            if (projectName === 'viewport-sm') {
+                await visualModule.takeSnapshot('Responsive - SM MyAviator Page');
+                return;
+            }
+
+            test.skip(true, `MyAviator responsive visual scoped to viewport-xl, viewport-md, viewport-sm. Current: ${projectName}`);
+        });
+    });
+
 });
