@@ -9,6 +9,8 @@ Use `@playwright/cli` as the primary execution and remediation tool for all prom
 - `PROMPT_DEBUG_REPORT`
 - `PROMPT_MODIFY_IMPROVE`
 - `PROMPT_NEW_AUTOMATION`
+- `PROMPT_VISUAL_AUTOMATION`
+- `PROMPT_RESPONSIVE_AUTOMATION`
 
 ## Required behavior
 
@@ -25,4 +27,11 @@ Use `@playwright/cli` as the primary execution and remediation tool for all prom
 
 - Provide clear Playwright CLI commands used (or to run) for reproduce -> diagnose -> fix -> verify.
 - Scope reruns to failed test cases first before any broader run.
+
+## Cross-References
+
+- Prompt shortcuts for all workflows: `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md`
+- Full automation playbook: `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md`
+- Percy visual review process: `FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md`
+- Test execution commands: `FRAMEWORK_HUB/02_Execution_Guides/TEST_COMMANDS.md`
 

@@ -79,3 +79,13 @@ When asking for script updates, share:
 
 This is enough to quickly add stable selectors and reduce false positives.
 
+## 8) Cross-References
+
+| Document | Purpose |
+|---|---|
+| **Visual Test Creation** | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` — Follow this guide to create Percy visual tests |
+| **Debug Report** | `ai-debug-report/PROMPT_DEBUG_REPORT.md` — Use when Percy failures need code-level investigation |
+| **Prompt Shortcuts** | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md` — Quick prompts for visual test workflows |
+| **Automation Playbook** | `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md` — Full end-to-end automation process |
+| **Playwright CLI** | `FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md` — CLI-first rules for DOM evidence |
+

@@ -44,8 +44,50 @@ Runs tests on the BrowserStack grid using `browserstack.yml` for infrastructure 
 ## 4. AI Prompts & Shortcuts (Platform Agnostic)
 Attach the relevant prompt guide and source document into your AI chat, and copy-paste these shortcuts. More details are in `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md`.
 
+### Functional Tests (New / From Requirements)
+
 | Source Document | Prompt Example |
 | :--- | :--- |
 | **Requirements** | `Review requirement.md for [Feature]. Generate 100% coverage plan, then automate. Ref: PROMPT_NEW_AUTOMATION.md. Show plan first.` |
 | **User Stories** | `Review user_stories.md for [Story]. Automate tests based on acceptance criteria. Ref: PROMPT_NEW_AUTOMATION.md. Show plan first.` |
 | **Test Cases**   | `Create functional tests for the following from testcases.md: [TC data]. Ref: PROMPT_NEW_AUTOMATION.md. Show plan first.` |
+
+### Update / Modify Existing Tests
+
+| Action | Prompt Example |
+| :--- | :--- |
+| **Modify tests** | `Update <file> to <describe change>. Ref: PROMPT_MODIFY_IMPROVE.md. Show impact analysis + plan first.` |
+| **Fix locators** | `Update locators in <PageObject>.ts for <element>. Ref: PROMPT_MODIFY_IMPROVE.md. Show impact analysis first.` |
+
+### Visual Tests (Percy)
+
+| Action | Prompt Example |
+| :--- | :--- |
+| **New visual tests** | `Create visual tests for src/tests/<spec>.spec.ts. Ref: PROMPT_VISUAL_AUTOMATION.md. Show plan first.` |
+| **Percy review** | See `FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md` for approve/reject rules. |
+
+### Responsive Tests (Viewport)
+
+| Action | Prompt Example |
+| :--- | :--- |
+| **New responsive tests** | `Create responsive tests for src/tests/<spec>.spec.ts. Ref: PROMPT_RESPONSIVE_AUTOMATION.md. Show plan first.` |
+
+### Debug Report (Failure Analysis)
+
+| Action | Prompt Example |
+| :--- | :--- |
+| **Fix failures** | `Fix failures from attached PROMPT_DEBUG_REPORT.md. Use playwright-cli. Show plan first.` |
+
+## 5. Cross-References
+
+| Document | Purpose | Location |
+| :--- | :--- | :--- |
+| **Prompt Shortcuts** | All quick prompts in one place | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md` |
+| **New Automation** | Full rules for creating new tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` |
+| **Modify/Improve** | Full rules for updating existing tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` |
+| **Visual Automation** | Percy visual test creation guide | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` |
+| **Responsive Automation** | Viewport responsive test creation guide | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_RESPONSIVE_AUTOMATION.md` |
+| **Debug Report** | Auto-generated failure analysis | `ai-debug-report/PROMPT_DEBUG_REPORT.md` |
+| **Playwright CLI** | CLI-first enforcement | `FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md` |
+| **Percy Approval** | Visual diff review/approve/reject | `FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md` |
+| **Automation Playbook** | Full end-to-end process | `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md` |

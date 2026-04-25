@@ -6,6 +6,36 @@ Goal: you can **drag & drop this file** to the AI agent and then type a **1–3 
 
 ---
 
+## 📚 Quick Reference — All Documents
+
+### AI Prompt Files (Drag & Drop into AI Chat)
+
+| Prompt File | Use When | Location |
+|---|---|---|
+| **PROMPT_NEW_AUTOMATION.md** | Creating new functional tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` |
+| **PROMPT_MODIFY_IMPROVE.md** | Updating/modifying existing tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` |
+| **PROMPT_VISUAL_AUTOMATION.md** | Creating Percy visual snapshot tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` |
+| **PROMPT_RESPONSIVE_AUTOMATION.md** | Creating responsive viewport tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_RESPONSIVE_AUTOMATION.md` |
+| **PROMPT_DEBUG_REPORT.md** | Debugging/fixing test failures | `ai-debug-report/PROMPT_DEBUG_REPORT.md` |
+
+### Execution Guides (Background Knowledge)
+
+| Guide | Purpose | Location |
+|---|---|---|
+| **AI Automation Playbook** | Full end-to-end automation workflow (Phase 1–4) | `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md` |
+| **Percy Approval Playbook** | Visual diff review — approve/reject rules | `FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md` |
+| **Playwright CLI Enforcement** | CLI-first rules for DOM evidence | `FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md` |
+| **Test Commands** | All local + BrowserStack execution commands | `FRAMEWORK_HUB/02_Execution_Guides/TEST_COMMANDS.md` |
+
+### Framework Standards (Auto-Read by AI)
+
+| Standard | Purpose | Location |
+|---|---|---|
+| **AGENTS.md** | Single source of truth for all AI behavior | `AGENTS.md` (project root) |
+| **AI Coverage Standards** | RICE-POT, anti-hallucination, traceability rules | `FRAMEWORK_HUB/04_Framework_Standards/AI_COVERAGE_STANDARDS.md` |
+
+---
+
 ## ✅ One Rule That Applies to Everything
 
 Always add this line to your prompt:
@@ -27,6 +57,12 @@ Attach ONE or more of these (drag & drop into chat):
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_RESPONSIVE_AUTOMATION.md` (create responsive viewport tests)
 - The latest generated debug report: `ai-debug-report/PROMPT_DEBUG_REPORT.md`
 
+Optionally attach execution guides for deeper context:
+- `FRAMEWORK_HUB/02_Execution_Guides/AI_AUTOMATION_PLAYBOOK.md` (full automation workflow)
+- `FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md` (visual diff review rules)
+- `FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md` (CLI-first enforcement)
+- `FRAMEWORK_HUB/02_Execution_Guides/TEST_COMMANDS.md` (run commands reference)
+
 ### Step 2 — Send a short instruction (simple English)
 
 Use one of the templates below.
@@ -43,6 +79,10 @@ You reply: **"Proceed"**.
 ---
 
 ## 1) 🆕 Create Functional Tests (New Automation)
+
+**Prompt file:** `PROMPT_NEW_AUTOMATION.md`  
+**Execution guide:** `AI_AUTOMATION_PLAYBOOK.md` (Phase 1–4: Planning → CLI Exploration → Code Generation → Verification)  
+**CLI rules:** `PLAYWRIGHT_CLI_ENFORCEMENT.md` (use `playwright-cli` for DOM evidence before writing locators)
 
 ### From Requirements (requirement.md)
 
@@ -96,6 +136,10 @@ Show the plan first before writing code.
 
 ## 2) 🛠️ Update / Modify Existing Tests
 
+**Prompt file:** `PROMPT_MODIFY_IMPROVE.md`  
+**Execution guide:** `AI_AUTOMATION_PLAYBOOK.md` (follow same Phase 2–4 for validation)  
+**CLI rules:** `PLAYWRIGHT_CLI_ENFORCEMENT.md` (use `playwright-cli` to validate locator changes)
+
 ### Minimal prompt
 
 ```
@@ -119,6 +163,10 @@ Show the impact analysis + plan first before writing code.
 ---
 
 ## 3) 👁️ Create / Update Visual Tests (Percy)
+
+**Prompt file:** `PROMPT_VISUAL_AUTOMATION.md`  
+**Percy review:** `PERCY_APPROVAL_REVIEW_PLAYBOOK.md` (approve/reject rules for visual diffs)  
+**CLI rules:** `PLAYWRIGHT_CLI_ENFORCEMENT.md` (use `playwright-cli` for DOM evidence before writing snapshot state setup)
 
 ### Minimal prompt (your preferred style)
 
@@ -148,6 +196,10 @@ Show plan first (test names + snapshot names) before writing code.
 
 ## 3.5) 📐 Create Responsive Tests (Viewport Testing)
 
+**Prompt file:** `PROMPT_RESPONSIVE_AUTOMATION.md`  
+**Execution guide:** `AI_AUTOMATION_PLAYBOOK.md` (Responsive Testing Guardrail section)  
+**CLI rules:** `PLAYWRIGHT_CLI_ENFORCEMENT.md` (use `playwright-cli snapshot` at multiple viewport sizes)
+
 ### Minimal prompt
 
 ```
@@ -176,6 +228,11 @@ Show plan first (test list per viewport + total count) before writing code.
 ---
 
 ## 4) 🔍 Debug Report → Root Cause → Fix
+
+**Prompt file:** `PROMPT_DEBUG_REPORT.md` (auto-generated in `ai-debug-report/`)  
+**Execution guide:** `AI_AUTOMATION_PLAYBOOK.md` (Phase 4: Local Verification)  
+**CLI rules:** `PLAYWRIGHT_CLI_ENFORCEMENT.md` (reproduce → diagnose → fix → verify with `playwright-cli`)  
+**Percy issues:** `PERCY_APPROVAL_REVIEW_PLAYBOOK.md` (if failures are visual diff related)
 
 ### Minimal prompt
 
@@ -251,7 +308,7 @@ After code changes:
 ### New tests
 ```
 Create new tests for <requirement>.
-Use PROMPT_NEW_AUTOMATION.md.
+Use PROMPT_NEW_AUTOMATION.md + AI_AUTOMATION_PLAYBOOK.md.
 Plan first.
 ```
 
@@ -265,7 +322,7 @@ Plan + impact analysis first.
 ### Visual tests
 ```
 Create visual tests for src/tests/<spec>.spec.ts.
-Use PROMPT_VISUAL_AUTOMATION.md.
+Use PROMPT_VISUAL_AUTOMATION.md + PERCY_APPROVAL_REVIEW_PLAYBOOK.md.
 Plan first.
 ```
 
@@ -279,7 +336,47 @@ Plan first.
 ### Debug report
 ```
 Fix failures from attached PROMPT_DEBUG_REPORT.md.
-Use playwright-cli.
+Use PLAYWRIGHT_CLI_ENFORCEMENT.md for CLI evidence.
 Plan first.
+```
+
+### Percy review
+```
+Review the Percy build diffs.
+Use PERCY_APPROVAL_REVIEW_PLAYBOOK.md for approve/reject rules.
+```
+
+---
+
+## 🗺️ Decision Flowchart — Which Prompt + Guide Do I Use?
+
+```
+START → What do I want to do?
+│
+├── Create NEW tests from requirements/stories/test cases?
+│   └── Attach: PROMPT_NEW_AUTOMATION.md
+│       Also read: AI_AUTOMATION_PLAYBOOK.md, PLAYWRIGHT_CLI_ENFORCEMENT.md
+│
+├── UPDATE or MODIFY existing tests?
+│   └── Attach: PROMPT_MODIFY_IMPROVE.md
+│       Also read: PLAYWRIGHT_CLI_ENFORCEMENT.md
+│
+├── Create VISUAL (Percy snapshot) tests?
+│   └── Attach: PROMPT_VISUAL_AUTOMATION.md
+│       Also read: PERCY_APPROVAL_REVIEW_PLAYBOOK.md
+│
+├── Create RESPONSIVE (viewport) tests?
+│   └── Attach: PROMPT_RESPONSIVE_AUTOMATION.md
+│       Also read: AI_AUTOMATION_PLAYBOOK.md (Responsive Guardrail)
+│
+├── FIX test failures from debug report?
+│   └── Attach: PROMPT_DEBUG_REPORT.md (from ai-debug-report/)
+│       Also read: PLAYWRIGHT_CLI_ENFORCEMENT.md
+│
+├── REVIEW Percy visual diffs?
+│   └── Read: PERCY_APPROVAL_REVIEW_PLAYBOOK.md
+│
+└── LOOK UP run commands (local / BrowserStack)?
+    └── Read: TEST_COMMANDS.md
 ```
 

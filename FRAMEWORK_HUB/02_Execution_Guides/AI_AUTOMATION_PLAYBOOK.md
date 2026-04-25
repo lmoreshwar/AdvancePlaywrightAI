@@ -11,6 +11,8 @@ Attach the relevant workflow file (recommended):
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` for new tests
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` for updates
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` for visual tests
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_RESPONSIVE_AUTOMATION.md` for responsive viewport tests
+- `ai-debug-report/PROMPT_DEBUG_REPORT.md` for debugging test failures
 
 Then send a short prompt like:
 
@@ -178,4 +180,20 @@ To start automating a specific test case, you can paste this exact prompt to you
 > 5. Run the new test and confirm it passes.
 >
 > **IMPORTANT:** All test specs MUST follow the formatting standard in `PROMPT_NEW_AUTOMATION.md` Rule 9 (see header.spec.ts as reference)."
+
+---
+
+## 📚 Cross-References
+
+| Document | Purpose | Location |
+|---|---|---|
+| **Prompt Shortcuts** | Quick copy-paste prompts for all workflows | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_SHORTCUTS.md` |
+| **New Automation** | Full rules for creating new tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` |
+| **Modify/Improve** | Full rules for updating existing tests | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` |
+| **Visual Automation** | Percy visual test creation guide | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` |
+| **Responsive Automation** | Viewport responsive test creation guide | `FRAMEWORK_HUB/03_AI_Commands/PROMPT_RESPONSIVE_AUTOMATION.md` |
+| **Debug Report** | Auto-generated failure analysis | `ai-debug-report/PROMPT_DEBUG_REPORT.md` |
+| **Playwright CLI Rules** | CLI-first enforcement for all workflows | `FRAMEWORK_HUB/02_Execution_Guides/PLAYWRIGHT_CLI_ENFORCEMENT.md` |
+| **Percy Approval** | Visual diff review/approve/reject process | `FRAMEWORK_HUB/02_Execution_Guides/PERCY_APPROVAL_REVIEW_PLAYBOOK.md` |
+| **Test Commands** | All local + BrowserStack run commands | `FRAMEWORK_HUB/02_Execution_Guides/TEST_COMMANDS.md` |
 
