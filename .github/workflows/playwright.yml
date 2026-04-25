@@ -134,7 +134,7 @@ jobs:
             accessKey: \${BROWSERSTACK_ACCESS_KEY}
           platforms:
           ${PLATFORMS}
-          parallelsPerPlatform: 4
+          parallelsPerPlatform: 1
           browserstackLocal: false
           buildName: "OpenText Playwright Framework Build"
           projectName: "OpenText AI Tester"
