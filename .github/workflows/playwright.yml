@@ -266,7 +266,10 @@ jobs:
           INVERT_FLAGS=(--grep-invert "@Visual")
 
           echo "Running BrowserStack with target=${TARGET}, scope=${SCOPE}, profile=${PROFILE}, workers=${WORKERS}"
-          npm run test:bstack -- --config=playwright.config.ts "${PROJECT_FLAGS[@]}" "${GREP_FLAGS[@]}" "${INVERT_FLAGS[@]}" --workers=${WORKERS}
+          # NOTE: PROJECT_FLAGS are NOT passed to BrowserStack runs.
+          # BrowserStack SDK rewrites project names (e.g. "desktop-chrome" becomes "-latest:Windows 10-browserstack").
+          # Platform targeting is handled by configs/browserstack.dynamic.yml instead.
+          npm run test:bstack -- --config=playwright.config.ts "${GREP_FLAGS[@]}" "${INVERT_FLAGS[@]}" --workers=${WORKERS}
         env:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
