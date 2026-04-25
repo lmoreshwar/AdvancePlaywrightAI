@@ -26,7 +26,7 @@ The correct order is always:
 ```
 STEP 1 → Write requirements in testcases.md
 STEP 2 → Write functional spec (Pages → Modules → Spec file e.g. aviator-ai.spec.ts)
-STEP 3 → THEN derive responsive tests from the SAME modules (responsive.spec.ts or new responsive-<feature>.spec.ts)
+STEP 3 → THEN derive responsive tests from the SAME modules (responsive-homepage.spec.ts or new responsive-<feature>.spec.ts)
 ```
 
 **Why?**  
@@ -71,11 +71,11 @@ Unlike functional tests that run at a fixed desktop viewport (1440×900), respon
 | Type | File | What It Does |
 |---|---|---|
 | Functional test | `src/tests/*.spec.ts` | Tests at default desktop viewport — asserts behavior |
-| Responsive test | `src/tests/responsive.spec.ts` or `src/tests/responsive-<feature>.spec.ts` | Same checks at 5 viewport breakpoints — asserts layout adapts |
+| Responsive test | `src/tests/responsive-homepage.spec.ts` or `src/tests/responsive-<feature>.spec.ts` | Same checks at 5 viewport breakpoints — asserts layout adapts |
 | Support layer | `src/modules/*Module.ts` | Business logic reused by both functional and responsive tests |
 | Viewport data | `src/testdata/menus.json` | Defines the 5 viewport breakpoints and types |
 
-**Spec file rule**: Responsive tests can live in `src/tests/responsive.spec.ts` (for homepage) or in a new `src/tests/responsive-<feature>.spec.ts` file for other features. Keep them separate from functional specs so they can be filtered independently with `@Responsive` tag.
+**Spec file rule**: Responsive tests can live in `src/tests/responsive-homepage.spec.ts` (for homepage) or in a new `src/tests/responsive-<feature>.spec.ts` file for other features. Keep them separate from functional specs so they can be filtered independently with `@Responsive` tag.
 
 ---
 
@@ -131,7 +131,7 @@ For every functional test case, ask these questions:
 BEFORE writing ANY code:
 1. Read src/testdata/menus.json — get the viewports array
 2. Read src/testdata/types.ts — get the ViewportConfig type
-3. Read src/tests/responsive.spec.ts — understand the existing pattern
+3. Read src/tests/responsive-homepage.spec.ts — understand the existing pattern
 4. Read ALL modules in src/modules/ that will be reused
 5. Read src/fixtures/index.ts — verify fixture names
 6. Read src/pages/ — understand available locators
@@ -140,7 +140,7 @@ BEFORE writing ANY code:
 ### Step 2 — Determine the Spec File
 
 **Decision Rule:**
-- If the responsive tests are for the **homepage** → add to existing `src/tests/responsive.spec.ts`
+- If the responsive tests are for the **homepage** → add to existing `src/tests/responsive-homepage.spec.ts`
 - If the responsive tests are for a **different feature** (e.g., Aviator AI, Customer Stories) → create a new file: `src/tests/responsive-<feature>.spec.ts`
 
 **Why separate files?** Each feature has different module dependencies and setup logic. Keeping them separate allows independent execution via tags and avoids monolithic spec files.
@@ -352,7 +352,7 @@ Generate responsive tests for these functional test cases:
 [PASTE specific test case descriptions here]
 
 Rules you must follow:
-1. Read src/tests/responsive.spec.ts FIRST — understand the existing pattern
+1. Read src/tests/responsive-homepage.spec.ts FIRST — understand the existing pattern
 2. Read src/testdata/menus.json — get viewport breakpoints
 3. Read all modules in src/modules/ — reuse existing methods
 4. Read src/fixtures/index.ts — use only registered fixture names
@@ -513,7 +513,7 @@ Test cases to make responsive:
 [paste the test case descriptions here]
 
 Rules:
-1. Read responsive.spec.ts for the existing pattern
+1. Read responsive-homepage.spec.ts for the existing pattern
 2. Read menus.json for viewport breakpoints
 3. Reuse module methods from src/modules/
 4. Loop over all 5 viewports
@@ -536,7 +536,7 @@ Rules:
 |---|---|
 | `src/testdata/menus.json` | Viewport breakpoints (XL/LG/MD/SM/XS) |
 | `src/testdata/types.ts` | ViewportConfig type definition |
-| `src/tests/responsive.spec.ts` | Existing pattern to follow |
+| `src/tests/responsive-homepage.spec.ts` | Existing pattern to follow |
 | `src/tests/responsive-aviator.spec.ts` | Aviator responsive tests (if exists) |
 | `src/modules/HeaderModule.ts` | Mobile/responsive layout verification methods |
 | `src/modules/HomepageModule.ts` | Homepage verification methods |

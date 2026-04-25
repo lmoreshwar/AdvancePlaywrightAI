@@ -164,7 +164,7 @@ After ALL modifications are complete:
 
 ```
 When MODIFYING responsive or viewport-specific tests:
-  1. Make layout/viewport changes ONLY inside src/tests/responsive.spec.ts
+  1. Make layout/viewport changes ONLY inside src/tests/responsive-<feature>.spec.ts (e.g. responsive-homepage.spec.ts)
   2. Protect viewport-specific changes with conditions (e.g. `if (vp.type === 'mobile')`)
   3. Verify the change across ALL viewports (XL, LG, MD, SM, XS) so fixing a mobile bug doesn't break the desktop test.
 ```
@@ -248,7 +248,7 @@ When MODIFYING or ADDING assertNoUnexpectedConsoleErrors() methods:
 |---|---|---|
 | `header.spec.ts` | 7 header tests | @P0 @Smoke, @P1 @Regression |
 | `homepage.spec.ts` | Homepage tests | @P0 @Smoke, @P1 @Regression |
-| `responsive.spec.ts` | Cross-viewport tests | @P1 @Regression |
+| `responsive-homepage.spec.ts` | Homepage responsive tests | @P0 @Regression @Responsive |
 | `customer-stories.spec.ts` | 4 Customer Stories tests | @P0 @Smoke, @P1 @Regression |
 | `aviator-ai.spec.ts` | 10 Aviator AI tests | @P0 @Smoke, @P1 @Regression |
 | `responsive-aviator.spec.ts` | 55 Aviator responsive tests | @P0 @Regression @Responsive @Aviator |

@@ -213,7 +213,7 @@ MANDATORY RULES:
 - ALWAYS use expect() for assertions
 - NEVER use bare values — always log and validate
 - NEVER create multiple test.describe() blocks in same file — use one parent suite per feature
-- DO NOT mix responsive viewport tests — use src/tests/responsive.spec.ts for that
+- DO NOT mix responsive viewport tests — use src/tests/responsive-<feature>.spec.ts for that
 ```
 
 #### Rule 10: 1-to-1 Requirement Traceability — ZERO GAP TOLERANCE (MANDATORY)
@@ -412,7 +412,7 @@ Never start with an empty ignore list.
 ```
 When analyzing test cases, decide where they belong BEFORE writing code:
 - Functional/Business Logic (e.g. data validation, forms) → Add to specific feature specs (e.g. header.spec.ts). DO NOT run these on multiple viewports unless explicitly asked.
-- Responsive Layout Logic (e.g. padding checking, mobile menus, breakpoints, elements shrinking/hiding across XL/LG/MD/SM/XS) → Add ONLY to src/tests/responsive.spec.ts inside the viewport loop.
+- Responsive Layout Logic (e.g. padding checking, mobile menus, breakpoints, elements shrinking/hiding across XL/LG/MD/SM/XS) → Add ONLY to src/tests/responsive-<feature>.spec.ts (e.g. responsive-homepage.spec.ts) inside the viewport loop.
 ```
 
 ---
@@ -437,7 +437,7 @@ When analyzing test cases, decide where they belong BEFORE writing code:
 | **Modules** | `src/modules/VisualModule.ts` | Percy visual regression snapshot capture module |
 | **Tests** | `src/tests/header.spec.ts` | 7 header tests (smoke + regression) |
 | **Tests** | `src/tests/homepage.spec.ts` | Homepage component tests |
-| **Tests** | `src/tests/responsive.spec.ts` | Cross-viewport responsive tests |
+| **Tests** | `src/tests/responsive-homepage.spec.ts` | Homepage responsive tests across 5 viewports (XL/LG/MD/SM/XS) |
 | **Tests** | `src/tests/customer-stories.spec.ts` | 4 Customer Stories regression tests |
 | **Tests** | `src/tests/aviator-ai.spec.ts` | 10 Aviator AI regression tests (3 sub-pages: Aviator, Limitless, MyAviator) |
 | **Tests** | `src/tests/responsive-aviator.spec.ts` | 55 Aviator AI responsive tests across 5 viewports (3 sub-pages) |

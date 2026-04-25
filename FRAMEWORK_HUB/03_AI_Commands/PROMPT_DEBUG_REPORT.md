@@ -243,7 +243,7 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\DELL\AppData\Loc
 ### 1. 🚨 Failure Summary
 - **Test**: `should have sticky header at XS`
 - **Project**: `viewport-lg`
-- **Error Location**: `responsive.spec.ts:27`
+- **Error Location**: `responsive-homepage.spec.ts:27`
 - **Error**:
 ```
 TimeoutError: page.goto: Timeout 90000ms exceeded.

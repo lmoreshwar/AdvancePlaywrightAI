@@ -135,6 +135,7 @@ Whenever the AI creates a **NEW** file in `src/` (Page, Module, Spec, Util, Test
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_NEW_AUTOMATION.md` → Section 4 "Existing File Map"
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_MODIFY_IMPROVE.md` → Section 4 "Quick Reference — Existing Code Map"
 - `FRAMEWORK_HUB/03_AI_Commands/PROMPT_VISUAL_AUTOMATION.md` → "Files the AI Must Read"
+- `FRAMEWORK_HUB/03_AI_Commands/PROMPT_RESPONSIVE_AUTOMATION.md` → "Files the AI Must Read"
 
 **Rules:**
 1. Add the new file's row to the correct layer group (Pages, Modules, Tests, Utils, TestData) in ALL applicable files.
@@ -156,6 +157,23 @@ Whenever the AI creates a **NEW** file in `src/` (Page, Module, Spec, Util, Test
 ## Test Specification Standard (MANDATORY)
 
 All `.spec.ts` files MUST follow the standardized format defined in `FRAMEWORK_HUB/04_Framework_Standards/AI_COVERAGE_STANDARDS.md`. 
+
+### Spec File Naming & Organization Standard
+
+The framework uses a clear file-per-concern naming convention. Each test type has its own spec file:
+
+| Test Type | Naming Pattern | Example | Scope |
+|---|---|---|---|
+| **Functional** | `<feature>.spec.ts` | `header.spec.ts`, `aviator-ai.spec.ts` | One file per feature — behavior assertions at default desktop viewport |
+| **Responsive** | `responsive-<feature>.spec.ts` | `responsive-homepage.spec.ts`, `responsive-aviator.spec.ts` | One file per feature — loops over 5 viewports (XL/LG/MD/SM/XS) |
+| **Visual** | `visual.spec.ts` | `visual.spec.ts` | **Single file** — ALL Percy snapshot tests, organized by `// ═══════ SECTION` separators |
+
+**Rules:**
+1. **Responsive tests** get a SEPARATE file per feature because each feature has different page URLs, module dependencies, and `beforeEach` setup. Pattern: `responsive-<feature>.spec.ts`
+2. **Visual tests** stay in ONE file (`visual.spec.ts`) because they are lightweight 3-step patterns (navigate → state → snapshot) and Percy baseline management benefits from a single coherent suite. Use section comments (`// ═══════ HOMEPAGE`, `// ═══════ AVIATOR AI`) to organize.
+3. **Never** name a responsive file without the feature suffix (e.g., never `responsive.spec.ts` — always `responsive-homepage.spec.ts`).
+4. **Never** create feature-specific visual files (e.g., never `visual-aviator.spec.ts` — always add to `visual.spec.ts`).
+5. When creating a new responsive or visual test, update the file map in ALL prompt files and the `README.md`.
 
 **Mandatory Requirements:**
 - Each test MUST have a unique test case ID: `TC-{MODULE-CODE}{NUMBER}` (e.g., `TC-H01`, `TC-AV02`, `TC-CS03`)
