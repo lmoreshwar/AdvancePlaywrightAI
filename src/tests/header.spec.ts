@@ -21,7 +21,7 @@ test.describe('@P0 @Regression @Header Header Regression', () => {
     // ═══════════════════════════════════════
     // TC-H01: Navigate to Homepage — Header shown
     // ═══════════════════════════════════════
-    test('@P0 @Smoke should display the header on homepage', async () => {
+    test('@P0 @Smoke TC-H01: should display the header on homepage', async () => {
         await test.step('Verify header is visible on homepage', async () => {
             // Header is already verified in beforeEach
             console.log('Header is displayed on homepage');
@@ -31,7 +31,7 @@ test.describe('@P0 @Regression @Header Header Regression', () => {
     // ═══════════════════════════════════════
     // TC-H02: Verify OpenText logo in all viewports
     // ═══════════════════════════════════════
-    test('@P0 @Smoke should display OpenText logo correctly', async () => {
+    test('@P0 @Smoke TC-H02: should display OpenText logo correctly', async () => {
         await test.step('Verify logo visibility and size', async () => {
             await headerModule.verifyLogo();
         });
@@ -40,7 +40,7 @@ test.describe('@P0 @Regression @Header Header Regression', () => {
     // ═══════════════════════════════════════
     // TC-H03: Verify Header Menus
     // ═══════════════════════════════════════
-    test('@P0 @Smoke should display all 7 main menu items', async () => {
+    test('@P0 @Smoke TC-H03: should display all 7 main menu items', async () => {
         await test.step('Verify all main navigation menus are visible', async () => {
             const menuTexts = await headerModule.verifyMainMenuItems();
             console.log(`Menu items found: ${menuTexts.join(', ')}`);
