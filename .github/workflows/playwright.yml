@@ -296,18 +296,10 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: 📦 Upload Test Results (Videos & Traces)
+      - name: 🎭 Upload Playwright HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: test-results/
-          retention-days: 30
-
-      - name: 📝 Upload Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: execution-logs
-          path: log/
+          name: playwright-report
+          path: playwright-report/
           retention-days: 30
