@@ -36,7 +36,7 @@ export class HeaderPage {
     logoLink = () => this.page.getByRole('link', { name: /OpenText home page/i }).first();
 
     // Main Navigation Menu Items
-    headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
+    headerNav = () => this.page.getByRole('navigation', { name: /Main Menus/i });
 
     // Mobile Responsive Controls
     hamburgerBtn = () => this.page.getByRole('button', { name: /Toggle navigation|Menu/i });
@@ -48,7 +48,7 @@ export class HeaderPage {
     searchIcon = () => this.page.getByRole('link', { name: /Search/i }).first();
     languageSwitcher = () => this.page.getByRole('link', { name: /Choose your country/i }).first();
     myAccountLink = () => this.page.getByRole('button', { name: 'My Account' }).first();
-    contactButton = () => this.page.getByRole('link', { name: 'Contact' }).first();
+    contactButton = () => this.page.getByRole('link', { name: 'ContactWrong' }).first();
 
     // ============================================
     // ACTIONS
@@ -62,11 +62,11 @@ export class HeaderPage {
         const closeBtn = this.privacyCloseBtn();
 
         if (await acceptBtn.isVisible().catch(() => false)) {
-            await acceptBtn.click().catch(() => {});
+            await acceptBtn.click().catch(() => { });
             // Wait for the cookie banner to disappear after clicking
-            await acceptBtn.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+            await acceptBtn.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => { });
         } else if (await closeBtn.isVisible().catch(() => false)) {
-            await closeBtn.click().catch(() => {});
+            await closeBtn.click().catch(() => { });
         }
 
         // Extra safety wait for overlay to fully clear
