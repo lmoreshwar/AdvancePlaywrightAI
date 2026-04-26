@@ -33,7 +33,7 @@ export class HeaderPage {
             .first();
 
     // Logo (from snapshot) — matches aria-label set on the OpenText home page link
-    logoLink = () => this.page.getByRole('link', { name: /OpenText home page/i }).first();
+    logoLink = () => this.page.getByRole('link', { name: /OpenText home pageFAILED/i }).first();
 
     // Main Navigation Menu Items
     headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
