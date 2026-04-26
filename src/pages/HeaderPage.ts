@@ -33,10 +33,10 @@ export class HeaderPage {
             .first();
 
     // Logo (from snapshot) — matches aria-label set on the OpenText home page link
-    logoLink = () => this.page.getByRole('link', { name: /OpenText home pageWrongLogo/i }).first();
+    logoLink = () => this.page.getByRole('link', { name: /OpenText home page/i }).first();
 
     // Main Navigation Menu Items
-    headerNav = () => this.page.getByRole('navigation', { name: /Main Menus/i });
+    headerNav = () => this.page.getByRole('navigation', { name: /Main Menu/i });
 
     // Mobile Responsive Controls
     hamburgerBtn = () => this.page.getByRole('button', { name: /Toggle navigation|Menu/i });
@@ -48,7 +48,7 @@ export class HeaderPage {
     searchIcon = () => this.page.getByRole('link', { name: /Search/i }).first();
     languageSwitcher = () => this.page.getByRole('link', { name: /Choose your country/i }).first();
     myAccountLink = () => this.page.getByRole('button', { name: 'My Account' }).first();
-    contactButton = () => this.page.getByRole('link', { name: 'ContactWrong' }).first();
+    contactButton = () => this.page.getByRole('link', { name: 'Contact' }).first();
 
     // ============================================
     // ACTIONS
