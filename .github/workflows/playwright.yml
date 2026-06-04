@@ -45,8 +45,7 @@ on:
           - 'tablet-chrome'
 
   # 2. Scheduled trigger (Every day at 02:00 UTC)
-  schedule:
-    - cron: '0 2 * * *'
+  
 
 jobs:
   test-browserstack:
