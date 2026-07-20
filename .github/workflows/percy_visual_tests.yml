@@ -28,7 +28,7 @@ on:
 
   # 2. Scheduled trigger (Every Monday at 00:00 UTC)
   schedule:
-    - cron: '0 0 * * 1'
+   
 
 jobs:
   visual-regression:
